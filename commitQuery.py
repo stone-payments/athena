@@ -51,6 +51,7 @@ queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True)
 commitCollection = db.createCollection("Commit")
 DevCommitCollection = db.createCollection("DevCommit")
 RepoCommitCollection = db.createCollection("RepoCommit")
+RepoDevCollection = db.createCollection("RepoDev")
 
 
 def new_client():
@@ -180,7 +181,7 @@ while True:
         commitDoc.links(temp2, temp)
         commitDoc.save()
     except Exception:
-        continue
+        pass
     try:
         temp = db['Commit'][str(c["commitId"])]
         temp2 = db['Repo'][str(c["repositoryId"])]
@@ -188,4 +189,13 @@ while True:
         RepoDoc.links(temp2, temp)
         RepoDoc.save()
     except Exception:
-        continue
+        pass
+    try:
+        temp = db['Dev'][str(c["devId"])]
+        temp2 = db['Repo'][str(c["repositoryId"])]
+        DevDoc = RepoDevCollection.createEdge()
+        DevDoc.links(temp2, temp)
+        DevDoc._key = (str(c["repositoryId"]) + str(c["devId"])).replace("/", "@")
+        DevDoc.save()
+    except Exception:
+        pass

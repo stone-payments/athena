@@ -1,3 +1,5 @@
+from threading import Thread
+
 import pyArango
 from pyArango.collection import Collection, Field
 from pyArango.connection import *
@@ -5,10 +7,10 @@ from pyArango.connection import *
 from graphqlclient import GraphQLClient
 
 ######conection info##########################################################
-token = '986264e209f19220047de58e01f643329128cb36'
+token = '117d1985b8c852c7ecbd9980d16568ed023479ed'
 url = 'https://api.github.com/graphql'
 ##############################################################################
-number_of_repos = 100
+number_of_repos = 50
 client = GraphQLClient(url, token)
 
 
@@ -25,6 +27,36 @@ class TeamsDev(pyArango.collection.Edges):
     )
 
 
+class DevCommit(pyArango.collection.Edges):
+    _fields = dict(
+    )
+
+
+class RepoCommit(pyArango.collection.Edges):
+    _fields = dict(
+    )
+
+
+class LanguagesRepo(pyArango.collection.Edges):
+    _fields = dict(
+        size=Field()
+    )
+
+
+class RepoDev(pyArango.collection.Edges):
+    _fields = dict(
+    )
+
+
+class Languages(Collection):
+    """
+    LANGUAGES
+    """
+    _fields = dict(
+        language=Field(),
+        id=Field()
+    )
+
 class Teams(Collection):
     """
     TEAMS
@@ -37,7 +69,24 @@ class Teams(Collection):
         childTeams=Field(),
         childTeamsTotal=Field(),
         ancestors=Field(),
-        id=Field(),
+        id=Field()
+    )
+
+
+class Commit(Collection):
+    """
+    COMMIT
+    """
+    _fields = dict(
+        messageHeadline=Field(),
+        oid=Field(),
+        committedDate=Field(),
+        author=Field(),
+        devId=Field(),
+        GitHubId=Field(),
+        repositoryId=Field(),
+        repoName=Field(),
+        branchName=Field()
     )
 
 
@@ -46,6 +95,11 @@ class mentionableUsers(pyArango.collection.Edges):
         aaa=Field(),
     )
 
+
+class Teste(Collection):
+    _fields = dict(
+        repoName=Field(),
+    )
 
 class Dev(Collection):
     """
@@ -101,6 +155,34 @@ def paginationSlug(query2, tmp, slugTemp):
     return pag
 
 
+def paginationNext(query2, next, next2):
+    pag = client.execute(query2,
+                         {
+                             "number_of_repos": number_of_repos,
+                             "next": next,
+                             "next2": next2
+                         })
+    return pag
+
+
+####### Find ######################################################################
+
+def find(key, json) -> object:
+    if isinstance(json, list):
+        for item in json:
+            f = find(key, item)
+            if f is not None:
+                return f
+    elif isinstance(json, dict):
+        if key in json:
+            return json[key]
+        else:
+            for inner in json.values():
+                f = find(key, inner)
+                if f is not None:
+                    return f
+    return None
+
 ### Connection #####################################################################
 
 conn = Connection(username="root", password="")
@@ -115,7 +197,7 @@ query = '''
           edges {
             node {
               id
-              name 
+              name
               description
               url
               nameWithOwner
@@ -132,11 +214,11 @@ query = '''
               watchers{
                  totalCount
               }
-              createdAt              
+              createdAt
             }
             cursor
           }
-        } 
+        }
       }
     }
 '''
@@ -195,7 +277,7 @@ query($number_of_repos:Int! $next:String){
               totalCount
           }
           pullRequests (last:1){
-              totalCount 
+              totalCount
           }
         }
         cursor
@@ -230,6 +312,10 @@ while cursor or first:
         cursor = False
         first = False
 print(count)
+
+###############################################################################################################
+
+
 
 ###### ContributedRepositories ##########################################################################################
 ContributedRepositoriesCollection = db.createCollection("ContributedRepositories")
@@ -282,6 +368,7 @@ while cursor or first:
         cursor = False
         first = False
 print(count)
+
 
 ###### mentionableUsers #########################################################################################################
 mentionableUsersCollection = db.createCollection("mentionableUsers")
@@ -336,6 +423,7 @@ while cursor or first:
         cursor = False
         first = False
 print(count)
+
 
 ###### Teams #########################################################################################
 TeamsCollection = db.createCollection("Teams")
@@ -462,3 +550,178 @@ for x in queryResult:
             cursor = False
             first = False
 print(count)
+
+###### TeamsDev #########################################################################################################
+# commitCollection = db.createCollection("Commit")
+
+aql = "FOR Repo in Repo return Repo.repoName"
+# by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True)
+
+print(queryResult)
+query = '''
+query($number_of_repos:Int!, $next:String, $next2:String!){
+  repository(owner: "stone-payments", name: $next2) {
+    repositoryId: id
+    repoName: name
+    defaultBranchRef {
+      branchName: name
+      target {
+        ... on Commit {
+          history(first: $number_of_repos, after: $next, since: "2017-08-01T00:00:00Z") {
+            pageInfo {
+              endCursor
+            }
+            edges {
+              node {
+                commitId: id
+                messageHeadline
+                oid
+                committedDate
+                author {
+                  user {
+                    devId: id
+                    login
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+'''
+
+
+# for x in queryResult:
+def commitrequest(repositoryname):
+    first = True
+    cursor = None
+    while cursor or first:
+        try:
+            prox = paginationNext(query, cursor, repositoryname)
+            cursor = prox["data"]["repository"]["defaultBranchRef"]["target"]["history"]["pageInfo"]["endCursor"]
+            proxNode = prox["data"]["repository"]
+            j = proxNode["defaultBranchRef"]["target"]["history"]["edges"]
+            for i in j:
+                try:
+                    doc = commitCollection.createDocument()
+                    doc["repositoryId"] = proxNode["repositoryId"]
+                    doc["repoName"] = proxNode["repoName"]
+                    doc["branchName"] = proxNode["defaultBranchRef"]["branchName"]
+                    doc["messageHeadline"] = i["node"]["messageHeadline"]
+                    doc["oid"] = i["node"]["oid"]
+                    doc["committedDate"] = i["node"]["committedDate"]
+                    doc["author"] = i["node"]["author"]["user"]["login"]
+                    doc["devId"] = i["node"]["author"]["user"]["devId"]
+                    doc["GitHubId"] = i["node"]["commitId"]
+                    doc._key = i["node"]["commitId"].replace("/", "@")
+                    doc.save()
+                except Exception:
+                    pass
+            if cursor is None:
+                cursor = False
+        except Exception as a:
+            print(a)
+            cursor = False
+            first = False
+    return
+
+
+if __name__ == '__main__':
+    jobs = []
+    count = 0
+    for x in queryResult:
+        count = count + 1
+        p = Thread(target=commitrequest, args=(x,))
+        jobs.append(p)
+        p.start()
+        print(count)
+
+testeCollection = db.createCollection("Teste")
+doc = testeCollection.createDocument()
+doc['repoName'] = [
+    {
+        "size": 10093,
+        "language": {
+            "id": "MDg6TGFuZ3VhZ2UzMDg=",
+            "name": "CSS"
+        }
+    },
+    {
+        "size": 387,
+        "language": {
+            "id": "MDg6TGFuZ3VhZ2UxNDA=",
+            "name": "JavaScript"
+        }
+    }
+]
+doc._key = 'fafa5454085'
+doc.save()
+
+###### Languages #########################################################################################################
+LanguagesCollection = db.createCollection("Languages")
+LanguagesRepoCollection = db.createCollection("LanguagesRepo")
+
+aql = "FOR Repo in Repo return Repo.repoName"
+# by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True)
+
+print(queryResult)
+query =
+"""query ($number_of_repos: Int!, $next: String, $next2: String!) {
+  repository(owner: "stone-payments", name: $next2) {
+    repositoryId: id
+    languages(first: $number_of_repos, after: $next) {
+      pageInfo {
+        endCursor
+      }
+      totalSize
+      edges {
+        size
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+"""
+
+for repositoryname in queryResult:
+    first = True
+    cursor = None
+    while cursor or first:
+        first = False
+        print(repositoryname)
+        try:
+            prox = paginationNext(query, cursor, repositoryname)
+            print(prox)
+            cursor = find('endCursor', prox)
+            print(cursor)
+            proxNode = find('languages', prox)
+            edges = find('edges', proxNode)
+            for node in edges:
+                try:
+                    doc = LanguagesCollection.createDocument()
+                    doc["name"] = find('name', node)
+                    doc["id"] = find('id', node)
+                    doc._key = find('id', node).replace("/", "@")
+                    doc.save()
+                except Exception:
+                    pass
+                try:
+                    temp = db['Languages'][str(node["node"]["id"]).replace("/", "@")]
+                    temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
+                    doc = LanguagesRepoCollection.createEdge({"size": node['size']})
+                    doc.links(temp, temp2)
+                    doc.save()
+                except Exception:
+                    pass
+        except Exception as a:
+            print(a)
+            cursor = False
+            first = False
