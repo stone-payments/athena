@@ -7,7 +7,7 @@ from pyArango.connection import *
 from graphqlclient import GraphQLClient
 
 ######conection info##########################################################
-token = '117d1985b8c852c7ecbd9980d16568ed023479ed'
+token = 'YOUR_TOKEN'
 url = 'https://api.github.com/graphql'
 ##############################################################################
 number_of_repos = 50
@@ -26,27 +26,22 @@ class TeamsDev(pyArango.collection.Edges):
         aaa=Field(),
     )
 
-
 class DevCommit(pyArango.collection.Edges):
     _fields = dict(
     )
 
-
 class RepoCommit(pyArango.collection.Edges):
     _fields = dict(
     )
-
 
 class LanguagesRepo(pyArango.collection.Edges):
     _fields = dict(
         size=Field()
     )
 
-
 class RepoDev(pyArango.collection.Edges):
     _fields = dict(
     )
-
 
 class Languages(Collection):
     """
@@ -94,8 +89,6 @@ class mentionableUsers(pyArango.collection.Edges):
     _fields = dict(
         aaa=Field(),
     )
-
-
 class Teste(Collection):
     _fields = dict(
         repoName=Field(),
@@ -164,7 +157,6 @@ def paginationNext(query2, next, next2):
                          })
     return pag
 
-
 ####### Find ######################################################################
 
 def find(key, json) -> object:
@@ -223,7 +215,8 @@ query = '''
     }
 '''
 
-repoCollection = db.createCollection("Repo")
+# repoCollection = db.createCollection("Repo")
+repoCollection = db["Repo"]
 
 count = 0
 first = True
@@ -233,23 +226,27 @@ while cursor or first:
         prox = pagination(query, cursor)
         proxRepositorios = prox["data"]["organization"]["repositories"]["edges"]
         for i in proxRepositorios:
-            count = count + 1
-            doc = repoCollection.createDocument()
-            doc['repoName'] = i["node"]["name"]
-            doc["description"] = i["node"]["description"]
-            doc["url"] = i["node"]["url"]
-            doc["isPrivate"] = i["node"]["isPrivate"]
-            doc["primaryLanguage"] = i["node"]["primaryLanguage"]
-            doc["forks"] = i["node"]["forks"]["totalCount"]
-            doc["stargazers"] = i["node"]["stargazers"]["totalCount"]
-            doc["watchers"] = i["node"]["watchers"]["totalCount"]
-            doc["createdAt"] = i["node"]["createdAt"]
-            doc["nameWithOwner"] = i["node"]["nameWithOwner"]
-            doc["id"] = i["node"]["id"].replace("/", "@")
-            doc._key = i["node"]["id"].replace("/", "@")
-            doc.save()
+            try:
+                count = count + 1
+                doc = repoCollection.createDocument()
+                doc['repoName'] = i["node"]["name"]
+                doc["description"] = i["node"]["description"]
+                doc["url"] = i["node"]["url"]
+                doc["isPrivate"] = i["node"]["isPrivate"]
+                doc["primaryLanguage"] = i["node"]["primaryLanguage"]
+                doc["forks"] = i["node"]["forks"]["totalCount"]
+                doc["stargazers"] = i["node"]["stargazers"]["totalCount"]
+                doc["watchers"] = i["node"]["watchers"]["totalCount"]
+                doc["createdAt"] = i["node"]["createdAt"]
+                doc["nameWithOwner"] = i["node"]["nameWithOwner"]
+                doc["id"] = i["node"]["id"].replace("/", "@")
+                doc._key = i["node"]["id"].replace("/", "@")
+                doc.save()
+            except Exception:
+                pass
         cursor = proxRepositorios[len(proxRepositorios) - 1]["cursor"]
-    except Exception:
+    except Exception as a:
+        print(a)
         cursor = False
         first = False
 print(count)
@@ -499,6 +496,7 @@ aql = "FOR Team in Teams return Team.slug"
 # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
 queryResult = db.AQLQuery(aql, rawResults=True)
 
+
 query = '''
 query($number_of_repos:Int!, $next:String, $slug:String!){
   organization(login: "stone-payments") {
@@ -662,20 +660,22 @@ doc._key = 'fafa5454085'
 doc.save()
 
 ###### Languages #########################################################################################################
-LanguagesCollection = db.createCollection("Languages")
-LanguagesRepoCollection = db.createCollection("LanguagesRepo")
+# LanguagesCollection = db.createCollection("Languages")
+# LanguagesRepoCollection = db.createCollection("LanguagesRepo")
+LanguagesCollection = db["Languages"]
+LanguagesRepoCollection = db["LanguagesRepo"]
 
 aql = "FOR Repo in Repo return Repo.repoName"
 # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
 queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True)
 
 print(queryResult)
-query =
-"""query ($number_of_repos: Int!, $next: String, $next2: String!) {
+query = """
+query ($number_of_repos: Int!, $next: String, $next2: String!) {
   repository(owner: "stone-payments", name: $next2) {
     repositoryId: id
-    languages(first: $number_of_repos, after: $next) {
-      pageInfo {
+    languages(first: $number_of_repos after:$next) {
+      pageInfo{
         endCursor
       }
       totalSize
@@ -716,7 +716,9 @@ for repositoryname in queryResult:
                 try:
                     temp = db['Languages'][str(node["node"]["id"]).replace("/", "@")]
                     temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
-                    doc = LanguagesRepoCollection.createEdge({"size": node['size']})
+                    doc = LanguagesRepoCollection.createEdge(
+                        {"size": round(((node['size'] / find('totalSize', prox)) * 100), 2)})
+                    doc._key = (str(node["node"]["id"]) + str(find('repositoryId', prox))).replace("/", "@")
                     doc.links(temp, temp2)
                     doc.save()
                 except Exception:

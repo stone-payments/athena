@@ -48,11 +48,15 @@ conn = Connection(username="root", password="")
 db = conn["athena3"]
 aql = "FOR Repo in Repo return Repo.repoName"
 queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True)
-commitCollection = db.createCollection("Commit")
-DevCommitCollection = db.createCollection("DevCommit")
-RepoCommitCollection = db.createCollection("RepoCommit")
-RepoDevCollection = db.createCollection("RepoDev")
+# commitCollection = db.createCollection("Commit")
+# DevCommitCollection = db.createCollection("DevCommit")
+# RepoCommitCollection = db.createCollection("RepoCommit")
+# RepoDevCollection = db.createCollection("RepoDev")
 
+commitCollection = db["Commit"]
+DevCommitCollection = db["DevCommit"]
+RepoCommitCollection = db["RepoCommit"]
+RepoDevCollection = db["RepoDev"]
 
 def new_client():
     ######conection info##########################################################
@@ -124,6 +128,8 @@ query($number_of_repos:Int!, $next:String, $next2:String!){
             first = False
             try:
                 prox = paginationNext(query, cursor, repository)
+                if prox.get("documentation_url"):
+                    print("ERROR")
                 cursor = find('endCursor', prox)
                 prox_node = find('repository', prox)
                 commits = find('edges', prox_node)
@@ -155,29 +161,33 @@ query($number_of_repos:Int!, $next:String, $next2:String!){
 repositories_queue = Queue(1500000)
 commits_queue = Queue(1500000)
 
-workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(50)]
+workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(5)]
 [t.start() for t in workers]
 for repository in queryResult:
     repositories_queue.put(repository)
 
 while True:
     c = commits_queue.get(timeout=5)
-    doc = commitCollection.createDocument()
-    doc["repositoryId"] = c["repositoryId"]
-    doc["repoName"] = c["repoName"]
-    doc["branchName"] = c["branchName"]
-    doc["messageHeadline"] = c["messageHeadline"]
-    doc["oid"] = c["oid"]
-    doc["committedDate"] = c["committedDate"]
-    doc["author"] = c["author"]
-    doc["devId"] = c["devId"]
-    doc["GitHubId"] = c["commitId"]
-    doc._key = c["commitId"].replace("/", "@")
-    doc.save()
+    try:
+        doc = commitCollection.createDocument()
+        doc["repositoryId"] = c["repositoryId"]
+        doc["repoName"] = c["repoName"]
+        doc["branchName"] = c["branchName"]
+        doc["messageHeadline"] = c["messageHeadline"]
+        doc["oid"] = c["oid"]
+        doc["committedDate"] = c["committedDate"]
+        doc["author"] = c["author"]
+        doc["devId"] = c["devId"]
+        doc["GitHubId"] = c["commitId"]
+        doc._key = c["commitId"].replace("/", "@")
+        doc.save()
+    except Exception:
+        pass
     try:
         temp = db['Commit'][str(c["commitId"])]
         temp2 = db['Dev'][str(c["devId"])]
         commitDoc = DevCommitCollection.createEdge()
+        commitDoc["_key"] = (str(c["commitId"]) + str(c["devId"])).replace("/", "@")
         commitDoc.links(temp2, temp)
         commitDoc.save()
     except Exception:
@@ -186,6 +196,7 @@ while True:
         temp = db['Commit'][str(c["commitId"])]
         temp2 = db['Repo'][str(c["repositoryId"])]
         RepoDoc = RepoCommitCollection.createEdge()
+        RepoDoc["_key"] = (str(c["commitId"]) + str(c["repositoryId"])).replace("/", "@")
         RepoDoc.links(temp2, temp)
         RepoDoc.save()
     except Exception:
@@ -194,8 +205,8 @@ while True:
         temp = db['Dev'][str(c["devId"])]
         temp2 = db['Repo'][str(c["repositoryId"])]
         DevDoc = RepoDevCollection.createEdge()
+        DevDoc["_key"] = (str(c["repositoryId"]) + str(c["devId"])).replace("/", "@")
         DevDoc.links(temp2, temp)
-        DevDoc._key = (str(c["repositoryId"]) + str(c["devId"])).replace("/", "@")
         DevDoc.save()
     except Exception:
         pass
