@@ -52,6 +52,9 @@ queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True)
 # DevCommitCollection = db.createCollection("DevCommit")
 # RepoCommitCollection = db.createCollection("RepoCommit")
 # RepoDevCollection = db.createCollection("RepoDev")
+# db['Commit'].ensureHashIndex(['devId'],unique=False, sparse=False)
+# db['Commit'].ensureHashIndex(['author'],unique=False, sparse=False)
+# db['Commit'].ensureSkiplistIndex(['committedDate'],unique=False, sparse=False)
 
 commitCollection = db["Commit"]
 DevCommitCollection = db["DevCommit"]
