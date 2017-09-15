@@ -21,8 +21,8 @@ class GraphQLClient:
             return req.json()
 
 
-class GraphQLClientRest:
-    def __init__(self, token):
+class ClientRest:
+    def __init__(self, token: object) -> object:
         self.token = token
 
     def execute(self, query):
