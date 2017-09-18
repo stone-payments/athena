@@ -7,7 +7,7 @@ from pyArango.connection import *
 from graphqlclient import GraphQLClient
 
 ######conection info##########################################################
-token = '117d1985b8c852c7ecbd9980d16568ed023479ed'
+token = ''
 url = 'https://api.github.com/graphql'
 ##############################################################################
 number_of_repos = 50
@@ -33,14 +33,16 @@ class DevCommit(pyArango.collection.Edges):
 class RepoCommit(pyArango.collection.Edges):
     _fields = dict(
     )
-
-
 class RepoFork(pyArango.collection.Edges):
     _fields = dict(
     )
 
-
 class DevFork(pyArango.collection.Edges):
+    _fields = dict(
+    )
+
+
+class RepoIssue(pyArango.collection.Edges):
     _fields = dict(
     )
 
@@ -155,8 +157,6 @@ class Repo1(Collection):
         Type=Field(),
         readme=Field()
     )
-
-
 class Fork(Collection):
     """
     Fork
@@ -173,6 +173,26 @@ class Fork(Collection):
         forkId=Field(),
         org=Field()
     )
+
+
+class Issue(Collection):
+    """
+    Issue
+    """
+    _fields = dict(
+        repositoryId=Field(),
+        repoName=Field(),
+        state=Field(),
+        closedAt=Field(),
+        author=Field(),
+        issueId=Field(),
+        createdAt=Field(),
+        closed=Field(),
+        label=Field(),
+        title=Field(),
+        org=Field()
+    )
+
 
 ######pagination############################################################
 
@@ -352,7 +372,6 @@ def RepoQuery(org):
             first = False
     print(count)
 
-
 ###### Dev #########################################################################################################
 devCollection = db.createCollection('Dev')
 db['Dev'].ensureHashIndex(['devName'], unique=False, sparse=False)
@@ -470,6 +489,7 @@ while cursor or first:
         first = False
 print(count)
 
+
 ###### mentionableUsers #########################################################################################################
 mentionableUsersCollection = db.createCollection("mentionableUsers")
 
@@ -523,6 +543,7 @@ while cursor or first:
         cursor = False
         first = False
 print(count)
+
 
 ###### Teams #########################################################################################
 TeamsCollection = db.createCollection("Teams")
@@ -598,6 +619,7 @@ TeamsDevCollection = db.createCollection("TeamsDev")
 aql = "FOR Team in Teams return Team.slug"
 # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
 queryResult = db.AQLQuery(aql, rawResults=True)
+
 
 query = '''
 query($number_of_repos:Int!, $next:String, $slug:String!){
@@ -767,6 +789,7 @@ LanguagesRepoCollection = db.createCollection("LanguagesRepo")
 LanguagesCollection = db["Languages"]
 LanguagesRepoCollection = db["LanguagesRepo"]
 db['Languages'].ensureHashIndex(['name'], unique=True, sparse=False)
+
 
 aql = "FOR Repo in Repo return Repo.repoName"
 # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example

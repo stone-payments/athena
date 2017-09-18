@@ -8,7 +8,7 @@ from graphqlclient import ClientRest
 from graphqlclient import GraphQLClient
 
 ######conection info##########################################################
-token = '117d1985b8c852c7ecbd9980d16568ed023479ed'
+token = 'fbe5fc51c0fb5dc874fd738143a6c3360921a018'
 ##############################################################################
 
 clientRest2 = ClientRest(token)
@@ -66,10 +66,15 @@ db = conn["athena3"]
 # forkCollection = db.createCollection("Fork")
 # devFork = db.createCollection("DevFork")
 # repoFork = db.createCollection("RepoFork")
+# IssueCollection = db.createCollection("Issue")
+# RepoIssueCollection = db.createCollection("RepoIssue")
 # db['Commit'].ensureHashIndex(['devId'],unique=False, sparse=False)
 # db['Commit'].ensureHashIndex(['author'],unique=False, sparse=False)
 # db['Commit'].ensureSkiplistIndex(['committedDate'],unique=False, sparse=False)
 db['Commit'].ensureHashIndex(['org'], unique=False, sparse=False)
+db['Issue'].ensureHashIndex(['repoName'], unique=False, sparse=False)
+db['Issue'].ensureSkiplistIndex(['closedAt'], unique=False, sparse=False)
+db['Issue'].ensureSkiplistIndex(['createdAt'], unique=False, sparse=False)
 
 commitCollection = db["Commit"]
 DevCommitCollection = db["DevCommit"]
@@ -78,6 +83,8 @@ RepoDevCollection = db["RepoDev"]
 ForkCollection = db["Fork"]
 DevForkCollection = db["DevFork"]
 RepoForkCollection = db["RepoFork"]
+IssueCollection = db["Issue"]
+RepoIssueCollection = db["RepoIssue"]
 
 def new_client():
     ######conection info##########################################################
@@ -445,6 +452,147 @@ def forkCollector(org):
     [t.join() for t in workers2]
 
 
+def issue(org):
+    aql = "FOR Repo in Repo FILTER Repo.org == @org return Repo.repoName"
+    bindVars = {"org": org}
+    queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True, bindVars=bindVars)
+
+    def collector(repositories: Queue, output: Queue):
+        while True:
+            repository = repositories.get_nowait()
+            print(repository)
+            first = True
+            cursor = None
+            query = '''
+    query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!){
+      organization(login: $org) {
+        Org: login
+        repository(name: $next2) {
+          repositoryId: id
+          repoName: name
+          issues(first: $number_of_repos, after: $next) {
+            pageInfo {
+              endCursor
+            }
+            edges {
+              node {
+                state
+                authorAssociation
+                lastEditedAt
+                timeline(last: 100) {
+                  nodes {
+                    ... on ClosedEvent {
+                      closedAt: createdAt
+                    }
+                  }
+                }
+                author
+                issueId: id
+                createdAt
+                closed
+                labels(first: 1) {
+                  edges {
+                    node {
+                      label:name
+                    }
+                  }
+                }
+                title
+              }
+            }
+          }
+        }
+      }
+    }
+    '''
+            while cursor is not None or first:
+                first = False
+                try:
+                    prox = paginatioOrgDate(query, cursor, repository, org)
+                    if prox.get("documentation_url"):
+                        print("ERROR")
+                    cursor = find('endCursor', prox)
+                    prox_node = find('repository', prox)
+                    issues = find('edges', prox_node)
+                    repository_id = prox_node["repositoryId"]
+                    repo_name = prox_node["repoName"]
+
+                    for c in issues:
+                        print("AE")
+                        node = c["node"]
+                        print(node)
+                        author = find('author', node)
+                        print(author)
+                        commit = {
+                            "repositoryId": repository_id,
+                            "repoName": repo_name,
+                            "state": find('state', c),
+                            "closedAt": find('closedAt', c),
+                            "author": find('author', c),
+                            "issueId": find('issueId', c),
+                            "createdAt": find('createdAt', c),
+                            "closed": find('closed', c),
+                            "label": find('label', c),
+                            "title": find('title', c),
+                            "org": org
+                        }
+                        print("foi")
+                        output.put(commit)
+                except Exception as a:
+                    print(a)
+                    cursor = None
+                    first = False
+
+    def save(repositories: Queue, output: Queue):
+        while True:
+            c = commits_queue.get(timeout=150)
+            print(c)
+            try:
+                try:
+                    doc = IssueCollection[str(c["issueId"].replace("/", "@"))]
+                except Exception:
+                    doc = IssueCollection.createDocument()
+                    pass
+                doc["repositoryId"] = c["repositoryId"]
+                doc["repoName"] = c["repoName"]
+                doc["state"] = c["state"]
+                doc["closedAt"] = c["closedAt"]
+                doc["author"] = c["author"]
+                doc["issueId"] = c["issueId"]
+                doc["createdAt"] = c["createdAt"]
+                doc["closed"] = c["closed"]
+                doc["label"] = c["label"]
+                doc["title"] = c["title"]
+                doc["org"] = c["org"]
+                doc._key = c["issueId"].replace("/", "@")
+                doc.save()
+            except Exception as a:
+                print(a)
+                pass
+            try:
+                temp = db['Issue'][str(c["issueId"])]
+                temp2 = db['Repo'][str(c["repositoryId"])]
+                RepoDoc = RepoIssueCollection.createEdge()
+                RepoDoc["_key"] = (str(c["issueId"]) + str(c["repositoryId"])).replace("/", "@")
+                RepoDoc.links(temp2, temp)
+                RepoDoc.save()
+            except Exception:
+                pass
+
+    repositories_queue = Queue(1500000)
+    commits_queue = Queue(1500000)
+
+    workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(5)]
+    workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(5)]
+    for repository in queryResult:
+        repositories_queue.put(repository)
+    [t.start() for t in workers]
+    [t.start() for t in workers2]
+    [t.join() for t in workers]
+    [t.join() for t in workers2]
+
+
 # commitcollector("pagarme")
 # statscollector("pagarme")
-forkCollector("stone-payments")
+# forkCollector("stone-payments")
+issue("stone-payments")
