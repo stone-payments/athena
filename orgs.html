@@ -51,7 +51,7 @@
             </div>
 
             <ul class="nav">
-							<li>
+							<li class="active">
 									<a href="orgs.html">
 											<i class="pe-7s-news-paper"></i>
 											<p>Orgs</p>
@@ -63,7 +63,7 @@
 											<p>Teams</p>
 									</a>
 							</li>
-                <li class="active">
+                <li>
                     <a href="dashboard.html">
                         <i class="pe-7s-graph"></i>
                         <p>Repos</p>
@@ -96,7 +96,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Repos - Dashboard</a>
+                    <a class="navbar-brand" href="#">Orgs - Dashboard</a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-left">
@@ -178,15 +178,16 @@
         <div class="content">
             <div class="container-fluid">
                 <div class="row">
-									<div class="col-md-3">
+									<div class="col-md-4">
 											<div class="card ">
-													<div class="header">
-															<h4 class="title">OpenSource</h4>
-													</div>
+												<div class="header">
+														<h4 class="title">OpenSource</h4>
+														<p class="category">OpenSource - Org (%)</p>
+												</div>
 													<div class="content">
 															<div class="table-full-width">
 																	<table class="table">
-																			<tbody id="openSource">
+																			<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="400" height="400"></canvas>
 
 
 																			</tbody>
@@ -202,7 +203,7 @@
 													</div>
 											</div>
 									</div>
-									<div class="col-md-3">
+									<div class="col-md-4">
 											<div class="card ">
 													<div class="header">
 															<h4 class="title">Readme</h4>
@@ -210,7 +211,7 @@
 													<div class="content">
 															<div class="table-full-width">
 																	<table class="table">
-																			<tbody id="readme">
+																			<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="400" height="400"></canvas>
 
 
 																			</tbody>
@@ -226,7 +227,7 @@
 													</div>
 											</div>
 									</div>
-									<div class="col-md-3">
+									<div class="col-md-4">
 											<div class="card  ">
 													<div class="header">
 															<h4 class="title">License</h4>
@@ -234,7 +235,7 @@
 													<div class="content">
 															<div class="table-full-width">
 																	<table class="table">
-																			<tbody id="license">
+																			<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="400" height="400"></canvas>
 
 																			</tbody>
 																	</table>
@@ -249,46 +250,45 @@
 													</div>
 											</div>
 									</div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="header">
-                                <h4 class="title">Languages</h4>
-                                <p class="category">Languages - Repository (%)</p>
-                            </div>
-                            <div class="content">
-                                <canvas id="pie-chart" class="ct-chart ct-perfect-fourth" width="400" height="400"></canvas>
-
-                                <div class="footer">
-
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="fa fa-clock-o"></i> Updated 2 days ago
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="header">
-                                <h4 class="title">Commits</h4>
-                                <p class="category">Commits - Repository</p>
-                            </div>
-                            <div class="content">
-                                <canvas id="myChart" class="ct-chart"></canvas>
-                                <div class="footer">
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="fa fa-history"></i> Updated 3 minutes ago
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+							<div class="row">
+								<div class="col-md-6">
+										<div class="card">
+												<div class="header">
+														<h4 class="title">Languages</h4>
+														<p class="category">Top 12 Languages - Org (%)</p>
+												</div>
+												<div class="content">
+														<canvas id="languages" class="ct-chart ct-perfect-fourth" width="400" height="400"></canvas>
+														<div class="footer">
+																<hr>
+																<div class="stats">
+																		<i class="fa fa-clock-o"></i> Updated 2 days ago
+																</div>
+														</div>
+												</div>
+										</div>
+								</div>
+								<div class="col-md-6">
+										<div class="card">
+												<div class="header">
+														<h4 class="title">Commits</h4>
+														<p class="category">Commits - Org (%)</p>
+												</div>
+												<div class="content" >
+														<canvas id="myChart" class="ct-chart ct-perfect-fourth" width="400" height="400"></canvas>
 
+														<div class="footer">
 
+																<hr>
+																<div class="stats">
+																		<i class="fa fa-clock-o"></i> Updated 2 days ago
+																</div>
+														</div>
+												</div>
+										</div>
+								</div>
+							</div>
 
                 <div class="row">
 
@@ -448,5 +448,5 @@
 
     	});
 	</script>
-	<script src="assets/js/chartsRepo.js"></script>
+	<script src="assets/js/chartsOrg.js"></script>
 </html>
