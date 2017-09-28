@@ -4,10 +4,11 @@ $(function() {
   let issuesChart = null;
   let teste = null;
   let openSourceChart = null;
-
+  let readmeChart = null;
+  let LicenseType = null;
 colors = ['#0e6251','#117864','#148f77','#17a589','#1abc9c','#48c9b0','#76d7c4','#a3e4d7','#d1f2eb',
 '#fef5e7','#fdebd0','#fad7a0','#f8c471','#f5b041','#f39c12','#d68910','#b9770e','#9c640c','#7e5109']
-
+colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#657212','#ABC421']
 
   $('#name').keypress(function(e){
        if(e.which == 13){//Enter key pressed
@@ -192,33 +193,18 @@ colors = ['#0e6251','#117864','#148f77','#17a589','#1abc9c','#48c9b0','#76d7c4',
                 }
 
                   openSourceChart = new Chart(document.getElementById("openSourceChart"), {
-                      type: 'pie',
+                      type: 'doughnut',
                       data: {
                         labels: ['openSource','Private'],
                         datasets: [{
                           label: "Languages (%)",
-                          backgroundColor: ['#0e6251','#b9770e'],
+                          backgroundColor: ['#0B3B1F','#C52233'],
                           borderWidth: 1,
                           data: [openSource,notOpenSource]
                         }]
                       },
                       options: {
-                          scales: {
-                              yAxes: [{
-                                  ticks: {
-                                      beginAtZero:true,
-                                      autoSkip: false,
-                                      maxTicksLimit: 100,
-                                      responsive: true
-                                  }
-                              }],
-                              xAxes: [{
-                                  ticks: {
-                                      autoSkip: false,
-                                      responsive: true
-                                  }
-                              }]
-                          }
+                        responsive:true
                       }
                   });
                 },
@@ -227,7 +213,83 @@ colors = ['#0e6251','#117864','#148f77','#17a589','#1abc9c','#48c9b0','#76d7c4',
 
                 }
             });
+            $.ajax({
+                url: 'http://127.0.0.1:5000/readmeOrg?name='+name,
+                type: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    returnedData = JSON.parse(response);
+                    var ok = Number(returnedData[0]['ok']);
+                    var poor = Number(returnedData[0]['poor']);
+                    var none = Number(returnedData[0]['bad']);
+                if(readmeChart != null){
+                    readmeChart.destroy();
 
+                }
+
+                  readmeChart = new Chart(document.getElementById("readmeChart"), {
+                      type: 'doughnut',
+                      data: {
+                        labels: ['OK','Poor','None'],
+                        datasets: [{
+                          label: "Languages (%)",
+                          backgroundColor: ['#0B3B1F','#ABC421','#C52233'],
+                          borderWidth: 1,
+                          data: [ok,poor,none]
+                        }]
+                      },
+                      options: {
+                        responsive:true
+                      }
+                  });
+                },
+                error: function(error) {
+                  console.log(error);
+
+                }
+            });
+            $.ajax({
+                url: 'http://127.0.0.1:5000/LicenseType?name='+name,
+                type: 'GET',
+                success: function(response) {
+                    console.log(response);
+                    returnedData = JSON.parse(response);
+                    let labelsLicense = returnedData.map(function(num) {
+                      return num.day;
+                  });
+                  let dataLicense = returnedData.map(function(num) {
+                    return num.number;
+                });
+                if(LicenseType != null){
+                    LicenseType.destroy();
+
+                }
+
+                  LicenseType = new Chart(document.getElementById("LicenseType"), {
+                      type: 'bar',
+                      data: {
+                        labels: labelsLicense,
+                        datasets: [{
+                          label: "Languages (%)",
+                          backgroundColor: ['rgb(168,169,173)','#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#657212','#ABC421'],
+                          borderWidth: 1,
+                          data: dataLicense
+                        }]
+                      },
+                      options: {
+                        responsive:true,
+                        tooltips: {
+                          mode: 'index',
+                          intersect: false
+                        },
+                      }
+                  });
+                },
+                error: function(error) {
+                  console.log(error);
+
+                }
+            });
         $.ajax({
             url: 'http://127.0.0.1:5000/Issues?name='+name+'&month='+8,
             type: 'GET',

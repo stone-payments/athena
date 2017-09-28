@@ -256,6 +256,7 @@ def LanguagesOrg():
         x['size'] = round(x['size']/result2,2)
     print(result)
     return json.dumps(result)
+
 @app.route('/OpenSource')
 def OpenSource():
     aql = """
@@ -330,6 +331,79 @@ def CommitsOrg():
         lst.append(recur(x))
     # print(lst)
     return json.dumps(lst)
+
+@app.route('/readmeOrg')
+def readmeOrg():
+    aql = """
+    LET ok = (
+    FOR Repo IN Repo
+    FILTER Repo.org == @name
+    FILTER Repo.readme == 'OK'
+        COLLECT 
+        day = Repo.readme
+    WITH COUNT INTO number
+    RETURN number)
+    LET poor = (
+    FOR Repo IN Repo
+    FILTER Repo.org == @name
+    FILTER Repo.readme == 'Poor'
+        COLLECT 
+        day = Repo.readme
+    WITH COUNT INTO number
+    RETURN number)
+        LET bad = (
+    FOR Repo IN Repo
+    FILTER Repo.org == @name
+    FILTER Repo.readme == null
+        COLLECT 
+        day = Repo.readme
+    WITH COUNT INTO number
+    RETURN number)
+    RETURN {ok,poor,bad}"""
+    name = request.args.get("name")
+    bindVars = {"name" : name}
+    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
+    # print([f for f in queryResult])
+    result = [dict(i) for i in queryResult]
+    soma = int(result[0]["ok"][0]) + int(result[0]["poor"][0]) + int(result[0]["bad"][0])
+    print(result)
+    for x in result:
+        x['ok'] = round(int(x['ok'][0])/soma*100,1)
+        x['poor'] = round(int(x['poor'][0])/soma*100,1)
+        x['bad'] = round(int(x['bad'][0])/soma*100,1)
+    print(result)
+    return json.dumps(result)
+
+@app.route('/LicenseType')
+def LicenseType():
+    aql = """
+    FOR Repo IN Repo
+    FILTER Repo.org == @name
+    COLLECT
+    day = Repo.licenseType
+    WITH COUNT INTO number
+    SORT number DESC
+    RETURN {
+    day: day,
+    number: number
+    }"""
+    name = request.args.get("name")
+    bindVars = {"name" : name}
+    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=10000, bindVars=bindVars)
+    # print([f for f in queryResult])
+    result = [dict(i) for i in queryResult]
+    soma = sum([x['number'] for x in result])
+    for x in result:
+        if x['day'] == None:
+            x['day'] = "None"
+        x['number'] = round(x['number']/soma*100,2)
+    print(soma)
+    # print(queryResult[0])
+    print(result)
+    return json.dumps(result)
+
 
 if __name__ == '__main__':
     app.run()
