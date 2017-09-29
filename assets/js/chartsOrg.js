@@ -277,11 +277,27 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                         }]
                       },
                       options: {
-                        responsive:true,
                         tooltips: {
                           mode: 'index',
                           intersect: false
                         },
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    autoSkip: false,
+                                    responsive: true
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    autoSkip: true,
+                                    maxTicksLimit: 100,
+                                    responsive: true,
+                                    beginAtZero:true
+                                }
+                            }]
+                        },
+
                       }
                   });
                 },

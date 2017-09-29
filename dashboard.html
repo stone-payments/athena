@@ -10,7 +10,9 @@
 	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
 
+		<link href="assets/css/jquery.comiseo.daterangepicker.css" rel="stylesheet">
 
+		<link href="assets/css/jquery-ui.min.css" rel="stylesheet">
     <!-- Bootstrap core CSS     -->
     <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
 
@@ -170,7 +172,7 @@
 				<nav class="navbar navbar-default navbar-fixed">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand"><input type="text" id="name">  <i id="find" class="fa fa-search"></i> </a>
+                    <a class="navbar-brand"><input type="text" id="name" placeholder="Insert repo name"> <input id="e1" name="e1"> <i id="find" class="fa fa-search"></i> </a>
                 </div>
             </div>
         </nav>
@@ -249,6 +251,29 @@
 													</div>
 											</div>
 									</div>
+									<div class="col-md-3">
+											<div class="card  ">
+													<div class="header">
+															<h4 class="title">Active</h4>
+													</div>
+													<div class="content">
+															<div class="table-full-width">
+																	<table class="table">
+																			<tbody id="active">
+
+																			</tbody>
+																	</table>
+															</div>
+
+															<div class="footer">
+																	<hr>
+																	<div class="stats">
+																			<i class="fa fa-history"></i> Updated 3 minutes ago
+																	</div>
+															</div>
+													</div>
+											</div>
+									</div>
                     <div class="col-md-4">
                         <div class="card">
                             <div class="header">
@@ -274,6 +299,7 @@
                             <div class="header">
                                 <h4 class="title">Commits</h4>
                                 <p class="category">Commits - Repository</p>
+
                             </div>
                             <div class="content">
                                 <canvas id="myChart" class="ct-chart"></canvas>
@@ -448,5 +474,12 @@
 
     	});
 	</script>
+	<script src="assets/js/moment.js"></script>
+	<script src="assets/js/jquery-ui.min.js"></script>
+	<script src="assets/js/jquery.comiseo.daterangepicker.js"></script>
+    <script>
+        $(function() { $("#e1").daterangepicker(); });
+    </script>
+
 	<script src="assets/js/chartsRepo.js"></script>
 </html>

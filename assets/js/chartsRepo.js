@@ -3,6 +3,8 @@ $(function() {
   let pieChart = null;
   let issuesChart = null;
   let teste = null;
+  let startDay = moment().startOf('month').format('YYYY-MM-DD');
+  let lastDay = moment().format("YYYY-MM-") + moment().daysInMonth();
 
   colors = ['#0e6251','#117864','#148f77','#17a589','#1abc9c','#48c9b0','#76d7c4','#a3e4d7','#d1f2eb',
   '#fef5e7','#fdebd0','#fad7a0','#f8c471','#f5b041','#f39c12','#d68910','#b9770e','#9c640c','#7e5109']
@@ -11,11 +13,16 @@ $(function() {
        if(e.which == 13){//Enter key pressed
            $('#find').click();//Trigger search button click event
        }
+
    });
     $("#find").click(function() {
 
         name = $("#name").val();
                     console.log(name);
+        if ($("#e1").val()){
+          startDay = JSON.parse($("#e1").val()).start;
+          lastDay = JSON.parse($("#e1").val()).end;
+        }
         $.ajax({
             url: 'http://127.0.0.1:5000/Languages?name='+name,
             type: 'GET',
@@ -71,7 +78,7 @@ $(function() {
             }
         });
         $.ajax({
-            url: 'http://127.0.0.1:5000/Commits2?name='+name+'&month='+8,
+            url: 'http://127.0.0.1:5000/Commits2?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
             type: 'GET',
             success: function(response) {
               console.log(response);
@@ -83,7 +90,6 @@ $(function() {
               let dataCommits = returnedData.map(function(num) {
                 return num.number;
             });
-
             var ctx = document.getElementById("myChart").getContext('2d');
 
             if(myChart != null){
@@ -124,9 +130,10 @@ $(function() {
                   scales: {
                       xAxes: [{
                           ticks: {
-                              autoSkip: false,
+                            autoSkip: labelsCommit.length > 31 ? true : false,
                               beginAtZero:true,
-                              responsive: true,
+                              responsive: true
+
                           }
                       }]
                   }
@@ -179,14 +186,23 @@ $(function() {
                 $("#readme").empty();
                 $("#openSource").empty();
                 $("#license").empty();
-                returnedData.map(function(num) {
-                   let openSource = String(num.openSource);
-                  let license = (num.licenseType == null ? "None" : String(num.licenseType));
-                  let readme = String(num.readme);
-
+                $("#active").empty();
+                console.log(String(returnedData[0]['open'][0]['licenseType']));
+                  let openSource = String(returnedData[0]['open'][0]['openSource']);
+                  let license = (returnedData[0]['open'][0]['licenseType'] == null ? "None" : String(returnedData[0]['open'][0]['license']));
+                  let readme = String(returnedData[0]['open'][0]['readme']);
+                  let active = Number(returnedData[0]['active']);
+                  console.log(active);
                 $("#readme").append(readme);
                   $("#openSource").append(openSource);
                     $("#license").append(license);
+                    if (active > 0){
+                      $("#active").append("True").css("text-align", "center");
+                    }
+                    else{
+                      $("#active").append("False").css("text-align", "center");
+                    }
+
                     if (readme == "OK"){
                       $("#readme").css("background-color", "green");
                     }
@@ -196,7 +212,7 @@ $(function() {
                     else{
                       $("#readme").css("background-color", "red");
                     }
-              });
+
             },
             error: function(error) {
               console.log(error);
@@ -205,7 +221,7 @@ $(function() {
         });
 
         $.ajax({
-            url: 'http://127.0.0.1:5000/Issues?name='+name+'&month='+8,
+            url: 'http://127.0.0.1:5000/Issues?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
             type: 'GET',
             success: function(response) {
 
@@ -281,21 +297,22 @@ $(function() {
                   scales: {
                       xAxes: [{
                           ticks: {
-                              autoSkip: false,
+                            autoSkip: labelsIssues1.length > 31 ? true : false,
+                              beginAtZero:true,
                               responsive: true
+
                           }
                       }],
                       yAxes: [{
                           ticks: {
+                              beginAtZero:true,
                               autoSkip: false,
                               responsive: true,
-                              beginAtZero:true,
                               stepSize: 1
                           }
                       }]
-                  },
-
-                }
+                  }
+                },
             });
             },
             error: function(error) {

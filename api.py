@@ -4,6 +4,8 @@ from flask_cors import CORS
 from pyArango.connection import *
 import json
 import datetime, calendar
+import datetime as dt
+from datetime import date, timedelta,datetime
 
 conn = Connection(username="root", password="")
 db = conn["athena3"]
@@ -64,26 +66,26 @@ def Commits2():
     aql = """
     FOR Commit IN Commit
     FILTER Commit.repoName == @name
-    FILTER Commit.committedDate >= "2017-08-01T00:00:00Z"
-    FILTER Commit.committedDate <= "2017-08-31T00:00:00Z"
+    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
+    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
     COLLECT
-    day = DATE_FORMAT(Commit.committedDate,"%www-%dd")
+    day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
     WITH COUNT INTO number
     SORT day ASC
     RETURN {
       day: day,
       number: number
     }"""
-    name =  request.args.get("name")
-    month = request.args.get("month")
-    bindVars = {"name" : name}
+    name = request.args.get("name")
+    startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    delta = endDate - startDate
+    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
-    year = 2017
-    month = int(month)
-    num_days = calendar.monthrange(year, month)[1]
-    days = [datetime.date(year, month, day).strftime('%a-%d') for day in range(1, num_days+1)]
+    print(result)
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
     lst = []
     def recur(x):
         day = {}
@@ -118,13 +120,23 @@ def RepoMembers():
 @app.route('/BestPractices')
 def BestPractices():
     aql = """
+    LET a =(
     FOR Repo IN Repo
     FILTER Repo.repoName == @name
-    RETURN {openSource:Repo.openSource,readme:Repo.readme,licenseType:Repo.licenseType}"""
+    RETURN {openSource:Repo.openSource,readme:Repo.readme,licenseType:Repo.licenseType})
+    LET b =(
+    FOR Commit IN Commit
+    FILTER Commit.repoName == @name
+    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") > @date
+       COLLECT WITH COUNT INTO length
+    RETURN length)
+    RETURN {open:a,active:b}"""
     name = request.args.get("name")
-    bindVars = {"name" : name}
+    date = (dt.datetime.now() + dt.timedelta(-60)).strftime('%Y-%m-%d')
+    print(date)
+    bindVars = {"name" : name,"date":date}
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
+    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
     return json.dumps(result)
@@ -135,27 +147,25 @@ def Issues():
     aql = """
     FOR Issue IN Issue
     FILTER Issue.repoName == @name
-    FILTER Issue.closedAt >= "2017-08-01T00:00:00Z"
-    FILTER Issue.closedAt <= "2017-08-31T00:00:00Z"
+    FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
+    FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
     COLLECT 
-    day = DATE_FORMAT(Issue.closedAt,"%www-%dd")
+    day = DATE_FORMAT(Issue.closedAt,"%www %dd-%mmm")
     WITH COUNT INTO number
     SORT day ASC
     RETURN {
       day: day,
       number: number
     }"""
-    name =  request.args.get("name")
-    month = request.args.get("month")
-    print(month)
-    bindVars = {"name" : name}
+    name = request.args.get("name")
+    startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    delta = endDate - startDate
+    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
-    year = 2017
-    month = int(month)
-    num_days = calendar.monthrange(year, month)[1]
-    days = [datetime.date(year, month, day).strftime('%a-%d') for day in range(1, num_days+1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
     lst = []
     def recur(x):
         global value
@@ -176,27 +186,21 @@ def Issues():
         aql = """
     FOR Issue IN Issue
     FILTER Issue.repoName == @name
-    FILTER Issue.createdAt >= "2017-08-01T00:00:00Z"
-    FILTER Issue.createdAt <= "2017-08-31T00:00:00Z"
+    FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
+    FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
     COLLECT 
-    day = DATE_FORMAT(Issue.createdAt,"%www-%dd")
+    day = DATE_FORMAT(Issue.createdAt,"%www %dd-%mmm")
     WITH COUNT INTO number
     SORT day ASC
     RETURN {
       day: day,
       number: number
     }"""
-    name =  request.args.get("name")
-    month = request.args.get("month")
-    print(month)
-    bindVars = {"name" : name}
+    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
-    year = 2017
-    month = int(month)
-    num_days = calendar.monthrange(year, month)[1]
-    days = [datetime.date(year, month, day).strftime('%a-%d') for day in range(1, num_days+1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
     lst2 = []
     def recur(x):
         global value
