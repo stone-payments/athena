@@ -4,11 +4,12 @@ from threading import Thread
 from pyArango.connection import *
 
 from graphTest import paginatioOrgDate
+from graphTest import paginationOrg
 from graphqlclient import ClientRest
 from graphqlclient import GraphQLClient
 
 ######conection info##########################################################
-token = 'fbe5fc51c0fb5dc874fd738143a6c3360921a018'
+token = ''
 ##############################################################################
 
 clientRest2 = ClientRest(token)
@@ -135,7 +136,7 @@ def commitcollector(org):
           branchName: name
           target {
             ... on Commit {
-              history(first: $number_of_repos, after: $next, since: "2017-09-01T00:00:00Z") {
+              history(first: $number_of_repos, after: $next, since: "2017-08-01T00:00:00Z") {
                 pageInfo {
                   endCursor
                 }
@@ -582,8 +583,8 @@ def issue(org):
     repositories_queue = Queue(1500000)
     commits_queue = Queue(1500000)
 
-    workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(5)]
-    workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(5)]
+    workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(3)]
+    workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(3)]
     for repository in queryResult:
         repositories_queue.put(repository)
     [t.start() for t in workers]
@@ -592,7 +593,67 @@ def issue(org):
     [t.join() for t in workers2]
 
 
-# commitcollector("pagarme")
-# statscollector("pagarme")
-# forkCollector("stone-payments")
-issue("stone-payments")
+def readm_olde(org):
+    aql = "FOR Repo in Repo FILTER Repo.org == @org return {repoName:Repo.repoName,key:Repo._key}"
+    bindVars = {"org": org}
+    queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True, bindVars=bindVars)
+    db['Repo'].ensureHashIndex(['readme'], unique=False, sparse=False)
+
+    def collector(repositories: Queue, output: Queue):
+        while True:
+            repository = repositories.get_nowait()
+            print(repository['repoName'])
+            query = '''
+            query ($org: String!, $next: String!) {
+              organization(login: $org) {
+                repository(name: $next) {
+                  id
+                  defaultBranchRef {
+                    target {
+                      ... on Commit {
+                        blame(path: "README.md") {
+                          ranges {
+                            endingLine
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            '''
+            try:
+                prox = paginationOrg(query, org, repository['repoName'])
+                output.put(1)
+                if prox.get('errors'):
+                    doc = db['Repo'][str(repository['key'])]
+                    doc["readme"] = False
+                    doc.save()
+                    continue
+                try:
+                    a = find('ranges', prox)
+                    doc = db["Repo"][str(find('id', prox))]
+                    doc["readme"] = True if a[-1]['endingLine'] >= 5 else False
+                    doc.save()
+                except Exception:
+                    continue
+            except Exception as a:
+                pass
+
+    count_queue = Queue(15000)
+    repositories_queue = Queue(15000)
+    workers = [Thread(target=collector, args=(repositories_queue, count_queue)) for _ in range(5)]
+    for repository in queryResult:
+        repositories_queue.put(repository)
+    [t.start() for t in workers]
+    [t.join() for t in workers]
+    print(count_queue.qsize())
+
+
+org = 'stone-payments'
+commitcollector(org)
+statscollector(org)
+forkCollector(org)
+issue(org)
+# readme(org)
