@@ -31,6 +31,11 @@ class TeamsDev(pyArango.collection.Edges):
     _fields = dict(
     )
 
+
+class TeamsRepo(pyArango.collection.Edges):
+    _fields = dict(
+    )
+
 class DevCommit(pyArango.collection.Edges):
     _fields = dict(
     )
@@ -226,12 +231,14 @@ def paginationOrg(query2, tmp, num):
                          })
     return pag
 
-def paginationSlug(query2, tmp, slugTemp):
+
+def paginationSlug(query2, tmp, slugTemp, org):
     pag = client.execute(query2,
                          {
                              "number_of_repos": number_of_repos,
                              "next": tmp,
-                             "slug": slugTemp
+                             "slug": slugTemp,
+                             "org": org
                          })
     return pag
 
@@ -655,13 +662,14 @@ def teamsDev(org):
         TeamsDevCollection = db.createCollection("TeamsDev")
     except Exception:
         TeamsDevCollection = db["TeamsDev"]
-    aql = "FOR Team in Teams return Team.slug"
+    bindVars = {"org": org}
+    aql = "FOR Teams in Teams FILTER Teams.org == @org return Teams.slug"
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
-    queryResult = db.AQLQuery(aql, rawResults=True)
+    queryResult = db.AQLQuery(aql, rawResults=True, bindVars=bindVars)
 
     query = '''
-    query($number_of_repos:Int!, $next:String, $slug:String!){
-      organization(login: "stone-payments") {
+    query($number_of_repos:Int!, $next:String, $slug:String!, $org:String!){
+      organization(login: $org) {
         team(slug: $slug) {
           name
           id
@@ -687,7 +695,7 @@ def teamsDev(org):
         cursor = None
         while cursor or first:
             try:
-                prox = paginationSlug(query, cursor, x)
+                prox = paginationSlug(query, cursor, x, org)
                 proxNode = prox["data"]["organization"]["team"]
                 i = proxNode["members"]["edges"]
                 for j in i:
@@ -711,6 +719,70 @@ def teamsDev(org):
                 first = False
     print(count)
 
+
+# #### teamsRepo #######################################################################
+
+def teamsRepo(org):
+    try:
+        TeamsRepoCollection = db.createCollection("TeamsRepo")
+    except Exception:
+        TeamsRepoCollection = db["TeamsRepo"]
+    bindVars = {"org": org}
+    aql = "FOR Teams in Teams FILTER Teams.org == @org return Teams.slug"
+    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    queryResult = db.AQLQuery(aql, rawResults=True, bindVars=bindVars)
+
+    query = '''
+        query ($number_of_repos: Int!, $next: String, $slug: String!, $org: String!) {
+          organization(login: $org) {
+            team(slug: $slug) {
+              name
+              id
+              repositories(first: $number_of_repos, after: $next) {
+                edges {
+                  node {
+                    id
+                    name
+                  }
+                }
+                pageInfo {
+                  endCursor
+                }
+              }
+            }
+          }
+        }
+        '''
+
+    count = 0
+    for x in queryResult:
+        first = True
+        cursor = None
+        while cursor or first:
+            try:
+                prox = paginationSlug(query, cursor, x, org)
+                proxNode = prox["data"]["organization"]["team"]
+                i = proxNode["repositories"]["edges"]
+                for j in i:
+                    count = count + 1
+                    try:
+                        temp = db['Repo'][str(j["node"]["id"]).replace("/", "@")]
+                        print(temp)
+                        temp2 = db['Teams'][str(proxNode["id"]).replace("/", "@")]
+                        print(temp2)
+                        doc = TeamsRepoCollection.createEdge()
+                        doc.links(temp, temp2)
+                        doc.save()
+                    except Exception:
+                        pass
+                cursor = prox["data"]["organization"]["team"]["repositories"]["pageInfo"]["endCursor"]
+                if cursor is None:
+                    cursor = False
+            except Exception as a:
+                print(a)
+                cursor = False
+                first = False
+    print(count)
 
 ##### Languages #########################################################################################################
 def languages(org):
@@ -896,7 +968,7 @@ def commitcollector(org):
           branchName: name
           target {
             ... on Commit {
-              history(first: $number_of_repos, after: $next, since: "2017-08-01T00:00:00Z") {
+              history(first: $number_of_repos, after: $next, since: "2017-09-15T00:00:00Z") {
                 pageInfo {
                   endCursor
                 }
@@ -1376,8 +1448,10 @@ def issue(org):
 
 org = 'stone-payments'
 RepoQuery(org)
-readme(org)
+dev(org)
 Teams(org)
+teamsDev(org)
+teamsRepo(org)
 readme(org)
 languages(org)
 commitcollector(org)
