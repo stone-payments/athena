@@ -53,6 +53,10 @@ $(function() {
                     }]
                   },
                   options: {
+                    tooltips: {
+                      mode: 'index',
+                      intersect: false
+                    },
                       scales: {
                           yAxes: [{
                               ticks: {
