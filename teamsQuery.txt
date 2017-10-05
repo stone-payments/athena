@@ -1,0 +1,35 @@
+query($number_of_repos:Int! $next:String, $org:String!){
+  organization(login: $org) {
+    teams(first: $number_of_repos after: $next) {
+      totalCount
+      pageInfo {
+        endCursor
+      }
+      edges {
+        node {
+          ancestors(first: 100) {
+            nodes {
+              id
+              name
+            }
+          }
+          members(first: 100) {
+            totalCount
+          }
+          createdAt
+          id
+          name
+          privacy
+          slug
+          childTeams(first: 100) {
+            totalCount
+            nodes {
+              name
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+}

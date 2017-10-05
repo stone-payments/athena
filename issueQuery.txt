@@ -1,0 +1,40 @@
+query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!){
+  organization(login: $org) {
+    Org: login
+    repository(name: $next2) {
+      repositoryId: id
+      repoName: name
+      issues(first: $number_of_repos, after: $next) {
+        pageInfo {
+          endCursor
+        }
+        edges {
+          node {
+            state
+            authorAssociation
+            lastEditedAt
+            timeline(last: 100) {
+              nodes {
+                ... on ClosedEvent {
+                  closedAt: createdAt
+                }
+              }
+            }
+            author
+            issueId: id
+            createdAt
+            closed
+            labels(first: 1) {
+              edges {
+                node {
+                  label:name
+                }
+              }
+            }
+            title
+          }
+        }
+      }
+    }
+  }
+}

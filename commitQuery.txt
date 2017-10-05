@@ -1,0 +1,32 @@
+query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!, $sinceTime:GitTimestamp!, $untilTime:GitTimestamp!){
+  repository(owner: $org, name: $next2) {
+    repositoryId: id
+    repoName: name
+    defaultBranchRef {
+      branchName: name
+      target {
+        ... on Commit {
+          history(first: $number_of_repos, after: $next, since: $sinceTime, until: $untilTime) {
+            pageInfo {
+              endCursor
+            }
+            edges {
+              node {
+                commitId: id
+                messageHeadline
+                oid
+                committedDate
+                author {
+                  user {
+                    devId: id
+                    login
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

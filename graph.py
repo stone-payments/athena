@@ -2,35 +2,25 @@ from queue import Queue
 from threading import Thread
 
 import pyArango
+import pyArango.validation as VAL
 from pyArango.collection import Collection, Field
-from pyArango.connection import *
 
+from config import *
 from graphqlclient import ClientRest
 from graphqlclient import GraphQLClient
 
-######conection info##########################################################
-token = ''
-url = 'https://api.github.com/graphql'
-##############################################################################
-number_of_repos = 50
-
-client = GraphQLClient(url, token)
-clientRest2 = ClientRest(token)
+client = GraphQLClient(url, token, timeout)
+clientRest2 = ClientRest(token, timeout)
 
 
 def restQuery(url, query, temp):
-    result = clientRest2.execute(query=url + query + temp)
+    result = clientRest2.execute(url, query, temp)
     return result
 ######## Classes #########################################################
-class ContributedRepositories(pyArango.collection.Edges):
-    _fields = dict(
-    )
-
 
 class TeamsDev(pyArango.collection.Edges):
     _fields = dict(
     )
-
 
 class TeamsRepo(pyArango.collection.Edges):
     _fields = dict(
@@ -43,6 +33,7 @@ class DevCommit(pyArango.collection.Edges):
 class RepoCommit(pyArango.collection.Edges):
     _fields = dict(
     )
+
 class RepoFork(pyArango.collection.Edges):
     _fields = dict(
     )
@@ -50,13 +41,14 @@ class RepoFork(pyArango.collection.Edges):
 class DevFork(pyArango.collection.Edges):
     _fields = dict(
     )
+
 class RepoIssue(pyArango.collection.Edges):
     _fields = dict(
     )
 
 class LanguagesRepo(pyArango.collection.Edges):
     _fields = dict(
-        size=Field()
+        size=Field(validators=[VAL.NotNull()]),
     )
 
 class RepoDev(pyArango.collection.Edges):
@@ -67,24 +59,31 @@ class Languages(Collection):
     """
     LANGUAGES
     """
+    _validation = {
+        'allow_foreign_fields': False  # allow fields that are not part of the schema
+    }
     _fields = dict(
-        language=Field(),
-        id=Field()
+        name=Field(validators=[VAL.NotNull()]),
+        id=Field(validators=[VAL.NotNull()])
     )
 
 class Teams(Collection):
     """
     TEAMS
     """
+    _validation = {
+        'allow_foreign_fields': False  # allow fields that are not part of the schema
+    }
     _fields = dict(
-        createdAt=Field(),
-        teamName=Field(),
-        privacy=Field(),
-        slug=Field(),
+        createdAt=Field(validators=[VAL.NotNull()]),
+        teamName=Field(validators=[VAL.NotNull()]),
+        privacy=Field(validators=[VAL.NotNull()]),
+        slug=Field(validators=[VAL.NotNull()]),
         childTeams=Field(),
         childTeamsTotal=Field(),
         ancestors=Field(),
-        id=Field()
+        id=Field(validators=[VAL.NotNull()]),
+        org=Field(validators=[VAL.NotNull()])
     )
 
 
@@ -92,38 +91,44 @@ class Commit(Collection):
     """
     COMMIT
     """
+    _validation = {
+        'allow_foreign_fields': False  # allow fields that are not part of the schema
+    }
     _fields = dict(
         messageHeadline=Field(),
-        oid=Field(),
-        committedDate=Field(),
+        oid=Field(validators=[VAL.NotNull()]),
+        committedDate=Field(validators=[VAL.NotNull()]),
         author=Field(),
-        devId=Field(),
-        GitHubId=Field(),
-        repositoryId=Field(),
-        repoName=Field(),
-        branchName=Field()
-    )
-
-
-class mentionableUsers(pyArango.collection.Edges):
-    _fields = dict(
-        aaa=Field(),
-    )
-class Teste(Collection):
-    _fields = dict(
-        repoName=Field(),
+        devId=Field(validators=[VAL.NotNull()]),
+        GitHubId=Field(validators=[VAL.NotNull()]),
+        repositoryId=Field(validators=[VAL.NotNull()]),
+        repoName=Field(validators=[VAL.NotNull()]),
+        branchName=Field(),
+        commitId=Field(validators=[VAL.NotNull()]),
+        org=Field(validators=[VAL.NotNull()]),
+        totalAddDel=Field(validators=[VAL.NotNull()]),
+        additions=Field(validators=[VAL.NotNull()]),
+        deletions=Field(validators=[VAL.NotNull()]),
+        numFiles=Field(validators=[VAL.NotNull()]),
     )
 
 class Dev(Collection):
     """
     DEV
     """
+    _validation = {
+        'allow_foreign_fields': False  # allow fields that are not part of the schema
+    }
     _fields = dict(
         devName=Field(),
-        login=Field(),
-        avatar_url=Field(),
         followers=Field(),
-        following=Field()
+        following=Field(),
+        login=Field(validators=[VAL.NotNull()]),
+        avatarUrl=Field(),
+        contributedRepositories=Field(),
+        pullRequests=Field(),
+        id=Field(validators=[VAL.NotNull()]),
+        org=Field(validators=[VAL.NotNull()]),
     )
 
 
@@ -131,55 +136,41 @@ class Repo(Collection):
     """
     REPO
     """
+    _validation = {
+        'allow_foreign_fields': False  # allow fields that are not part of the schema
+    }
     _fields = dict(
         repoName=Field(),
         description=Field(),
         url=Field(),
-        isPrivate=Field(),
+        openSource=Field(validators=[VAL.NotNull()]),
         primaryLanguage=Field(),
         forks=Field(),
         stargazers=Field(),
         watchers=Field(),
         createdAt=Field(),
-        id=Field(),
-        nameWithOwner=Field()
-    )
-
-class Repo1(Collection):
-    """
-    REPO2
-    """
-    _fields = dict(
-        repoName=Field(),
-        description=Field(),
-        url=Field(),
-        isPrivate=Field(),
-        primaryLanguage=Field(),
-        forks=Field(),
-        stargazers=Field(),
-        watchers=Field(),
-        createdAt=Field(),
-        id=Field(),
         nameWithOwner=Field(),
         licenseId=Field(),
-        Type=Field(),
-        readme=Field()
+        licenseType=Field(),
+        id=Field(validators=[VAL.NotNull()]),
+        org=Field(validators=[VAL.NotNull()])
     )
+
 class Fork(Collection):
     """
     Fork
     """
     _fields = dict(
-        repositoryId=Field(),
+        repositoryId=Field(validators=[VAL.NotNull()]),
         repoName=Field(),
-        createdAt=Field(),
-        id=Field(),
-        isPrivate=Field(),
+        createdAt=Field(validators=[VAL.NotNull()]),
+        id=Field(validators=[VAL.NotNull()]),
+        isPrivate=Field(validators=[VAL.NotNull()]),
         isLocked=Field(),
-        devId=Field(),
+        devId=Field(validators=[VAL.NotNull()]),
         login=Field(),
-        forkId=Field(),
-        org=Field()
+        forkId=Field(validators=[VAL.NotNull()]),
+        org=Field(validators=[VAL.NotNull()])
     )
 
 class Issue(Collection):
@@ -187,25 +178,25 @@ class Issue(Collection):
     Issue
     """
     _fields = dict(
-        repositoryId=Field(),
+        repositoryId=Field(validators=[VAL.NotNull()]),
         repoName=Field(),
         state=Field(),
         closedAt=Field(),
         author=Field(),
-        issueId=Field(),
-        createdAt=Field(),
+        issueId=Field(validators=[VAL.NotNull()]),
+        createdAt=Field(validators=[VAL.NotNull()]),
         closed=Field(),
         label=Field(),
         title=Field(),
-        org=Field()
+        org=Field(validators=[VAL.NotNull()])
     )
 
 
 ######pagination############################################################
 
 
-def pagination(query2, number_of_repo, tmp, org):
-    pag = client.execute(query2,
+def pagination(query, number_of_repo, tmp, org):
+    pag = client.execute(query,
                          {
                              "number_of_repos": number_of_repo,
                              "next": tmp,
@@ -214,8 +205,8 @@ def pagination(query2, number_of_repo, tmp, org):
     return pag
 
 
-def paginationRepoNum(query2, tmp, num):
-    pag = client.execute(query2,
+def paginationRepoNum(query, tmp, num):
+    pag = client.execute(query,
                          {
                              "number_of_repos": num,
                              "next": tmp
@@ -223,8 +214,8 @@ def paginationRepoNum(query2, tmp, num):
     return pag
 
 
-def paginationOrg(query2, tmp, num):
-    pag = client.execute(query2,
+def paginationOrg(query, tmp, num):
+    pag = client.execute(query,
                          {
                              "org": tmp,
                              "next": num
@@ -232,8 +223,8 @@ def paginationOrg(query2, tmp, num):
     return pag
 
 
-def paginationSlug(query2, tmp, slugTemp, org):
-    pag = client.execute(query2,
+def paginationSlug(query, tmp, slugTemp, org):
+    pag = client.execute(query,
                          {
                              "number_of_repos": number_of_repos,
                              "next": tmp,
@@ -243,23 +234,26 @@ def paginationSlug(query2, tmp, slugTemp, org):
     return pag
 
 
-def paginationNext(query2, next, next2):
-    pag = client.execute(query2,
-                         {
-                             "number_of_repos": number_of_repos,
-                             "next": next,
-                             "next2": next2
-                         })
-    return pag
-
-
-def paginatioOrgDate(query2, next, next2, org):
-    pag = client.execute(query2,
+def paginationNext(query, next, next2, org):
+    pag = client.execute(query,
                          {
                              "number_of_repos": number_of_repos,
                              "next": next,
                              "next2": next2,
                              "org": org
+                         })
+    return pag
+
+
+def paginatioOrgDate(query, next, next2, org, sinceTime, untilTime):
+    pag = client.execute(query,
+                         {
+                             "number_of_repos": number_of_repos,
+                             "next": next,
+                             "next2": next2,
+                             "org": org,
+                             "sinceTime": sinceTime,
+                             "untilTime": untilTime
                          })
     return pag
 
@@ -283,56 +277,16 @@ def find(key, json) -> object:
 
 ### Connection #####################################################################
 
-conn = Connection(username="root", password="")
-try:
-    db = conn.createDatabase(name="athena3")
-except Exception:
-    db = conn["athena3"]
+# conn = Connection(username="root", password="")
+# try:
+#     db = conn.createDatabase(name="athena3")
+# except Exception:
+#     db = conn["athena3"]
 
 # ##### Repo #######################################################################
 def RepoQuery(org):
-    query = '''
-        query($number_of_repos:Int! $next:String, $org:String!)  {
-          organization(login: $org) {
-            repositories(first: $number_of_repos, after:$next) {
-              edges {
-                node {
-                  defaultBranchRef{
-                    target{
-                      repository{
-                        licenseInfo {
-                         licenseId: id
-                          licenseType: key
-                        }
-                      }
-                    }
-                  }
-                  id
-                  name
-                  description
-                  url
-                  nameWithOwner
-                  isPrivate
-                  primaryLanguage {
-                    priLanguage: name
-                  }
-                  forks{
-                    totalCount
-                  }
-                  stargazers{
-                    totalCount
-                  }
-                  watchers{
-                     totalCount
-                  }
-                  createdAt
-                }
-                cursor
-              }
-            }
-          }
-        }
-    '''
+    with open("repoQuery.txt", "r") as query:
+        query = query.read()
     try:
         repoCollection = db.createCollection("Repo")
     except Exception:
@@ -347,32 +301,32 @@ def RepoQuery(org):
     cursor = None
     while cursor or first:
         try:
-            prox = pagination(query, 100, cursor, org)
+            prox = pagination(query, number_of_repos, cursor, org)
             proxRepositorios = prox["data"]["organization"]["repositories"]["edges"]
-            for i in proxRepositorios:
+            for repo in proxRepositorios:
                 try:
                     count = count + 1
                     try:
-                        doc = repoCollection[str(i["node"]["id"].replace("/", "@"))]
+                        doc = repoCollection[str(repo["node"]["id"].replace("/", "@"))]
                     except:
                         doc = repoCollection.createDocument()
                         pass
-                    doc['repoName'] = i["node"]["name"]
-                    doc["description"] = i["node"]["description"]
-                    doc["url"] = i["node"]["url"]
-                    doc["openSource"] = False if i["node"]["isPrivate"] else True
-                    doc["primaryLanguage"] = find('priLanguage', i)
-                    doc["forks"] = i["node"]["forks"]["totalCount"]
-                    doc["stargazers"] = i["node"]["stargazers"]["totalCount"]
-                    doc["watchers"] = i["node"]["watchers"]["totalCount"]
-                    doc["createdAt"] = i["node"]["createdAt"]
-                    doc["nameWithOwner"] = i["node"]["nameWithOwner"]
-                    doc["licenseId"] = find('licenseId', i)
-                    print(i["node"]["name"])
-                    doc["licenseType"] = find('licenseType', i)
-                    doc["id"] = i["node"]["id"].replace("/", "@")
+                    doc['repoName'] = repo["node"]["name"]
+                    doc["description"] = repo["node"]["description"]
+                    doc["url"] = repo["node"]["url"]
+                    doc["openSource"] = False if repo["node"]["isPrivate"] else True
+                    doc["primaryLanguage"] = find('priLanguage', repo)
+                    doc["forks"] = repo["node"]["forks"]["totalCount"]
+                    doc["stargazers"] = repo["node"]["stargazers"]["totalCount"]
+                    doc["watchers"] = repo["node"]["watchers"]["totalCount"]
+                    doc["createdAt"] = repo["node"]["createdAt"]
+                    doc["nameWithOwner"] = repo["node"]["nameWithOwner"]
+                    doc["licenseId"] = find('licenseId', repo)
+                    print(repo["node"]["name"])
+                    doc["licenseType"] = find('licenseType', repo)
+                    doc["id"] = repo["node"]["id"].replace("/", "@")
                     doc["org"] = org
-                    doc._key = i["node"]["id"].replace("/", "@")
+                    doc._key = repo["node"]["id"].replace("/", "@")
                     doc.save()
                 except Exception as a:
                     print(a)
@@ -393,43 +347,15 @@ def dev(org):
     db['Dev'].ensureHashIndex(['devName'], unique=False, sparse=False)
     db['Dev'].ensureHashIndex(['login'], unique=False, sparse=False)
 
-    query = '''
-    query($number_of_repos:Int! $next:String, $org:String!){
-      organization(login:$org) {
-        members(first:$number_of_repos after:$next) {
-          edges {
-            node {
-              id
-              name
-              followers (first:1){
-                totalCount
-                }
-              following(first:1){
-                totalCount
-              }
-              login
-              avatarUrl
-              contributedRepositories(last:1){
-                  totalCount
-              }
-              pullRequests (last:1){
-                  totalCount
-              }
-            }
-            cursor
-          }
-        }
-      }
-    }
-    '''
-
+    with open("devQuery.txt", "r") as query:
+        query = query.read()
     count = 0
     first = True
     cursor = None
     while cursor or first:
         try:
             prox = pagination(query, 30, cursor, org)
-            # print(prox)
+            print(prox)
             proxRepositorios = prox["data"]["organization"]["members"]["edges"]
             for i in proxRepositorios:
                 count = count + 1
@@ -454,126 +380,6 @@ def dev(org):
             cursor = False
             first = False
 
-
-
-###############################################################################################################
-
-
-
-###### ContributedRepositories ##########################################################################################
-def contributedRepositoriesCollection(org):
-    try:
-        ContributedRepositoriesCollection = db.createCollection("ContributedRepositories")
-    except Exception:
-        ContributedRepositoriesCollection = db["ContributedRepositories"]
-    query = '''
-    query($number_of_repos:Int! $next:String){
-      organization(login:"stone-payments") {
-        members(first:$number_of_repos after:$next) {
-          edges {
-            node {
-              id
-              contributedRepositories(first:100 affiliations:ORGANIZATION_MEMBER){
-                edges{
-                    node{
-                      id
-                    }
-                    cursor
-                  }
-              }
-            }
-            cursor
-          }
-        }
-      }
-    }
-    '''
-
-    count = 0
-    first = True
-    cursor = None
-    while cursor or first:
-        try:
-            prox = pagination(query, cursor)
-            proxRepositorios = prox["data"]["organization"]["members"]["edges"]
-            for i in proxRepositorios:
-                proxNode = i["node"]["contributedRepositories"]["edges"]
-                for j in proxNode:
-                    try:
-                        temp = db['Dev'][str(i["node"]["id"])]
-                        temp2 = db['Repo'][str(j["node"]["id"])]
-                        doc = ContributedRepositoriesCollection.createEdge({"aaa": 10})
-                        doc.links(temp2, temp)
-                        doc.save()
-                    except Exception:
-                        continue
-            cursor = proxRepositorios[len(proxRepositorios) - 1]["cursor"]
-            count = count + 1
-        except Exception as a:
-            print(a)
-            cursor = False
-            first = False
-    print(count)
-
-
-###### mentionableUsers #########################################################################################################
-def mentionableUsers(org):
-    try:
-        mentionableUsersCollection = db.createCollection("mentionableUsers")
-    except Exception:
-        mentionableUsersCollection = db["mentionableUsers"]
-    query = '''
-    query($number_of_repos:Int! $next:String){
-        organization(login:"stone-payments"){
-        repositories(last:$number_of_repos after: $next){
-          edges{
-            node{
-              name
-              id
-              mentionableUsers(last:100){
-                edges{
-                  node{
-                    name
-                    id
-                  }
-                }
-              }
-            }
-            cursor
-          }
-        }
-      }
-    }
-    '''
-
-    count = 0
-    first = True
-    cursor = None
-    while cursor or first:
-        try:
-            prox = pagination(query, cursor)
-            proxRepositorios = prox["data"]["organization"]["repositories"]["edges"]
-            for i in proxRepositorios:
-                count = count + 1
-                proxNode = i["node"]["mentionableUsers"]["edges"]
-                for j in proxNode:
-                    count = count + 1
-                    try:
-                        temp = db['Dev'][str(j["node"]["id"]).replace("/", "@")]
-                        temp2 = db['Repo'][str(i["node"]["id"]).replace("/", "@")]
-                        doc = mentionableUsersCollection.createEdge({"aaa": 10})
-                        doc.links(temp, temp2)
-                        doc.save()
-                    except Exception:
-                        pass
-            cursor = proxRepositorios[len(proxRepositorios) - 1]["cursor"]
-        except Exception as a:
-            print(a)
-            cursor = False
-            first = False
-    print(count)
-
-
 ###### Teams #########################################################################################
 def Teams(org):
     try:
@@ -582,43 +388,8 @@ def Teams(org):
         TeamsCollection = db["Teams"]
     db['Teams'].ensureHashIndex(['teamName'], unique=False, sparse=False)
 
-    query = '''
-    query($number_of_repos:Int! $next:String, $org:String!){
-      organization(login: $org) {
-        teams(first: $number_of_repos after: $next) {
-          totalCount
-          pageInfo {
-            endCursor
-          }
-          edges {
-            node {
-              ancestors(first: 100) {
-                nodes {
-                  id
-                  name
-                }
-              }
-              members(first: 100) {
-                totalCount
-              }
-              createdAt
-              id
-              name
-              privacy
-              slug
-              childTeams(first: 100) {
-                totalCount
-                nodes {
-                  name
-                  id
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    '''
+    with open("teamsQuery.txt", "r") as query:
+        query = query.read()
 
     count = 0
     first = True
@@ -667,27 +438,8 @@ def teamsDev(org):
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, bindVars=bindVars)
 
-    query = '''
-    query($number_of_repos:Int!, $next:String, $slug:String!, $org:String!){
-      organization(login: $org) {
-        team(slug: $slug) {
-          name
-          id
-          members(first: $number_of_repos, after:  $next) {
-            edges{
-            node {
-              name
-              id
-            }
-            }
-            pageInfo {
-              endCursor
-            }
-          }
-        }
-      }
-    }
-    '''
+    with open("teamsDevQuery.txt", "r") as query:
+        query = query.read()
 
     count = 0
     for x in queryResult:
@@ -732,27 +484,8 @@ def teamsRepo(org):
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, bindVars=bindVars)
 
-    query = '''
-        query ($number_of_repos: Int!, $next: String, $slug: String!, $org: String!) {
-          organization(login: $org) {
-            team(slug: $slug) {
-              name
-              id
-              repositories(first: $number_of_repos, after: $next) {
-                edges {
-                  node {
-                    id
-                    name
-                  }
-                }
-                pageInfo {
-                  endCursor
-                }
-              }
-            }
-          }
-        }
-        '''
+    with open("teamsRepoQuery.txt", "r") as query:
+        query = query.read()
 
     count = 0
     for x in queryResult:
@@ -803,27 +536,8 @@ def languages(org):
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True, bindVars=bindVars)
 
-    print(queryResult)
-    query = """
-    query ($number_of_repos: Int!, $next: String, $next2: String!,$org:String!) {
-      repository(owner: $org, name: $next2) {
-        repositoryId: id
-        languages(first: $number_of_repos after:$next) {
-          pageInfo{
-            endCursor
-          }
-          totalSize
-          edges {
-            size
-            node {
-              id
-              name
-            }
-          }
-        }
-      }
-    }
-    """
+    with open("languagesQuery.txt", "r") as query:
+        query = query.read()
 
     for repositoryname in queryResult:
         first = True
@@ -832,7 +546,7 @@ def languages(org):
             first = False
             print(repositoryname)
             try:
-                prox = paginatioOrgDate(query, cursor, repositoryname, org)
+                prox = paginationNext(query, cursor, repositoryname, org)
                 print(prox)
                 cursor = find('endCursor', prox)
                 proxNode = find('languages', prox)
@@ -861,142 +575,50 @@ def languages(org):
                 cursor = False
                 first = False
 
-# #### Readme #######################################################################
 
-def readme(org):
-    aql = "FOR Repo in Repo FILTER Repo.org == @org return {repoName:Repo.repoName,key:Repo._key}"
-    bindVars = {"org": org}
-    queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True, bindVars=bindVars)
-    db['Repo'].ensureHashIndex(['readme'], unique=False, sparse=False)
-
-    def collector(repositories: Queue, output: Queue):
-        while True:
-            repository = repositories.get_nowait()
-            print(repository['repoName'])
-            query = '''
-            query ($org: String!, $next: String!) {
-              organization(login: $org) {
-                repository(name: $next) {
-                  id
-                  defaultBranchRef {
-                    target {
-                      ... on Commit {
-                        blame(path: "README.md") {
-                          ranges {
-                            endingLine
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            '''
-            try:
-                prox = paginationOrg(query, org, repository['repoName'])
-                output.put(1)
-                if prox.get('errors'):
-                    doc = db['Repo'][str(repository['key'])]
-                    doc["readme"] = None
-                    doc.save()
-                    continue
-                try:
-                    a = find('ranges', prox)
-                    doc = db["Repo"][str(find('id', prox))]
-                    doc["readme"] = "OK" if a[-1]['endingLine'] >= 5 else "Poor"
-                    doc.save()
-                except Exception:
-                    continue
-            except Exception as a:
-                pass
-
-    count_queue = Queue(15000)
-    repositories_queue = Queue(15000)
-    workers = [Thread(target=collector, args=(repositories_queue, count_queue)) for _ in range(5)]
-    for repository in queryResult:
-        repositories_queue.put(repository)
-    [t.start() for t in workers]
-    [t.join() for t in workers]
-    print(count_queue.qsize())
-
-
-urlCommit = 'https://api.github.com/repos/'
-
+########################################################################################################
 
 def commitcollector(org):
+    try:
+        commitCollection = db.createCollection("Commit")
+    except Exception:
+        commitCollection = db["Commit"]
+        pass
     try:
         db['Commit'].ensureHashIndex(['org'], unique=False, sparse=False)
     except Exception:
         pass
     try:
-        commitCollection = db.createCollection["Commit"]
-    except Exception:
-        commitCollection = db["Commit"]
-        pass
-    try:
-        DevCommitCollection = db.createCollection["DevCommit"]
+        DevCommitCollection = db.createCollection("DevCommit")
     except:
         DevCommitCollection = db["DevCommit"]
         pass
     try:
-        RepoCommitCollection = db.createCollection["RepoCommit"]
+        RepoCommitCollection = db.createCollection("RepoCommit")
     except:
         RepoCommitCollection = db["RepoCommit"]
         pass
     try:
-        RepoDevCollection = db.createCollection["RepoDev"]
+        RepoDevCollection = db.createCollection("RepoDev")
     except:
         RepoDevCollection = db["RepoDev"]
         pass
     aql = "FOR Repo in Repo FILTER Repo.org == @org return Repo.repoName"
     bindVars = {"org": org}
     queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True, bindVars=bindVars)
-
     def collector(repositories: Queue, output: Queue):
         while True:
             repository = repositories.get_nowait()
             print(repository)
             first = True
             cursor = None
-            query = '''
-    query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!){
-      repository(owner: $org, name: $next2) {
-        repositoryId: id
-        repoName: name
-        defaultBranchRef {
-          branchName: name
-          target {
-            ... on Commit {
-              history(first: $number_of_repos, after: $next, since: "2017-09-15T00:00:00Z") {
-                pageInfo {
-                  endCursor
-                }
-                edges {
-                  node {
-                    commitId: id
-                    messageHeadline
-                    oid
-                    committedDate
-                    author {
-                      user {
-                        devId: id
-                        login
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    '''
+            with open("commitQuery.txt", "r") as query:
+                query = query.read()
             while cursor is not None or first:
                 first = False
                 try:
-                    prox = paginatioOrgDate(query, cursor, repository, org)
+                    prox = paginatioOrgDate(query, cursor, repository, org, sinceTime, untilTime)
+                    print(prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
                     cursor = find('endCursor', prox)
@@ -1092,13 +714,59 @@ def commitcollector(org):
     [t.join() for t in workers2]
 
 
-def statscollector(org):
-    aql = """FOR Commit IN Commit
-    FILTER Commit.additions == null
-    FILTER Commit.org == @org
-    FILTER Commit.committedDate > "2017-08-01T00:00:00Z"
-    RETURN {oid:Commit.oid,repo:Commit.repoName,id:Commit.GitHubId}"""
+# #### Readme #######################################################################
+
+def readme(org):
+    aql = "FOR Repo in Repo FILTER Repo.org == @org return {repoName:Repo.repoName,key:Repo._key}"
     bindVars = {"org": org}
+    queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True, bindVars=bindVars)
+    db['Repo'].ensureHashIndex(['readme'], unique=False, sparse=False)
+
+    def collector(repositories: Queue, output: Queue):
+        while True:
+            repository = repositories.get_nowait()
+            print(repository['repoName'])
+            with open("readmeQuery.txt", "r") as query:
+                query = query.read()
+            try:
+                prox = paginationOrg(query, org, repository['repoName'])
+                output.put(1)
+                if prox.get('errors'):
+                    doc = db['Repo'][str(repository['key'])]
+                    doc["readme"] = None
+                    doc.save()
+                    continue
+                try:
+                    a = find('ranges', prox)
+                    doc = db["Repo"][str(find('id', prox))]
+                    doc["readme"] = "OK" if a[-1]['endingLine'] >= 5 else "Poor"
+                    doc.save()
+                except Exception:
+                    continue
+            except Exception as a:
+                pass
+
+    count_queue = Queue(15000)
+    repositories_queue = Queue(15000)
+    workers = [Thread(target=collector, args=(repositories_queue, count_queue)) for _ in range(5)]
+    for repository in queryResult:
+        repositories_queue.put(repository)
+    [t.start() for t in workers]
+    [t.join() for t in workers]
+    print(count_queue.qsize())
+
+
+#############################################################################################################
+
+def statscollector(org):
+    try:
+        commitCollection = db.createCollection["Commit"]
+    except Exception:
+        commitCollection = db["Commit"]
+        pass
+    with open("statsQuery.txt", "r") as aql:
+        aql = aql.read()
+    bindVars = {"org": org, "sinceTime": sinceTime, "untilTime": untilTime}
     queryResult = db.AQLQuery(aql, batchSize=20000, rawResults=True, bindVars=bindVars)
 
     def collector(repositories: Queue, output: Queue):
@@ -1154,9 +822,19 @@ def statscollector(org):
 
 def forkCollector(org):
     try:
-        ForkCollection = db.createCollection["Fork"]
+        ForkCollection = db.createCollection("Fork")
     except Exception:
         ForkCollection = db["Fork"]
+        pass
+    try:
+        DevForkCollection = db.createCollection("DevFork")
+    except Exception:
+        DevForkCollection = db["DevFork"]
+        pass
+    try:
+        RepoForkCollection = db.createCollection("RepoFork")
+    except Exception:
+        RepoForkCollection = db["RepoFork"]
         pass
     aql = "FOR Repo in Repo FILTER Repo.org == @org return Repo.repoName"
     bindVars = {"org": org}
@@ -1168,38 +846,12 @@ def forkCollector(org):
             print(repository)
             first = True
             cursor = None
-            query = '''
-    query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!){
-      organization(login: $org) {
-        repository(name: $next2) {
-          repositoryId:id
-          repoName:name
-          forks(first: $number_of_repos , after:$next) {
-          pageInfo{
-              endCursor
-            }
-            edges {
-              node {
-                createdAt
-                forkId: id
-                isPrivate
-                isLocked
-                lockReason
-                owner {
-                 devId: id
-                  login
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    '''
+            with open("forkQuery.txt", "r") as query:
+                query = query.read()
             while cursor is not None or first:
                 first = False
                 try:
-                    prox = paginatioOrgDate(query, cursor, repository, org)
+                    prox = paginationNext(query, cursor, repository, org)
                     if prox.get("documentation_url"):
                         print("ERROR")
                     cursor = find('endCursor', prox)
@@ -1292,18 +944,18 @@ def forkCollector(org):
 
 def issue(org):
     try:
+        IssueCollection = db.createCollection("Issue")
+    except Exception:
+        IssueCollection = db["Issue"]
+        pass
+    try:
         db['Issue'].ensureHashIndex(['repoName'], unique=False, sparse=False)
         db['Issue'].ensureSkiplistIndex(['closedAt'], unique=False, sparse=False)
         db['Issue'].ensureSkiplistIndex(['createdAt'], unique=False, sparse=False)
     except Exception:
         pass
     try:
-        IssueCollection = db.createCollection["Issue"]
-    except Exception:
-        IssueCollection = db["Issue"]
-        pass
-    try:
-        RepoIssueCollection = db.createCollection["RepoIssue"]
+        RepoIssueCollection = db.createCollection("RepoIssue")
     except:
         RepoIssueCollection = db["RepoIssue"]
         pass
@@ -1317,52 +969,12 @@ def issue(org):
             print(repository)
             first = True
             cursor = None
-            query = '''
-    query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!){
-      organization(login: $org) {
-        Org: login
-        repository(name: $next2) {
-          repositoryId: id
-          repoName: name
-          issues(first: $number_of_repos, after: $next) {
-            pageInfo {
-              endCursor
-            }
-            edges {
-              node {
-                state
-                authorAssociation
-                lastEditedAt
-                timeline(last: 100) {
-                  nodes {
-                    ... on ClosedEvent {
-                      closedAt: createdAt
-                    }
-                  }
-                }
-                author
-                issueId: id
-                createdAt
-                closed
-                labels(first: 1) {
-                  edges {
-                    node {
-                      label:name
-                    }
-                  }
-                }
-                title
-              }
-            }
-          }
-        }
-      }
-    }
-    '''
+            with open("issueQuery.txt", "r") as query:
+                query = query.read()
             while cursor is not None or first:
                 first = False
                 try:
-                    prox = paginatioOrgDate(query, cursor, repository, org)
+                    prox = paginationNext(query, cursor, repository, org)
                     if prox.get("documentation_url"):
                         print("ERROR")
                     cursor = find('endCursor', prox)
@@ -1446,7 +1058,7 @@ def issue(org):
     [t.join() for t in workers2]
 
 
-org = 'stone-payments'
+org = 'mundipagg'
 RepoQuery(org)
 dev(org)
 Teams(org)
