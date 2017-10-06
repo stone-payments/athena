@@ -1,7 +1,3 @@
-import time
-
-import schedule
-
 from collections_and_edges import *
 from module import createcollections
 
@@ -24,8 +20,21 @@ def job():
         issue(db, org)
 
 
-schedule.every().hour.do(job)
+# schedule.every().hour.do(job)
+#
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+org = "mundipagg"
+# repoquery(db, org)
+dev(db, org)
+# teams(db, org)
+# teamsDev(db, org)
+# teamsRepo(db, org)
+# readme(db, org)
+# languages(db, org)
+# commitcollector(db, org)
+# statscollector(db, org)
+# forkcollector(db, org)
+# issue(db, org)

@@ -109,9 +109,7 @@ def teams(db, org):
                 doc["teamName"] = team["node"]["name"]
                 doc["privacy"] = team["node"]["privacy"]
                 doc["slug"] = team["node"]["slug"]
-                doc["childTeams"] = team["node"]["childTeams"]["nodes"]
                 doc["childTeamsTotal"] = team["node"]["childTeams"]["totalCount"]
-                doc["ancestors"] = team["node"]["ancestors"]["nodes"]
                 doc["id"] = team["node"]["id"].replace("/", "@")
                 doc["org"] = org
                 doc._key = team["node"]["id"].replace("/", "@")
