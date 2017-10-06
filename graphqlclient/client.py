@@ -24,7 +24,7 @@ class ClientRest:
         self.token = token
         self.timeout = timeout
 
-    def execute(self, url, query, temp):
+    def execute(self, url: object, query: object, temp: object) -> object:
         query = url + query + temp
         if self.token != "":
             headers = {'Authorization': 'token %s' % self.token}

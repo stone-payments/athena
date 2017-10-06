@@ -1,6 +1,0 @@
-FOR Commit IN Commit
-    FILTER Commit.additions == null
-    FILTER Commit.org == @org
-    FILTER Commit.committedDate >= @sinceTime
-    FILTER Commit.committedDate < @untilTime
-    RETURN {oid:Commit.oid,repo:Commit.repoName,id:Commit.GitHubId}
