@@ -1,0 +1,27 @@
+query($number_of_repos:Int! $next:String, $org:String!){
+  organization(login:$org) {
+    members(first:$number_of_repos after:$next) {
+      edges {
+        node {
+          id
+          name
+          followers (first:1){
+            totalCount
+            }
+          following(first:1){
+            totalCount
+          }
+          login
+          avatarUrl
+          contributedRepositories(last:1){
+              totalCount
+          }
+          pullRequests (last:1){
+              totalCount
+          }
+        }
+        cursor
+      }
+    }
+  }
+}

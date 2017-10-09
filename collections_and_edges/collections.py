@@ -521,7 +521,6 @@ def issue(db, org):
                             "repoName": repo_name,
                             "state": find('state', c),
                             "closedAt": find('closedAt', c),
-                            "author": find('author', c),
                             "issueId": find('issueId', c),
                             "createdAt": find('createdAt', c),
                             "closed": find('closed', c),
@@ -547,7 +546,6 @@ def issue(db, org):
                 doc["repoName"] = c["repoName"]
                 doc["state"] = c["state"]
                 doc["closedAt"] = c["closedAt"]
-                doc["author"] = c["author"]
                 doc["issueId"] = c["issueId"]
                 doc["createdAt"] = c["createdAt"]
                 doc["closed"] = c["closed"]
