@@ -123,7 +123,8 @@ $(function() {
                             'rgba(153, 102, 255, 1)',
                             'rgba(255, 159, 64, 1)'
                         ],
-                        borderWidth: 1
+                        borderWidth: 1,
+                        lineTension: 0
                     }]
                 },
                 options: {
@@ -138,6 +139,12 @@ $(function() {
                               beginAtZero:true,
                               responsive: true
 
+                          }
+                      }],
+                      yAxes: [{
+                          ticks: {
+                            beginAtZero:true,
+                              stepSize:1
                           }
                       }]
                   }
@@ -290,7 +297,8 @@ $(function() {
                             'rgba(153, 102, 255, 1)',
                             'rgba(255, 159, 64, 1)'
                         ],
-                        borderWidth: 1
+                        borderWidth: 1,
+                        lineTension: 0
                     }]
                 },
                 options: {

@@ -9,7 +9,9 @@
 
 	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
     <meta name="viewport" content="width=device-width" />
-
+		<!-- date-picker   -->
+	<link href="assets/css/jquery.comiseo.daterangepicker.css" rel="stylesheet">
+	<link href="assets/css/jquery-ui.min.css" rel="stylesheet">
 
     <!-- Bootstrap core CSS     -->
     <link href="assets/css/bootstrap.min.css" rel="stylesheet" />
@@ -170,7 +172,7 @@
 				<nav class="navbar navbar-default navbar-fixed">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand"><input type="text" id="name">  <i id="find" class="fa fa-search"></i> </a>
+                    <a class="navbar-brand"><input type="text" id="name" placeholder="Insert org name"> <input id="e1" name="e1"> <i id="find" class="fa fa-search"></i> </a>
                 </div>
             </div>
         </nav>
@@ -450,5 +452,11 @@
 
     	});
 	</script>
+	<script src="assets/js/moment.js"></script>
+	<script src="assets/js/jquery-ui.min.js"></script>
+	<script src="assets/js/jquery.comiseo.daterangepicker.js"></script>
+		<script>
+				$(function() { $("#e1").daterangepicker(); });
+		</script>
 	<script src="assets/js/chartsOrg.js"></script>
 </html>

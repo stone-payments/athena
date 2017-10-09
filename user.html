@@ -59,7 +59,7 @@
 											<p>Orgs</p>
 									</a>
 							</li>
-							<li class="active">
+							<li >
 									<a href="teams.html">
 											<i class="pe-7s-note2"></i>
 											<p>Teams</p>
@@ -71,7 +71,7 @@
                         <p>Repos</p>
                     </a>
                 </li>
-                <li>
+                <li class="active">
                     <a href="user.html">
                         <i class="pe-7s-user"></i>
                         <p>Users</p>
@@ -172,15 +172,7 @@
 				<nav class="navbar navbar-default navbar-fixed">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand"><input type="text" id="name" placeholder="Insert team name">
-											<select id="orgSelector">
-													<option value="stone-payments">stone-payments</option>
-													<option value="pagarme">pagarme</option>
-													<option value="mundipagg">mundipagg</option>
-													<option value="equals-conc">equals-con</option>
-													<option value="cappta">cappta</option>
-													</select>
-											 <input id="e1" name="e1"> <i id="find" class="fa fa-search"></i> </a>
+                    <a class="navbar-brand"><input type="text" id="name" placeholder="Insert devs login"> <input id="e1" name="e1"> <i id="find" class="fa fa-search"></i> </a>
                 </div>
             </div>
         </nav>
@@ -189,27 +181,32 @@
             <div class="container-fluid">
                 <div class="row">
 									<div class="col-md-4">
-											<div class="card ">
-												<div class="header">
-														<h4 class="title">OpenSource</h4>
-														<p class="category">OpenSource - Team (%)</p>
-												</div>
+											<div class="card card-user">
+													<div class="image" style="background-color: rgb(4, 57, 28);">
+
+													</div>
 													<div class="content">
-															<div class="table-full-width">
-																	<table class="table">
-																			<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+															<div class="author">
+																	 <a href="#">
+																	<img id =avatar class="avatar border-gray" src="assets/img/default-avatar.png" alt="..."/>
 
+																		<h4 class="title" id="username">Dev<br />
 
-																			</tbody>
-																	</table>
+																		</h4>
+																	</a>
 															</div>
+															<p id="followers" class="description text-left"> Followers </p>
+																								<p id="following" class="description text-left">Following</p>
+																									<p id="contributed" class="description text-left"> Contributed Repositories </p>
+																									<p id="pullrequests" class="description text-left">PullRequests</p>
 
-															<div class="footer">
-																	<hr>
-																	<div class="stats">
-																			<i class="fa fa-history"></i> Updated 3 minutes ago
-																	</div>
-															</div>
+													</div>
+													<hr>
+													<div class="text-center">
+															<button href="#" class="btn btn-simple"><i class="fa fa-facebook-square"></i></button>
+															<button href="#" class="btn btn-simple"><i class="fa fa-twitter"></i></button>
+															<button href="#" class="btn btn-simple"><i class="fa fa-google-plus-square"></i></button>
+
 													</div>
 											</div>
 									</div>
@@ -285,7 +282,7 @@
 										<div class="card">
 												<div class="header">
 														<h4 class="title">Commits</h4>
-														<p class="category">Commits - Team</p>
+														<p class="category">Commits - Team (%)</p>
 												</div>
 												<div class="content" >
 														<canvas id="myChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
@@ -419,5 +416,5 @@
 		<script>
 				$(function() { $("#e1").daterangepicker(); });
 		</script>
-	<script src="assets/js/chartsTeams.js"></script>
+	<script src="assets/js/chartsUser.js"></script>
 </html>

@@ -1,6 +1,7 @@
 $(function() {
   let myChart = null;
   let languages = null;
+  let avatar = null;
   let issuesChart = null;
   let teste = null;
   let openSourceChart = null;
@@ -20,65 +21,30 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
     $("#find").click(function() {
 
         name = $("#name").val();
-        orgSelector = $("#orgSelector").val();
-        console.log(orgSelector);
         console.log(name);
         if ($("#e1").val()){
           startDay = JSON.parse($("#e1").val()).start;
           lastDay = JSON.parse($("#e1").val()).end;
         }
+
         $.ajax({
-            url: 'http://127.0.0.1:5000/LanguagesOrgTeam?org='+orgSelector+'&team='+name,
+            url: 'http://127.0.0.1:5000/get_avatar?login='+name,
             type: 'GET',
             success: function(response) {
-                console.log(response);
                 returnedData = JSON.parse(response);
-                let labels = returnedData.map(function(num) {
-                  return num.name;
-              });
-              let dataSize = returnedData.map(function(num) {
-                return num.size;
-            });
-            console.log(dataSize);
-            if(languages != null){
-                languages.destroy();
-
-            }
-
-              languages = new Chart(document.getElementById("languages"), {
-                  type: 'bar',
-                  data: {
-                    labels: labels,
-                    datasets: [{
-                      label: "Languages (%)",
-                      backgroundColor: colors,
-                      borderWidth: 1,
-                      data: dataSize
-                    }]
-                  },
-                  options: {
-                    tooltips: {
-                      mode: 'index',
-                      intersect: false
-                    },
-                      scales: {
-                          yAxes: [{
-                              ticks: {
-                                  beginAtZero:true,
-                                  autoSkip: false,
-                                  maxTicksLimit: 100,
-                                  responsive: true
-                              }
-                          }],
-                          xAxes: [{
-                              ticks: {
-                                  autoSkip: false,
-                                  responsive: true
-                              }
-                          }]
-                      }
-                  }
-              });
+                let url = String(returnedData[0]['avatar']);
+                let login = String(returnedData[0]['login']);
+                let following = String(returnedData[0]['following']);
+                let followers = String(returnedData[0]['followers']);
+                let pullrequests = String(returnedData[0]['pullrequests']);
+                let contributed = String(returnedData[0]['contributed']);
+            console.log(url);
+            $('#avatar').attr("src", url);
+              $('#login').text(login);
+                $('#contributed').text(contributed+" Contributed Repositories");
+                  $('#pullrequests').text(pullrequests+" Pull Requests");
+                    $('#followers').text(followers+" Followers");
+                    $('#following').text(following+" Following");
             },
             error: function(error) {
               console.log(error);
@@ -86,8 +52,7 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
             }
         });
         $.ajax({
-            url: 'http://127.0.0.1:5000/CommitsTeam?name='+name+'&startDate='+startDay+'&endDate='+lastDay+'&org='+orgSelector,
-            type: 'GET',
+            url: 'http://127.0.0.1:5000/CommitsTeam?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
             success: function(response) {
               console.log(response);
                 returnedData = JSON.parse(response);
@@ -192,136 +157,8 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
 
             }
         });
-            $.ajax({
-                url: 'http://127.0.0.1:5000/OpenSourceTeam?org='+orgSelector+'&team='+name,
-                type: 'GET',
-                success: function(response) {
-                    console.log(response);
-                    returnedData = JSON.parse(response);
-                    var openSource = Number(returnedData[0]['openSource']);
-                    var notOpenSource = Number(returnedData[0]['notOpenSource']);
-                    console.log(notOpenSource);
-                if(openSourceChart != null){
-                    openSourceChart.destroy();
-
-                }
-
-                  openSourceChart = new Chart(document.getElementById("openSourceChart"), {
-                      type: 'doughnut',
-                      data: {
-                        labels: ['openSource','Private'],
-                        datasets: [{
-                          label: "Languages (%)",
-                          backgroundColor: ['#0B3B1F','#C52233'],
-                          borderWidth: 1,
-                          data: [openSource,notOpenSource]
-                        }]
-                      },
-                      options: {
-                        responsive:true
-                      }
-                  });
-                },
-                error: function(error) {
-                  console.log(error);
-
-                }
-            });
-            $.ajax({
-                url: 'http://127.0.0.1:5000/readmeOrgTeam?org='+orgSelector+'&team='+name,
-                type: 'GET',
-                success: function(response) {
-                    console.log(response);
-                    returnedData = JSON.parse(response);
-                    var ok = Number(returnedData[0]['ok']);
-                    var poor = Number(returnedData[0]['poor']);
-                    var none = Number(returnedData[0]['bad']);
-                if(readmeChart != null){
-                    readmeChart.destroy();
-
-                }
-
-                  readmeChart = new Chart(document.getElementById("readmeChart"), {
-                      type: 'doughnut',
-                      data: {
-                        labels: ['OK','Poor','None'],
-                        datasets: [{
-                          label: "Languages (%)",
-                          backgroundColor: ['#0B3B1F','#ABC421','#C52233'],
-                          borderWidth: 1,
-                          data: [ok,poor,none]
-                        }]
-                      },
-                      options: {
-                        responsive:true
-                      }
-                  });
-                },
-                error: function(error) {
-                  console.log(error);
-
-                }
-            });
-            $.ajax({
-                url: 'http://127.0.0.1:5000/LicenseTypeTeam?org='+orgSelector+'&team='+name,
-                type: 'GET',
-                success: function(response) {
-                    console.log(response);
-                    returnedData = JSON.parse(response);
-                    let labelsLicense = returnedData.map(function(num) {
-                      return num.day;
-                  });
-                  let dataLicense = returnedData.map(function(num) {
-                    return num.number;
-                });
-                if(LicenseType != null){
-                    LicenseType.destroy();
-
-                }
-
-                  LicenseType = new Chart(document.getElementById("LicenseType"), {
-                      type: 'bar',
-                      data: {
-                        labels: labelsLicense,
-                        datasets: [{
-                          label: "Languages (%)",
-                          backgroundColor: ['rgb(168,169,173)','#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#657212','#ABC421'],
-                          borderWidth: 1,
-                          data: dataLicense
-                        }]
-                      },
-                      options: {
-                        tooltips: {
-                          mode: 'index',
-                          intersect: false
-                        },
-                        scales: {
-                            xAxes: [{
-                                ticks: {
-                                    autoSkip: false,
-                                    responsive: true
-                                }
-                            }],
-                            yAxes: [{
-                                ticks: {
-                                    autoSkip: true,
-                                    maxTicksLimit: 100,
-                                    responsive: true,
-                                    beginAtZero:true
-                                }
-                            }]
-                        },
-
-                      }
-                  });
-                },
-                error: function(error) {
-                  console.log(error);
-
-                }
-            });
         $.ajax({
-            url: 'http://127.0.0.1:5000/IssuesTeam?name='+name+'&startDate='+startDay+'&endDate='+lastDay+'&org='+orgSelector,
+            url: 'http://127.0.0.1:5000/IssuesTeam?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
             type: 'GET',
             success: function(response) {
 

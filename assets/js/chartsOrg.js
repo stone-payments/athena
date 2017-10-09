@@ -6,6 +6,8 @@ $(function() {
   let openSourceChart = null;
   let readmeChart = null;
   let LicenseType = null;
+  let startDay = moment().startOf('month').format('YYYY-MM-DD');
+  let lastDay = moment().format("YYYY-MM-") + moment().daysInMonth();
 colors = ['#0e6251','#117864','#148f77','#17a589','#1abc9c','#48c9b0','#76d7c4','#a3e4d7','#d1f2eb',
 '#fef5e7','#fdebd0','#fad7a0','#f8c471','#f5b041','#f39c12','#d68910','#b9770e','#9c640c','#7e5109']
 colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#657212','#ABC421']
@@ -19,6 +21,10 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
 
         name = $("#name").val();
                     console.log(name);
+        if ($("#e1").val()){
+          startDay = JSON.parse($("#e1").val()).start;
+          lastDay = JSON.parse($("#e1").val()).end;
+        }
         $.ajax({
             url: 'http://127.0.0.1:5000/LanguagesOrg?name='+name,
             type: 'GET',
@@ -78,7 +84,7 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
             }
         });
         $.ajax({
-            url: 'http://127.0.0.1:5000/CommitsOrg?name='+name+'&month='+8,
+            url: 'http://127.0.0.1:5000/CommitsOrg?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
             type: 'GET',
             success: function(response) {
               console.log(response);
@@ -120,7 +126,8 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                             'rgba(153, 102, 255, 1)',
                             'rgba(255, 159, 64, 1)'
                         ],
-                        borderWidth: 1
+                        borderWidth: 1,
+                        lineTension: 0
                     }]
                 },
                 options: {
@@ -132,9 +139,14 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                   scales: {
                       xAxes: [{
                           ticks: {
-                              autoSkip: false,
+                              autoSkip: labelsCommit.length > 31 ? true : false,
                               beginAtZero:true,
                               responsive: true,
+                          }
+                      }],
+                      yAxes: [{
+                          ticks: {
+                              stepSize:1
                           }
                       }]
                   }
@@ -307,7 +319,7 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                 }
             });
         $.ajax({
-            url: 'http://127.0.0.1:5000/Issues?name='+name+'&month='+8,
+            url: 'http://127.0.0.1:5000/IssuesOrg?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
             type: 'GET',
             success: function(response) {
 
@@ -351,7 +363,8 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                             'rgba(153, 102, 255, 1)',
                             'rgba(255, 159, 64, 1)'
                         ],
-                        borderWidth: 1
+                        borderWidth: 1,
+                        lineTension: 0
                     },
                     {
                         label: 'num of Created Issues',
@@ -372,7 +385,8 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                             'rgba(153, 102, 255, 1)',
                             'rgba(255, 159, 64, 1)'
                         ],
-                        borderWidth: 1
+                        borderWidth: 1,
+                        lineTension: 0
                     }]
                 },
                 options: {
@@ -383,16 +397,15 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                   scales: {
                       xAxes: [{
                           ticks: {
-                              autoSkip: false,
+                              autoSkip: labelsIssues1.length > 31 ? true : false,
                               responsive: true
                           }
                       }],
                       yAxes: [{
                           ticks: {
-                              autoSkip: false,
+                              autoSkip: true,
                               responsive: true,
-                              beginAtZero:true,
-                              stepSize: 1
+                              beginAtZero:true
                           }
                       }]
                   },
