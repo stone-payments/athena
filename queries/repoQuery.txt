@@ -31,6 +31,9 @@ query($number_of_repos:Int! $next:String, $org:String!)  {
           watchers{
              totalCount
           }
+        issues{
+          totalCount
+        }
           createdAt
         }
         cursor

@@ -19,6 +19,7 @@ class GraphQLClient:
         else:
             raise NameError("Token is not Defined")
 
+
 class ClientRest:
     def __init__(self, token, timeout=100.001):
         self.token = token
@@ -28,7 +29,7 @@ class ClientRest:
         query = url + query + temp
         if self.token != "":
             headers = {'Authorization': 'token %s' % self.token}
-            req = requests.get(query, headers=headers, timeout=100.001)
+            req = requests.get(query, headers=headers, timeout=self.timeout)
             # print(req)
             return req.json()
         else:

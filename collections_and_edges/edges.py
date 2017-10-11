@@ -1,13 +1,14 @@
 from module import *
 
 
-###### TeamsDev #########################################################################################################
+# TEAMS_DEV ###############################
 
 
-def teamsDev(db, org):
+def teams_dev(db, org):
     TeamsDevCollection = db["TeamsDev"]
     bindVars = {"org": org}
-    aql = "FOR Teams in Teams FILTER Teams.org == @org return Teams.slug"
+    with open("queries/teamsDevArango.txt", "r") as aql:
+        aql = aql.read()
     queryResult = db.AQLQuery(aql, rawResults=True, bindVars=bindVars)
     with open("queries/teamsDevQuery.txt", "r") as query:
         query = query.read()
@@ -16,7 +17,7 @@ def teamsDev(db, org):
         cursor = None
         while cursor or first:
             try:
-                prox = paginationuniversal(query, number_of_repo=number_of_repos, next=cursor, slug=x, org=org)
+                prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, slug=x, org=org)
                 print(prox)
                 proxNode = prox["data"]["organization"]["team"]
                 teams = proxNode["members"]["edges"]
@@ -37,13 +38,14 @@ def teamsDev(db, org):
                 first = False
 
 
-# #### teamsRepo #######################################################################
+# TEAMS_REPO ###############################
 
 
-def teamsRepo(db, org):
+def teams_repo(db, org):
     TeamsRepoCollection = db["TeamsRepo"]
     bindVars = {"org": org}
-    aql = "FOR Teams in Teams FILTER Teams.org == @org return Teams.slug"
+    with open("queries/teamsRepoArango.txt", "r") as aql:
+        aql = aql.read()
     queryResult = db.AQLQuery(aql, rawResults=True, bindVars=bindVars)
     with open("queries/teamsRepoQuery.txt", "r") as query:
         query = query.read()
@@ -52,7 +54,7 @@ def teamsRepo(db, org):
         cursor = None
         while cursor or first:
             try:
-                prox = paginationuniversal(query, number_of_repo=number_of_repos, next=cursor, slug=x, org=org)
+                prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, slug=x, org=org)
                 print(prox)
                 proxNode = prox["data"]["organization"]["team"]
                 teams = proxNode["repositories"]["edges"]
