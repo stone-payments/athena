@@ -1,1 +1,1 @@
-FOR Teams in Teams FILTER Teams.org == @org return Teams.slug
+FOR Teams in Teams FILTER Teams.org == @org FILTER Teams.repoCount > 100 return Teams.slug

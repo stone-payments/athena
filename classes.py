@@ -235,6 +235,7 @@ class Issue(Collection):
         repoName=Field(validators=[val.NotNull(), StringVal()]),
         state=Field(validators=[StringVal()]),
         closedAt=Field(validators=[StringVal()]),
+        author=Field(validators=[StringVal()]),
         issueId=Field(validators=[val.NotNull(), StringVal()]),
         createdAt=Field(validators=[val.NotNull(), StringVal()]),
         closed=Field(validators=[BoolVal()]),

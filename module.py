@@ -5,7 +5,7 @@ from pyArango.theExceptions import (UpdateError, CreationError)
 from config import *
 from graphqlclient import ClientRest
 from graphqlclient import GraphQLClient
-
+from classes import *
 client = GraphQLClient(url, token, timeout)
 clientRest2 = ClientRest(token, timeout)
 
@@ -50,9 +50,9 @@ def find(key, json) -> object:
 
 # HANDLING EXCEPTIONS ###############
 
-def handling_except(exception_type):
-    if exception_type == CreationError or exception_type == UpdateError or exception_type == KeyError:
+def handling_except(exception):
+    if exception == CreationError or exception == UpdateError or exception == KeyError:
         pass
     else:
-        print(exception_type)
+        print(exception)
         sys.exit(1)

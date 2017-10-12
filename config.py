@@ -18,6 +18,7 @@ update = 1  # update every x hours
 batch_size = 20000  # number of results fetched from ArangoDb
 queue_max_size = 1500000
 num_of_threads = 5
+stats_num_of_threads = 2
 queue_timeout = 15
 stats_queue_timeout = 10
 commit_queue_timeout = 25

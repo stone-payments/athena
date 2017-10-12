@@ -26,10 +26,11 @@ def teams_dev(db, org):
                         temp = db['Dev'][str(team["node"]["id"]).replace("/", "@")]
                         temp2 = db['Teams'][str(proxNode["id"]).replace("/", "@")]
                         doc = TeamsDevCollection.createEdge()
+                        doc._key = (str(team["node"]["id"]) + str(proxNode["id"])).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
-                    except Exception as exception_type:
-                        handling_except(type(exception_type))
+                    except Exception as exception:
+                        handling_except(type(exception))
                 cursor = prox["data"]["organization"]["team"]["members"]["pageInfo"]["endCursor"]
                 if cursor is None:
                     cursor = False
@@ -63,10 +64,11 @@ def teams_repo(db, org):
                         temp = db['Repo'][str(team["node"]["id"]).replace("/", "@")]
                         temp2 = db['Teams'][str(proxNode["id"]).replace("/", "@")]
                         doc = TeamsRepoCollection.createEdge()
+                        doc._key = (str(team["node"]["id"]) + str(proxNode["id"])).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
-                    except Exception as exception_type:
-                        handling_except(type(exception_type))
+                    except Exception as exception:
+                        handling_except(type(exception))
                 cursor = prox["data"]["organization"]["team"]["repositories"]["pageInfo"]["endCursor"]
                 if cursor is None:
                     cursor = False

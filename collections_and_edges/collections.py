@@ -11,19 +11,24 @@ def repo_query(db, org):
     with open("queries/repoQuery.txt", "r") as query:
         query = query.read()
     repoCollection = db["Repo"]
+    LanguagesCollection = db["Languages"]
+    LanguagesRepoCollection = db["LanguagesRepo"]
     db['Repo'].ensureHashIndex(['repoName'], unique=False, sparse=False)
     db['Repo'].ensureHashIndex(['isPrivate'], unique=False, sparse=False)
     db['Repo'].ensureHashIndex(['licenseId'], unique=False, sparse=False)
     db['Repo'].ensureHashIndex(['licenseType'], unique=False, sparse=False)
 
-    first = True
+    hasNextPage = True
     cursor = None
-    while cursor or first:
+    while hasNextPage:
         try:
             prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, org=org)
-            print(prox)
+            # print(prox)
+            hasNextPage = find('hasNextPage', prox)
+            cursor = find('endCursor', prox)
             proxRepositorios = prox["data"]["organization"]["repositories"]["edges"]
             for repo in proxRepositorios:
+                languages_repo = find('language_edges', repo)
                 try:
                     try:
                         doc = repoCollection[str(repo["node"]["id"].replace("/", "@"))]
@@ -42,25 +47,42 @@ def repo_query(db, org):
                     doc["nameWithOwner"] = repo["node"]["nameWithOwner"]
                     doc["licenseId"] = find('licenseId', repo)
                     doc["licenseType"] = find('licenseType', repo)
-                    doc["id"] = repo["node"]["id"].replace("/", "@")
+                    doc["id"] = repo["node"]["repoId"].replace("/", "@")
                     doc["org"] = org
-                    doc._key = repo["node"]["id"].replace("/", "@")
+                    doc._key = repo["node"]["repoId"].replace("/", "@")
                     doc.save()
-                except Exception as exception_type:
-                    handling_except(type(exception_type))
-            cursor = proxRepositorios[len(proxRepositorios) - 1]["cursor"]
+                except Exception as exception:
+                    handling_except(type(exception))
+                for language in languages_repo:
+                    # print(language)
+                    try:
+                        doc = LanguagesCollection.createDocument()
+                        doc["name"] = find('languageName', language)
+                        doc["id"] = find('languageId', language)
+                        doc._key = find('languageId', language).replace("/", "@")
+                        doc.save()
+                    except Exception as exception:
+                        handling_except(type(exception))
+                    try:
+                        temp = db['Languages'][str(find('languageId', language)).replace("/", "@")]
+                        temp2 = db['Repo'][str(find('repoId', repo)).replace("/", "@")]
+                        doc = LanguagesRepoCollection.createEdge(
+                            {"size": round(((find('languageSize', language) / find('totalSize', repo)) * 100), 2)})
+                        doc._key = (str(find('repoId', repo)) + str(find('languageId', language))).replace("/", "@")
+                        doc.links(temp, temp2)
+                        doc.save()
+                        print("FOI")
+                    except Exception as exception:
+                        handling_except(type(exception))
         except Exception:
-            cursor = False
-            first = False
+            cursor = None
 
 
 # DEV ###############################
 
 
-def dev(db, org):
+def dev(db, org, query):
     devCollection = db['Dev']
-    with open("queries/devQuery.txt", "r") as query:
-        query = query.read()
     first = True
     cursor = None
     while cursor or first:
@@ -85,8 +107,8 @@ def dev(db, org):
                     doc["org"] = org
                     doc._key = dev["node"]["id"].replace("/", "@")
                     doc.save()
-                except Exception as exception_type:
-                    handling_except(type(exception_type))
+                except Exception as exception:
+                    handling_except(type(exception))
             cursor = proxRepositorios[len(proxRepositorios) - 1]["cursor"]
         except Exception:
             cursor = False
@@ -130,8 +152,8 @@ def teams(db, org):
                     doc["org"] = org
                     doc._key = team["node"]["id"].replace("/", "@")
                     doc.save()
-                except Exception as exception_type:
-                    handling_except(type(exception_type))
+                except Exception as exception:
+                    handling_except(type(exception))
                 try:
                     temp = db['Dev'][str(find('memberId', member)).replace("/", "@")]
                     temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
@@ -139,8 +161,8 @@ def teams(db, org):
                     doc._key = (str(team["node"]["id"]) + str(find('memberId', member))).replace("/", "@")
                     doc.links(temp, temp2)
                     doc.save()
-                except Exception as exception_type:
-                    handling_except(type(exception_type))
+                except Exception as exception:
+                    handling_except(type(exception))
                 try:
                     temp = db['Repo'][str(find('repoId', repos)).replace("/", "@")]
                     temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
@@ -148,8 +170,8 @@ def teams(db, org):
                     doc._key = (str(team["node"]["id"]) + str(find('repoId', repos))).replace("/", "@")
                     doc.links(temp, temp2)
                     doc.save()
-                except Exception as exception_type:
-                    handling_except(type(exception_type))
+                except Exception as exception:
+                    handling_except(type(exception))
         except Exception:
             cursor = None
 
@@ -188,8 +210,8 @@ def languages(db, org):
                             doc["id"] = find('id', node)
                             doc._key = find('id', node).replace("/", "@")
                             doc.save()
-                        except Exception as exception_type:
-                            handling_except(type(exception_type))
+                        except Exception as exception:
+                            handling_except(type(exception))
                         try:
                             temp = db['Languages'][str(node["node"]["id"]).replace("/", "@")]
                             temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
@@ -198,8 +220,8 @@ def languages(db, org):
                             doc._key = (str(node["node"]["id"]) + str(find('repositoryId', prox))).replace("/", "@")
                             doc.links(temp, temp2)
                             doc.save()
-                        except Exception as exception_type:
-                            handling_except(type(exception_type))
+                        except Exception as exception:
+                            handling_except(type(exception))
                 except Exception:
                     cursor = False
                     first = False
@@ -286,8 +308,8 @@ def commit_collector(db, org):
                 doc["org"] = c["org"]
                 doc._key = c["commitId"].replace("/", "@")
                 doc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
             try:
                 temp = db['Commit'][str(c["commitId"])]
                 temp2 = db['Dev'][str(c["devId"])]
@@ -295,8 +317,8 @@ def commit_collector(db, org):
                 commitDoc["_key"] = (str(c["commitId"]) + str(c["devId"])).replace("/", "@")
                 commitDoc.links(temp2, temp)
                 commitDoc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
             try:
                 temp = db['Commit'][str(c["commitId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
@@ -304,8 +326,8 @@ def commit_collector(db, org):
                 RepoDoc["_key"] = (str(c["commitId"]) + str(c["repositoryId"])).replace("/", "@")
                 RepoDoc.links(temp2, temp)
                 RepoDoc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
             try:
                 temp = db['Dev'][str(c["devId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
@@ -313,8 +335,8 @@ def commit_collector(db, org):
                 DevDoc["_key"] = (str(c["repositoryId"]) + str(c["devId"])).replace("/", "@")
                 DevDoc.links(temp2, temp)
                 DevDoc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
 
     repositories_queue = Queue(queue_max_size)
     commits_queue = Queue(queue_max_size)
@@ -358,8 +380,8 @@ def readme(db, org):
                     doc.save()
                 except Exception:
                     continue
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
 
     count_queue = Queue(queue_max_size)
     repositories_queue = Queue(queue_max_size)
@@ -408,14 +430,14 @@ def stats_collector(db, org):
                 doc['numFiles'] = c['numFiles']
                 doc._key = c["commitId"].replace("/", "@")
                 doc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
 
     repositories_queue = Queue(queue_max_size)
     commits_queue = Queue(queue_max_size)
 
-    workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
-    workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
+    workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(stats_num_of_threads)]
+    workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(stats_num_of_threads)]
 
     for repo in queryResult:
         repositories_queue.put(repo)
@@ -498,8 +520,8 @@ def fork_collector(db, org):
                 doc["org"] = c["org"]
                 doc._key = c["forkId"].replace("/", "@")
                 doc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
             try:
                 temp = db['Fork'][str(c["forkId"])]
                 temp2 = db['Dev'][str(c["devId"])]
@@ -507,8 +529,8 @@ def fork_collector(db, org):
                 commitDoc["_key"] = (str(c["forkId"]) + str(c["devId"])).replace("/", "@")
                 commitDoc.links(temp2, temp)
                 commitDoc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
             try:
                 temp = db['Fork'][str(c["forkId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
@@ -516,8 +538,8 @@ def fork_collector(db, org):
                 RepoDoc["_key"] = (str(c["forkId"]) + str(c["repositoryId"])).replace("/", "@")
                 RepoDoc.links(temp2, temp)
                 RepoDoc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
 
     repositories_queue = Queue(queue_max_size)
     commits_queue = Queue(queue_max_size)
@@ -571,6 +593,7 @@ def issue(db, org):
                             "repositoryId": repository_id,
                             "repoName": repo_name,
                             "state": find('state', c),
+                            "author": author,
                             "closedAt": find('closedAt', c),
                             "issueId": find('issueId', c),
                             "createdAt": find('createdAt', c),
@@ -604,8 +627,8 @@ def issue(db, org):
                 doc["org"] = c["org"]
                 doc._key = c["issueId"].replace("/", "@")
                 doc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
             try:
                 temp = db['Issue'][str(c["issueId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
@@ -613,8 +636,8 @@ def issue(db, org):
                 RepoDoc["_key"] = (str(c["issueId"]) + str(c["repositoryId"])).replace("/", "@")
                 RepoDoc.links(temp2, temp)
                 RepoDoc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+            except Exception as exception:
+                handling_except(type(exception))
 
     repositories_queue = Queue(queue_max_size)
     commits_queue = Queue(queue_max_size)

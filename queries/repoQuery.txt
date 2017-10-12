@@ -1,19 +1,37 @@
-query($number_of_repos:Int! $next:String, $org:String!)  {
+query ($number_of_repos: Int!, $next: String, $org: String!) {
   organization(login: $org) {
-    repositories(first: $number_of_repos, after:$next) {
+    repositories(first: $number_of_repos, after: $next) {
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
       edges {
         node {
-          defaultBranchRef{
-            target{
-              repository{
+          defaultBranchRef {
+            target {
+              repository {
                 licenseInfo {
-                 licenseId: id
+                  licenseId: id
                   licenseType: key
                 }
               }
             }
           }
-          id
+          languages(first: $number_of_repos) {
+            pageInfo {
+              endCursor
+            }
+            languagesCount: totalCount
+            totalSize
+            language_edges:edges {
+              languageSize:size
+              node {
+                languageId: id
+                languageName: name
+              }
+            }
+          }
+          repoId:id
           name
           description
           url
@@ -22,18 +40,18 @@ query($number_of_repos:Int! $next:String, $org:String!)  {
           primaryLanguage {
             priLanguage: name
           }
-          forks{
+          forks {
             totalCount
           }
-          stargazers{
+          stargazers {
             totalCount
           }
-          watchers{
-             totalCount
+          watchers {
+            totalCount
           }
-        issues{
-          totalCount
-        }
+          issues {
+            totalCount
+          }
           createdAt
         }
         cursor
