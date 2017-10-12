@@ -34,3 +34,8 @@ class ClientRest:
             return req.json()
         else:
             raise NameError("Token is not Defined")
+
+
+            # clientRest2 = ClientRest("896a853e110a21a6e25cbbcf1ebd2e2ce1139a8e")
+            # print(clientRest2.execute('https://api.github.com/repos/', 'stone-payments/', 'pombo-correio-api/events'))
+            # # /repos/:owner/:repo/events

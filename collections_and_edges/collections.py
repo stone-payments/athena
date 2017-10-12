@@ -1,4 +1,3 @@
-
 from queue import Queue
 from threading import Thread
 
@@ -99,37 +98,60 @@ def dev(db, org):
 
 def teams(db, org):
     TeamsCollection = db["Teams"]
+    TeamsDevCollection = db["TeamsDev"]
+    TeamsRepoCollection = db["TeamsRepo"]
     with open("queries/teamsQuery.txt", "r") as query:
         query = query.read()
-    first = True
     cursor = None
-    while cursor is not None or first:
-        first = False
+    hasNextPage = True
+    while hasNextPage:
         try:
-            try:
-                prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, org=org)
-                print(prox)
-                cursor = find('endCursor', prox)
-                proxrepositorios = prox["data"]["organization"]["teams"]["edges"]
-                for team in proxrepositorios:
-                    try:
-                        doc = TeamsCollection[str(team["node"]["id"].replace("/", "@"))]
-                    except Exception:
-                        doc = TeamsCollection.createDocument()
+            prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, org=org)
+            print(prox)
+            cursor = find('endCursor', prox)
+            hasNextPage = find('hasNextPage', prox)
+            print(hasNextPage)
+            proxrepositorios = prox["data"]["organization"]["teams"]["edges"]
+            for team in proxrepositorios:
+                member = team["node"]["members"]
+                repos = team["node"]["repositories"]
+                try:
+                    doc = TeamsCollection[str(team["node"]["id"].replace("/", "@"))]
+                except Exception:
+                    doc = TeamsCollection.createDocument()
+                try:
                     doc['createdAt'] = team["node"]["createdAt"]
                     doc["teamName"] = team["node"]["name"]
                     doc["privacy"] = team["node"]["privacy"]
                     doc["slug"] = team["node"]["slug"]
-                    doc["childTeamsTotal"] = team["node"]["childTeams"]["totalCount"]
+                    doc["membersCount"] = find('membersCount', team)
+                    doc["repoCount"] = find('repoCount', team)
                     doc["id"] = team["node"]["id"].replace("/", "@")
                     doc["org"] = org
                     doc._key = team["node"]["id"].replace("/", "@")
                     doc.save()
-            except Exception as exception_type:
-                handling_except(type(exception_type))
+                except Exception as exception_type:
+                    handling_except(type(exception_type))
+                try:
+                    temp = db['Dev'][str(find('memberId', member)).replace("/", "@")]
+                    temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
+                    doc = TeamsDevCollection.createEdge()
+                    doc._key = (str(team["node"]["id"]) + str(find('memberId', member))).replace("/", "@")
+                    doc.links(temp, temp2)
+                    doc.save()
+                except Exception as exception_type:
+                    handling_except(type(exception_type))
+                try:
+                    temp = db['Repo'][str(find('repoId', repos)).replace("/", "@")]
+                    temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
+                    doc = TeamsRepoCollection.createEdge()
+                    doc._key = (str(team["node"]["id"]) + str(find('repoId', repos))).replace("/", "@")
+                    doc.links(temp, temp2)
+                    doc.save()
+                except Exception as exception_type:
+                    handling_except(type(exception_type))
         except Exception:
             cursor = None
-            first = False
 
 
 # LANGUAGES ###############################
@@ -143,44 +165,51 @@ def languages(db, org):
     bindVars = {"org": org}
     queryResult = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bindVars)
 
-    with open("queries/languagesQuery.txt", "r") as query:
-        query = query.read()
-
-    for repo in queryResult:
-        first = True
-        cursor = None
-        while cursor or first:
-            first = False
-            try:
-                prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, next2=repo,
-                                            org=org)
-                print(prox)
-                cursor = find('endCursor', prox)
-                proxNode = find('languages', prox)
-                edges = find('edges', proxNode)
-                for node in edges:
-                    try:
-                        doc = LanguagesCollection.createDocument()
-                        doc["name"] = find('name', node)
-                        doc["id"] = find('id', node)
-                        doc._key = find('id', node).replace("/", "@")
-                        doc.save()
-                    except Exception as exception_type:
-                        handling_except(type(exception_type))
-                    try:
-                        temp = db['Languages'][str(node["node"]["id"]).replace("/", "@")]
-                        temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
-                        doc = LanguagesRepoCollection.createEdge(
-                            {"size": round(((node['size'] / find('totalSize', prox)) * 100), 2)})
-                        doc._key = (str(node["node"]["id"]) + str(find('repositoryId', prox))).replace("/", "@")
-                        doc.links(temp, temp2)
-                        doc.save()
-                    except Exception as exception_type:
-                        handling_except(type(exception_type))
-            except Exception:
-                cursor = False
+    def collector(repositories: Queue, ):
+        while True:
+            repos = repositories.get_nowait()
+            with open("queries/languagesQuery.txt", "r") as query:
+                query = query.read()
+            first = True
+            cursor = None
+            while cursor or first:
                 first = False
+                try:
+                    prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, next2=repos,
+                                                org=org)
+                    print(prox)
+                    cursor = find('endCursor', prox)
+                    proxNode = find('languages', prox)
+                    edges = find('edges', proxNode)
+                    for node in edges:
+                        try:
+                            doc = LanguagesCollection.createDocument()
+                            doc["name"] = find('name', node)
+                            doc["id"] = find('id', node)
+                            doc._key = find('id', node).replace("/", "@")
+                            doc.save()
+                        except Exception as exception_type:
+                            handling_except(type(exception_type))
+                        try:
+                            temp = db['Languages'][str(node["node"]["id"]).replace("/", "@")]
+                            temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
+                            doc = LanguagesRepoCollection.createEdge(
+                                {"size": round(((node['size'] / find('totalSize', prox)) * 100), 2)})
+                            doc._key = (str(node["node"]["id"]) + str(find('repositoryId', prox))).replace("/", "@")
+                            doc.links(temp, temp2)
+                            doc.save()
+                        except Exception as exception_type:
+                            handling_except(type(exception_type))
+                except Exception:
+                    cursor = False
+                    first = False
 
+    repositories_queue = Queue(queue_max_size)
+    workers = [Thread(target=collector, args=(repositories_queue,)) for _ in range(num_of_threads)]
+    for repository in queryResult:
+        repositories_queue.put(repository)
+    [t.start() for t in workers]
+    [t.join() for t in workers]
 
 # COMMITS ###############################
 
@@ -310,15 +339,15 @@ def readme(db, org):
 
     def collector(repositories: Queue, output: Queue):
         while True:
-            repository = repositories.get_nowait()
+            repos = repositories.get_nowait()
             with open("queries/readmeQuery.txt", "r") as query:
                 query = query.read()
             try:
-                prox = pagination_universal(query, next=repository['repoName'], org=org)
+                prox = pagination_universal(query, next=repos['repoName'], org=org)
                 print(prox)
                 output.put(1)
                 if prox.get('errors'):
-                    doc = db['Repo'][str(repository['key'])]
+                    doc = db['Repo'][str(repos['key'])]
                     doc["readme"] = None
                     doc.save()
                     continue

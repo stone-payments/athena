@@ -51,7 +51,8 @@ def find(key, json) -> object:
 # HANDLING EXCEPTIONS ###############
 
 def handling_except(exception_type):
-    if exception_type == CreationError or exception_type == UpdateError:
+    if exception_type == CreationError or exception_type == UpdateError or exception_type == KeyError:
         pass
     else:
+        print(exception_type)
         sys.exit(1)

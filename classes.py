@@ -128,7 +128,8 @@ class Teams(Collection):
         teamName=Field(validators=[val.NotNull(), StringVal()]),
         privacy=Field(validators=[val.NotNull(), StringVal()]),
         slug=Field(validators=[val.NotNull(), StringVal()]),
-        childTeamsTotal=Field(validators=[IntVal()]),
+        membersCount=Field(validators=[IntVal()]),
+        repoCount=Field(validators=[IntVal()]),
         id=Field(validators=[val.NotNull(), StringVal()]),
         org=Field(validators=[val.NotNull(), StringVal()])
     )

@@ -28,8 +28,8 @@ def teams_dev(db, org):
                         doc = TeamsDevCollection.createEdge()
                         doc.links(temp, temp2)
                         doc.save()
-                    except Exception:
-                        pass
+                    except Exception as exception_type:
+                        handling_except(type(exception_type))
                 cursor = prox["data"]["organization"]["team"]["members"]["pageInfo"]["endCursor"]
                 if cursor is None:
                     cursor = False
@@ -65,8 +65,8 @@ def teams_repo(db, org):
                         doc = TeamsRepoCollection.createEdge()
                         doc.links(temp, temp2)
                         doc.save()
-                    except Exception:
-                        pass
+                    except Exception as exception_type:
+                        handling_except(type(exception_type))
                 cursor = prox["data"]["organization"]["team"]["repositories"]["pageInfo"]["endCursor"]
                 if cursor is None:
                     cursor = False

@@ -1,35 +1,42 @@
-query($number_of_repos:Int! $next:String, $org:String!){
+query ($number_of_repos: Int!, $next: String, $org: String!) {
   organization(login: $org) {
-    teams(first: $number_of_repos after: $next) {
+    teams(first: $number_of_repos, after: $next) {
       totalCount
       pageInfo {
         endCursor
+        hasNextPage
       }
       edges {
         node {
-          ancestors(first: 100) {
-            nodes {
-              id
-              name
+          members(first:100) {
+            membersCount: totalCount
+            edges {
+              node {
+                memberId: id
+                memberName:name
+              }
             }
           }
-          members(first: 100) {
-            totalCount
+          repositories(first:100) {
+            repoCount: totalCount
+            edges {
+              node {
+                repoId:id
+               repoName: name
+              }
+            }
           }
           createdAt
           id
           name
           privacy
           slug
-          childTeams(first: 100) {
-            totalCount
-            nodes {
-              name
-              id
-            }
-          }
         }
       }
     }
   }
+rateLimit{
+  limit
+  remaining
+}
 }
