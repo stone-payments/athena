@@ -10,7 +10,7 @@ from user_api import *
 
 
 conn = Connection(username="root", password="")
-db = conn["athena3"]
+db = conn["athena_teste"]
 value = 0
 
 app = Flask(__name__)
@@ -94,7 +94,7 @@ def Commits2():
         for y in result:
             if y.get('day') == x:
                 day['day'] = str(y.get('day'))
-                day['number'] = str(y.get('number'))
+                day['number'] = int(y.get('number'))
                 return day
         day['day'] = x
         day['number'] = 0
@@ -328,7 +328,7 @@ def CommitsOrg():
         for y in result:
             if y.get('day') == x:
                 day['day'] = str(y.get('day'))
-                day['number'] = str(y.get('number'))
+                day['number'] = int(y.get('number'))
                 return day
         day['day'] = x
         day['number'] = 0
@@ -632,7 +632,7 @@ def CommitsTeam():
         for y in result:
             if y.get('day') == x:
                 day['day'] = str(y.get('day'))
-                day['number'] = str(y.get('number'))
+                day['number'] = int(y.get('number'))
                 return day
         day['day'] = x
         day['number'] = 0
@@ -878,9 +878,39 @@ def IssuesTeam():
 
 @app.route('/get_avatar')
 def get_avatar():
-    temp = avatar()
-    return temp
+    response = avatar()
+    return response
 
+
+@app.route('/get_user_commit')
+def get_user_commit():
+    response = user_commit()
+    return response
+
+@app.route('/get_user_language')
+def get_user_language():
+    response = user_language()
+    return response
+
+@app.route('/get_user_contributed_repo')
+def get_user_contributed_repo():
+    response = user_contributed_repo()
+    return response
+
+@app.route('/get_user_issue')
+def get_user_issue():
+    response = user_issue()
+    return response
+
+@app.route('/get_user_stats')
+def get_user_stats():
+    response = user_stats()
+    return response
+
+@app.route('/get_repo_name')
+def get_repo_name():
+    response = repo_name()
+    return response
 
 if __name__ == '__main__':
     app.run()

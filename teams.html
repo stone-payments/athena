@@ -264,7 +264,7 @@
 									</div>
                 </div>
 							<div class="row">
-								<div class="col-md-4">
+								<div class="col-md-6">
 										<div class="card">
 												<div class="header">
 														<h4 class="title">Languages</h4>
@@ -281,20 +281,26 @@
 												</div>
 										</div>
 								</div>
-								<div class="col-md-8">
-										<div class="card">
+								<div class="col-md-3">
+										<div class="card ">
 												<div class="header">
-														<h4 class="title">Commits</h4>
-														<p class="category">Commits - Team</p>
+														<h4 class="title">Members</h4>
+														<p class="category">Team Members</p>
 												</div>
-												<div class="content" >
-														<canvas id="myChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+												<div class="content" style="overflow: scroll;max-height:400px;">
+														<div class="table-full-width">
+																<table class="table">
+																		<tbody id="members">
+
+
+																		</tbody>
+																</table>
+														</div>
 
 														<div class="footer">
-
 																<hr>
 																<div class="stats">
-																		<i class="fa fa-clock-o"></i> Updated 2 days ago
+																		<i class="fa fa-history"></i> Updated 3 minutes ago
 																</div>
 														</div>
 												</div>
@@ -304,14 +310,14 @@
 
                 <div class="row">
 
-                    <div class="col-md-8">
+                    <div class="col-md-12">
                         <div class="card ">
                             <div class="header">
                                 <h4 class="title">Issues</h4>
                                 <p class="category">Issues - Team</p>
                             </div>
                             <div class="content">
-                                <canvas id="issuesChart" class="ct-chart"></canvas>
+                                <canvas id="issuesChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 
                                 <div class="footer">
                                     <div class="legend">
@@ -326,34 +332,30 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4">
-                        <div class="card ">
-                            <div class="header">
-                                <h4 class="title">Members</h4>
-                                <p class="category">Team Members</p>
-                            </div>
-                            <div class="content" style="overflow: scroll;max-height:400px;">
-                                <div class="table-full-width">
-                                    <table class="table">
-                                        <tbody id="members">
 
-
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="footer">
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="fa fa-history"></i> Updated 3 minutes ago
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                 </div>
+								<div class="row">
+									<div class="col-md-12">
+											<div class="card">
+													<div class="header">
+															<h4 class="title">Commits</h4>
+															<p class="category">Commits - Team</p>
+													</div>
+													<div class="content" >
+															<canvas id="myChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 
+															<div class="footer">
+
+																	<hr>
+																	<div class="stats">
+																			<i class="fa fa-clock-o"></i> Updated 2 days ago
+																	</div>
+															</div>
+													</div>
+											</div>
+									</div>
+								</div>
 
 
 

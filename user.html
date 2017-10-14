@@ -285,7 +285,7 @@
 														<p class="category">Commits - Team (%)</p>
 												</div>
 												<div class="content" >
-														<canvas id="myChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+														<canvas id="commmit_chart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 
 														<div class="footer">
 
@@ -326,13 +326,13 @@
                     <div class="col-md-4">
                         <div class="card ">
                             <div class="header">
-                                <h4 class="title">Members</h4>
-                                <p class="category">Team Members</p>
+                                <h4 class="title">Contributed Repositories</h4>
+                                <p class="category">Repositories</p>
                             </div>
                             <div class="content" style="overflow: scroll;max-height:400px;">
                                 <div class="table-full-width">
                                     <table class="table">
-                                        <tbody id="members">
+                                        <tbody id="contributed_repo">
 
 
                                         </tbody>
@@ -351,7 +351,30 @@
 
                 </div>
 
+								<div class="row">
 
+                    <div class="col-md-8">
+                        <div class="card ">
+                            <div class="header">
+                                <h4 class="title">Additions - Deletions</h4>
+                                <p class="category">Issues - Team</p>
+                            </div>
+                            <div class="content">
+                                <canvas id="stats_chart" class="ct-chart"></canvas>
+
+                                <div class="footer">
+                                    <div class="legend">
+
+                                    </div>
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="fa fa-check"></i> Data information certified
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+									</div>
 
 
             </div>

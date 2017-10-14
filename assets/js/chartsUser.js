@@ -1,5 +1,6 @@
 $(function() {
-  let myChart = null;
+  let commmit_chart = null;
+  let stats_chart = null;
   let languages = null;
   let avatar = null;
   let issuesChart = null;
@@ -52,7 +53,8 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
             }
         });
         $.ajax({
-            url: 'http://127.0.0.1:5000/CommitsTeam?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
+            url: 'http://127.0.0.1:5000/get_user_commit?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
+            type: 'GET',
             success: function(response) {
               console.log(response);
                 returnedData = JSON.parse(response);
@@ -64,13 +66,13 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                 return num.number;
             });
 
-            var ctx = document.getElementById("myChart").getContext('2d');
+            var ctx = document.getElementById("commmit_chart").getContext('2d');
 
-            if(myChart != null){
-                    myChart.destroy();
+            if(commmit_chart != null){
+                    commmit_chart.destroy();
                 }
 
-            myChart = new Chart(ctx, {
+            commmit_chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labelsCommit,
@@ -113,7 +115,14 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                       }],
                       yAxes: [{
                           ticks: {
-                              stepSize:1
+
+                            suggestedMax: 10,
+                            beginAtZero:true,
+                            callback: function(value, index, values) {
+                              if (Math.floor(value) === value) {
+                                  return value;
+                              }
+                          }
                           }
                       }]
                   }
@@ -127,38 +136,67 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
             }
         });
         $.ajax({
-            url: 'http://127.0.0.1:5000/RepoMembers?name='+name,
+            url: 'http://127.0.0.1:5000/get_user_language?name='+name,
             type: 'GET',
             success: function(response) {
                 console.log(response);
                 returnedData = JSON.parse(response);
-                $("#members").empty();
-                returnedData.map(function(num) {
-                  memberName = num.member;
-              html = `<tr>
-                        <td style="width:10px;">
-
-                                <i class="pe-7s-angle-right-circle"></i>
-
-                        </td>
-                        <td>${memberName}</td>
-                        <td class="td-actions text-right">
-
-                        </td>
-                    </tr>`
-                  $("#members").append(html);
+                let labels = returnedData.map(function(num) {
+                  return num.name;
               });
+              let dataSize = returnedData.map(function(num) {
+                return num.size;
+            });
+            console.log(dataSize);
+            if(languages != null){
+                languages.destroy();
 
+            }
 
-
+              languages = new Chart(document.getElementById("languages"), {
+                  type: 'bar',
+                  data: {
+                    labels: labels,
+                    datasets: [{
+                      label: "Languages (%)",
+                      backgroundColor: colors,
+                      borderWidth: 1,
+                      data: dataSize
+                    }]
+                  },
+                  options: {
+                    tooltips: {
+                      mode: 'index',
+                      intersect: false
+                    },
+                      scales: {
+                          yAxes: [{
+                              ticks: {
+                                suggestedMax: 100,
+                                  beginAtZero:true,
+                                  autoSkip: false,
+                                  maxTicksLimit: 100,
+                                  responsive: true
+                              }
+                          }],
+                          xAxes: [{
+                              ticks: {
+                                  autoSkip: false,
+                                  responsive: true
+                              }
+                          }]
+                      }
+                  }
+              });
             },
             error: function(error) {
               console.log(error);
 
             }
         });
+
         $.ajax({
-            url: 'http://127.0.0.1:5000/IssuesTeam?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
+            url: 'http://127.0.0.1:5000/get_user_issue?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
             type: 'GET',
             success: function(response) {
 
@@ -242,10 +280,13 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                       }],
                       yAxes: [{
                           ticks: {
-                              autoSkip: true,
-                              responsive: true,
-                              beginAtZero:true,
-                              stepSize:1
+                            suggestedMax: 10,
+                            beginAtZero:true,
+                            callback: function(value, index, values) {
+                              if (Math.floor(value) === value) {
+                                  return value;
+                              }
+                          }
                           }
                       }]
                   },
@@ -259,12 +300,12 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
             }
         });
         $.ajax({
-            url: 'http://127.0.0.1:5000/RepoMembersTeam?org='+'stone-payments'+'&team='+name,
+            url: 'http://127.0.0.1:5000/get_user_contributed_repo?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
             type: 'GET',
             success: function(response) {
                 console.log(response);
                 returnedData = JSON.parse(response);
-                $("#members").empty();
+                $("#contributed_repo").empty();
                 returnedData.map(function(num) {
                   memberName = num.member;
               html = `<tr>
@@ -278,11 +319,115 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
 
                         </td>
                     </tr>`
-                  $("#members").append(html);
+                  $("#contributed_repo").append(html);
               });
 
 
 
+            },
+            error: function(error) {
+              console.log(error);
+
+            }
+        });
+        $.ajax({
+            url: 'http://127.0.0.1:5000/get_user_stats?name='+name+'&startDate='+startDay+'&endDate='+lastDay,
+            type: 'GET',
+            success: function(response) {
+
+                returnedData = JSON.parse(response);
+                console.log(returnedData[0]);
+                let labelsIssues1 = returnedData[0].map(function(num) {
+                  return num.day;
+              });
+              let dataIssues1 = returnedData[0].map(function(num) {
+                return num.number;
+            });
+          let dataIssues2 = returnedData[1].map(function(num) {
+            return num.number;
+        });
+
+
+            var ctx = document.getElementById("stats_chart").getContext('2d');
+
+            if(stats_chart != null){
+                    stats_chart.destroy();
+                }
+
+            stats_chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labelsIssues1,
+                    datasets: [{
+                        label: 'num of mralves',
+                        data: dataIssues1,
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1,
+                        lineTension: 0
+                    },
+                    {
+                        label: 'num of Deletions',
+                        data: dataIssues2,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255,99,132,1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1,
+                        lineTension: 0
+                    }]
+                },
+                options: {
+                  tooltips: {
+                    mode: 'index',
+                    intersect: false
+                  },
+                  scales: {
+                      xAxes: [{
+                          ticks: {
+                              autoSkip: labelsIssues1.length > 31 ? true : false,
+                              responsive: true
+                          }
+                      }],
+                      yAxes: [{
+                          ticks: {
+                            suggestedMax: 10,
+                            beginAtZero:true,
+                            callback: function(value, index, values) {
+                              if (Math.floor(value) === value) {
+                                  return value;
+                              }
+                          }
+                          }
+                      }]
+                  },
+
+                }
+            });
             },
             error: function(error) {
               console.log(error);

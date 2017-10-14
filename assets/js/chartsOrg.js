@@ -62,6 +62,7 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                       scales: {
                           yAxes: [{
                               ticks: {
+                                suggestedMax: 100,
                                   beginAtZero:true,
                                   autoSkip: false,
                                   maxTicksLimit: 100,
@@ -146,7 +147,13 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                       }],
                       yAxes: [{
                           ticks: {
-                              stepSize:1
+                            suggestedMax: 10,
+                            beginAtZero:true,
+                            callback: function(value, index, values) {
+                              if (Math.floor(value) === value) {
+                                  return value;
+                              }
+                          }
                           }
                       }]
                   }
@@ -403,9 +410,12 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
                       }],
                       yAxes: [{
                           ticks: {
-                              autoSkip: true,
-                              responsive: true,
-                              beginAtZero:true
+                            beginAtZero:true,
+                            callback: function(value, index, values) {
+                              if (Math.floor(value) === value) {
+                                  return value;
+                              }
+                          }
                           }
                       }]
                   },

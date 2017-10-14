@@ -9,6 +9,20 @@ $(function() {
   colors = ['#0e6251','#117864','#148f77','#17a589','#1abc9c','#48c9b0','#76d7c4','#a3e4d7','#d1f2eb',
   '#fef5e7','#fdebd0','#fad7a0','#f8c471','#f5b041','#f39c12','#d68910','#b9770e','#9c640c','#7e5109']
 
+  let xhr;
+              $('#name').autoComplete({
+                minChars: 1,
+              source: function(term, response){
+                  try { xhr.abort(); } catch(e){}
+                  xhr = $.getJSON('http://127.0.0.1:5000/get_repo_name?name='+term, function(result){
+                    let returnedData = result.map(function(num) {
+                            return num.data;
+                });
+            response(returnedData); });
+              }
+            });
+
+
   $('#name').keypress(function(e){
        if(e.which == 13){//Enter key pressed
            $('#find').click();//Trigger search button click event
@@ -60,6 +74,7 @@ $(function() {
                       scales: {
                           yAxes: [{
                               ticks: {
+                                suggestedMax: 100,
                                   beginAtZero:true,
                                   autoSkip: false,
                                   maxTicksLimit: 100,
@@ -68,6 +83,7 @@ $(function() {
                           }],
                           xAxes: [{
                               ticks: {
+
                                   autoSkip: false,
                                   responsive: true
                               }
@@ -143,8 +159,13 @@ $(function() {
                       }],
                       yAxes: [{
                           ticks: {
+                            suggestedMax: 10,
                             beginAtZero:true,
-                              stepSize:1
+                            callback: function(value, index, values) {
+                              if (Math.floor(value) === value) {
+                                  return value;
+                              }
+                          }
                           }
                       }]
                   }
