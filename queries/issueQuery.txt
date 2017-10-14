@@ -1,4 +1,4 @@
-query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!){
+query ($number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
   organization(login: $org) {
     Org: login
     repository(name: $next2) {
@@ -13,21 +13,26 @@ query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!){
             state
             authorAssociation
             lastEditedAt
-            timeline(last: 100) {
+            timeline(last: 1) {
               nodes {
                 ... on ClosedEvent {
                   closedAt: createdAt
+                  actor {
+                    closed_login:login
+                  }
                 }
               }
             }
-            author
+            author {
+              created_login:login
+            }
             issueId: id
             createdAt
             closed
             labels(first: 1) {
               edges {
                 node {
-                  label:name
+                  label: name
                 }
               }
             }

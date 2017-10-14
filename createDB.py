@@ -96,3 +96,4 @@ def create_collections(db):
     db['Issue'].ensureSkiplistIndex(['closedAt'], unique=False, sparse=False)
     db['Issue'].ensureSkiplistIndex(['createdAt'], unique=False, sparse=False)
     db['Repo'].ensureHashIndex(['readme'], unique=False, sparse=False)
+    db['Repo'].ensureFulltextIndex(['repoName'], minLength=1)

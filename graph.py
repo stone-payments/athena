@@ -27,7 +27,7 @@ start_time = time.time()
 job()
 print("--- %s seconds ---" % (time.time() - start_time))
 
-schedule.every(update).hour.do(job)
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# schedule.every(update).hour.do(job)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)

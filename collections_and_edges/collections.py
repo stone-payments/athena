@@ -137,6 +137,8 @@ def teams(db, org):
             for team in proxrepositorios:
                 member = team["node"]["members"]
                 repos = team["node"]["repositories"]
+                team_dev_contents = find('members_edge', team)
+                team_repo_contents = find('repo_edge', team)
                 try:
                     doc = TeamsCollection[str(team["node"]["id"].replace("/", "@"))]
                 except Exception:
@@ -154,24 +156,26 @@ def teams(db, org):
                     doc.save()
                 except Exception as exception:
                     handling_except(type(exception))
-                try:
-                    temp = db['Dev'][str(find('memberId', member)).replace("/", "@")]
-                    temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
-                    doc = TeamsDevCollection.createEdge()
-                    doc._key = (str(team["node"]["id"]) + str(find('memberId', member))).replace("/", "@")
-                    doc.links(temp, temp2)
-                    doc.save()
-                except Exception as exception:
-                    handling_except(type(exception))
-                try:
-                    temp = db['Repo'][str(find('repoId', repos)).replace("/", "@")]
-                    temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
-                    doc = TeamsRepoCollection.createEdge()
-                    doc._key = (str(team["node"]["id"]) + str(find('repoId', repos))).replace("/", "@")
-                    doc.links(temp, temp2)
-                    doc.save()
-                except Exception as exception:
-                    handling_except(type(exception))
+                for team_dev_content in team_dev_contents:
+                    try:
+                        temp = db['Dev'][str(find('memberId', team_dev_content)).replace("/", "@")]
+                        temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
+                        doc = TeamsDevCollection.createEdge()
+                        doc._key = (str(team["node"]["id"]) + str(find('memberId', team_dev_content))).replace("/", "@")
+                        doc.links(temp, temp2)
+                        doc.save()
+                    except Exception as exception:
+                        handling_except(type(exception))
+                for team_repo_content in team_repo_contents:
+                    try:
+                        temp = db['Repo'][str(find('repoId', team_repo_content)).replace("/", "@")]
+                        temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
+                        doc = TeamsRepoCollection.createEdge()
+                        doc._key = (str(team["node"]["id"]) + str(find('repoId', team_repo_content))).replace("/", "@")
+                        doc.links(temp, temp2)
+                        doc.save()
+                    except Exception as exception:
+                        handling_except(type(exception))
         except Exception:
             cursor = None
 
@@ -586,20 +590,20 @@ def issue(db, org):
                     repository_id = prox_node["repositoryId"]
                     repo_name = prox_node["repoName"]
 
-                    for c in issues:
-                        node = c["node"]
-                        author = find('author', node)
+                    for node in issues:
                         commit = {
                             "repositoryId": repository_id,
                             "repoName": repo_name,
-                            "state": find('state', c),
-                            "author": author,
-                            "closedAt": find('closedAt', c),
-                            "issueId": find('issueId', c),
-                            "createdAt": find('createdAt', c),
-                            "closed": find('closed', c),
-                            "label": find('label', c),
-                            "title": find('title', c),
+                            "state": find('state', node),
+                            "closed_login": find('closed_login', node),
+                            "closedAt": find('closedAt', node),
+                            "issueId": find('issueId', node),
+                            "created_login": find('created_login', node),
+                            "createdAt": find('createdAt', node),
+                            "authorAssociation": find('authorAssociation', node),
+                            "closed": find('closed', node),
+                            "label": find('label', node),
+                            "title": find('title', node),
                             "org": org
                         }
                         output.put(commit)
@@ -618,9 +622,12 @@ def issue(db, org):
                 doc["repositoryId"] = c["repositoryId"]
                 doc["repoName"] = c["repoName"]
                 doc["state"] = c["state"]
+                doc["closed_login"] = c["closed_login"]
                 doc["closedAt"] = c["closedAt"]
                 doc["issueId"] = c["issueId"]
+                doc["created_login"] = c["created_login"]
                 doc["createdAt"] = c["createdAt"]
+                doc["authorAssociation"] = c["authorAssociation"]
                 doc["closed"] = c["closed"]
                 doc["label"] = c["label"]
                 doc["title"] = c["title"]
@@ -632,10 +639,10 @@ def issue(db, org):
             try:
                 temp = db['Issue'][str(c["issueId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
-                RepoDoc = RepoIssueCollection.createEdge()
-                RepoDoc["_key"] = (str(c["issueId"]) + str(c["repositoryId"])).replace("/", "@")
-                RepoDoc.links(temp2, temp)
-                RepoDoc.save()
+                repo_doc = RepoIssueCollection.createEdge()
+                repo_doc["_key"] = (str(c["issueId"]) + str(c["repositoryId"])).replace("/", "@")
+                repo_doc.links(temp2, temp)
+                repo_doc.save()
             except Exception as exception:
                 handling_except(type(exception))
 

@@ -6,11 +6,11 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
         endCursor
         hasNextPage
       }
-      edges {
+     edges {
         node {
           members(first:100) {
             membersCount: totalCount
-            edges {
+            members_edge: edges {
               node {
                 memberId: id
                 memberName:name
@@ -19,7 +19,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
           }
           repositories(first:100) {
             repoCount: totalCount
-            edges {
+           repo_edge: edges {
               node {
                 repoId:id
                repoName: name
