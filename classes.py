@@ -88,7 +88,7 @@ class LanguagesRepo(Edges):
         'allow_foreign_fields': False
     }
     _fields = dict(
-        size=Field(validators=[val.NotNull(), IntVal()]),
+        size=Field(validators=[val.NotNull(), IntValidator()]),
     )
 
 
@@ -111,8 +111,8 @@ class Languages(Collection):
         'allow_foreign_fields': False
     }
     _fields = dict(
-        name=Field(validators=[val.NotNull(), StringVal()]),
-        id=Field(validators=[val.NotNull(), StringVal()])
+        name=Field(validators=[val.NotNull(), StringValidator()]),
+        id=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -124,14 +124,14 @@ class Teams(Collection):
         'allow_foreign_fields': False
     }
     _fields = dict(
-        createdAt=Field(validators=[val.NotNull(), StringVal()]),
-        teamName=Field(validators=[val.NotNull(), StringVal()]),
-        privacy=Field(validators=[val.NotNull(), StringVal()]),
-        slug=Field(validators=[val.NotNull(), StringVal()]),
-        membersCount=Field(validators=[IntVal()]),
-        repoCount=Field(validators=[IntVal()]),
-        id=Field(validators=[val.NotNull(), StringVal()]),
-        org=Field(validators=[val.NotNull(), StringVal()])
+        createdAt=Field(validators=[val.NotNull(), StringValidator()]),
+        teamName=Field(validators=[val.NotNull(), StringValidator()]),
+        privacy=Field(validators=[val.NotNull(), StringValidator()]),
+        slug=Field(validators=[val.NotNull(), StringValidator()]),
+        membersCount=Field(validators=[IntValidator()]),
+        repoCount=Field(validators=[IntValidator()]),
+        id=Field(validators=[val.NotNull(), StringValidator()]),
+        org=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -143,21 +143,21 @@ class Commit(Collection):
         'allow_foreign_fields': False
     }
     _fields = dict(
-        messageHeadline=Field(validators=[StringVal()]),
-        oid=Field(validators=[val.NotNull(), StringVal()]),
-        committedDate=Field(validators=[val.NotNull(), StringVal()]),
-        author=Field(validators=[StringVal()]),
-        devId=Field(validators=[val.NotNull(), StringVal()]),
-        GitHubId=Field(validators=[val.NotNull(), StringVal()]),
-        repositoryId=Field(validators=[val.NotNull(), StringVal()]),
-        repoName=Field(validators=[val.NotNull(), StringVal()]),
-        branchName=Field(validators=[StringVal()]),
-        commitId=Field(validators=[val.NotNull(), StringVal()]),
-        org=Field(validators=[val.NotNull(), StringVal()]),
-        totalAddDel=Field(validators=[val.NotNull(), IntVal()]),
-        additions=Field(validators=[val.NotNull(), IntVal()]),
-        deletions=Field(validators=[val.NotNull(), IntVal()]),
-        numFiles=Field(validators=[val.NotNull(), IntVal()]),
+        messageHeadline=Field(validators=[StringValidator()]),
+        oid=Field(validators=[val.NotNull(), StringValidator()]),
+        committedDate=Field(validators=[val.NotNull(), StringValidator()]),
+        author=Field(validators=[StringValidator()]),
+        devId=Field(validators=[val.NotNull(), StringValidator()]),
+        GitHubId=Field(validators=[val.NotNull(), StringValidator()]),
+        repositoryId=Field(validators=[val.NotNull(), StringValidator()]),
+        repoName=Field(validators=[val.NotNull(), StringValidator()]),
+        branchName=Field(validators=[StringValidator()]),
+        commitId=Field(validators=[val.NotNull(), StringValidator()]),
+        org=Field(validators=[val.NotNull(), StringValidator()]),
+        totalAddDel=Field(validators=[val.NotNull(), IntValidator()]),
+        additions=Field(validators=[val.NotNull(), IntValidator()]),
+        deletions=Field(validators=[val.NotNull(), IntValidator()]),
+        numFiles=Field(validators=[val.NotNull(), IntValidator()]),
     )
 
 
@@ -169,15 +169,15 @@ class Dev(Collection):
         'allow_foreign_fields': False
     }
     _fields = dict(
-        devName=Field(validators=[StringVal()]),
-        followers=Field(IntVal()),
-        following=Field(IntVal()),
-        login=Field(validators=[val.NotNull(), StringVal()]),
-        avatarUrl=Field(validators=[StringVal()]),
-        contributedRepositories=Field(IntVal()),
-        pullRequests=Field(IntVal()),
-        id=Field(validators=[val.NotNull(), StringVal()]),
-        org=Field(validators=[val.NotNull(), StringVal()]),
+        devName=Field(validators=[StringValidator()]),
+        followers=Field(IntValidator()),
+        following=Field(IntValidator()),
+        login=Field(validators=[val.NotNull(), StringValidator()]),
+        avatarUrl=Field(validators=[StringValidator()]),
+        contributedRepositories=Field(IntValidator()),
+        pullRequests=Field(IntValidator()),
+        id=Field(validators=[val.NotNull(), StringValidator()]),
+        org=Field(validators=[val.NotNull(), StringValidator()]),
     )
 
 
@@ -189,22 +189,22 @@ class Repo(Collection):
         'allow_foreign_fields': False
     }
     _fields = dict(
-        repoName=Field(validators=[StringVal()]),
-        description=Field(validators=[StringVal()]),
-        url=Field(validators=[StringVal()]),
-        openSource=Field(validators=[val.NotNull(), BoolVal()]),
-        primaryLanguage=Field(validators=[StringVal()]),
-        forks=Field(validators=[IntVal()]),
-        issues=Field(validators=[IntVal()]),
-        stargazers=Field(validators=[IntVal()]),
-        watchers=Field(validators=[IntVal()]),
-        createdAt=Field(validators=[StringVal()]),
-        nameWithOwner=Field(validators=[StringVal()]),
-        licenseId=Field(validators=[StringVal()]),
-        licenseType=Field(validators=[StringVal()]),
+        repoName=Field(validators=[StringValidator()]),
+        description=Field(validators=[StringValidator()]),
+        url=Field(validators=[StringValidator()]),
+        openSource=Field(validators=[val.NotNull(), BoolValidator()]),
+        primaryLanguage=Field(validators=[StringValidator()]),
+        forks=Field(validators=[IntValidator()]),
+        issues=Field(validators=[IntValidator()]),
+        stargazers=Field(validators=[IntValidator()]),
+        watchers=Field(validators=[IntValidator()]),
+        createdAt=Field(validators=[StringValidator()]),
+        nameWithOwner=Field(validators=[StringValidator()]),
+        licenseId=Field(validators=[StringValidator()]),
+        licenseType=Field(validators=[StringValidator()]),
         id=Field(validators=[val.NotNull()]),
         org=Field(validators=[val.NotNull()]),
-        readme=Field(validators=[StringVal()])
+        readme=Field(validators=[StringValidator()])
     )
 
 
@@ -213,16 +213,16 @@ class Fork(Collection):
     Fork
     """
     _fields = dict(
-        repositoryId=Field(validators=[val.NotNull(), StringVal()]),
-        repoName=Field(validators=[StringVal()]),
-        createdAt=Field(validators=[val.NotNull(), StringVal()]),
-        id=Field(validators=[val.NotNull(), StringVal()]),
-        isPrivate=Field(validators=[val.NotNull(), BoolVal()]),
-        isLocked=Field(validators=[BoolVal()]),
-        devId=Field(validators=[val.NotNull(), StringVal()]),
-        login=Field(validators=[StringVal()]),
-        forkId=Field(validators=[val.NotNull(), StringVal()]),
-        org=Field(validators=[val.NotNull(), StringVal()])
+        repositoryId=Field(validators=[val.NotNull(), StringValidator()]),
+        repoName=Field(validators=[StringValidator()]),
+        createdAt=Field(validators=[val.NotNull(), StringValidator()]),
+        id=Field(validators=[val.NotNull(), StringValidator()]),
+        isPrivate=Field(validators=[val.NotNull(), BoolValidator()]),
+        isLocked=Field(validators=[BoolValidator()]),
+        devId=Field(validators=[val.NotNull(), StringValidator()]),
+        login=Field(validators=[StringValidator()]),
+        forkId=Field(validators=[val.NotNull(), StringValidator()]),
+        org=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -231,17 +231,17 @@ class Issue(Collection):
     Issue
     """
     _fields = dict(
-        repositoryId=Field(validators=[val.NotNull(), StringVal()]),
-        repoName=Field(validators=[val.NotNull(), StringVal()]),
-        state=Field(validators=[StringVal()]),
-        closed_login=Field(validators=[StringVal()]),
-        closedAt=Field(validators=[StringVal()]),
-        issueId=Field(validators=[val.NotNull(), StringVal()]),
-        created_login=Field(validators=[val.NotNull(),StringVal()]),
-        createdAt=Field(validators=[val.NotNull(), StringVal()]),
-        authorAssociation=Field(validators=[val.NotNull(), StringVal()]),
-        closed=Field(validators=[BoolVal()]),
-        label=Field(validators=[StringVal()]),
-        title=Field(validators=[StringVal()]),
-        org=Field(validators=[val.NotNull(), StringVal()])
+        repositoryId=Field(validators=[val.NotNull(), StringValidator()]),
+        repoName=Field(validators=[val.NotNull(), StringValidator()]),
+        state=Field(validators=[StringValidator()]),
+        closed_login=Field(validators=[StringValidator()]),
+        closedAt=Field(validators=[StringValidator()]),
+        issueId=Field(validators=[val.NotNull(), StringValidator()]),
+        created_login=Field(validators=[val.NotNull(), StringValidator()]),
+        createdAt=Field(validators=[val.NotNull(), StringValidator()]),
+        authorAssociation=Field(validators=[val.NotNull(), StringValidator()]),
+        closed=Field(validators=[BoolValidator()]),
+        label=Field(validators=[StringValidator()]),
+        title=Field(validators=[StringValidator()]),
+        org=Field(validators=[val.NotNull(), StringValidator()])
     )

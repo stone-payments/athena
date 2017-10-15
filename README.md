@@ -3,7 +3,7 @@
 Athena is a GitHub BI platform.
 
   - See users profiles
-  - See users perfomance 
+  - See users performance
   - And other metrics
 
 # Why?

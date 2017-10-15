@@ -1,11 +1,10 @@
 import sys
-
 from pyArango.theExceptions import (UpdateError, CreationError)
-
 from config import *
 from graphqlclient import ClientRest
 from graphqlclient import GraphQLClient
 from classes import *
+
 client = GraphQLClient(url, token, timeout)
 clientRest2 = ClientRest(token, timeout)
 
@@ -13,13 +12,13 @@ clientRest2 = ClientRest(token, timeout)
 # PAGINATION ###############################
 
 
-def pagination_universal(query, number_of_repo=None, next=None, next2=None, org=None, slug=None, since=None,
+def pagination_universal(query, number_of_repo=None, next_cursor=None, next_repo=None, org=None, slug=None, since=None,
                          until=None):
     pag = client.execute(query,
                          {
                              "number_of_repos": number_of_repo,
-                             "next": next,
-                             "next2": next2,
+                             "next": next_cursor,
+                             "next2": next_repo,
                              "org": org,
                              "slug": slug,
                              "sinceTime": since,

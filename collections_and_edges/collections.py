@@ -1,6 +1,5 @@
 from queue import Queue
 from threading import Thread
-
 from module import *
 
 
@@ -10,30 +9,30 @@ from module import *
 def repo_query(db, org):
     with open("queries/repoQuery.txt", "r") as query:
         query = query.read()
-    repoCollection = db["Repo"]
-    LanguagesCollection = db["Languages"]
-    LanguagesRepoCollection = db["LanguagesRepo"]
+    repo_collection = db["Repo"]
+    languages_collection = db["Languages"]
+    languages_repo_collection = db["LanguagesRepo"]
     db['Repo'].ensureHashIndex(['repoName'], unique=False, sparse=False)
     db['Repo'].ensureHashIndex(['isPrivate'], unique=False, sparse=False)
     db['Repo'].ensureHashIndex(['licenseId'], unique=False, sparse=False)
     db['Repo'].ensureHashIndex(['licenseType'], unique=False, sparse=False)
 
-    hasNextPage = True
+    has_next_page = True
     cursor = None
-    while hasNextPage:
+    while has_next_page:
         try:
-            prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, org=org)
+            prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, org=org)
             # print(prox)
-            hasNextPage = find('hasNextPage', prox)
+            has_next_page = find('hasNextPage', prox)
             cursor = find('endCursor', prox)
-            proxRepositorios = prox["data"]["organization"]["repositories"]["edges"]
-            for repo in proxRepositorios:
+            prox_repositorios = prox["data"]["organization"]["repositories"]["edges"]
+            for repo in prox_repositorios:
                 languages_repo = find('language_edges', repo)
                 try:
                     try:
-                        doc = repoCollection[str(repo["node"]["id"].replace("/", "@"))]
-                    except:
-                        doc = repoCollection.createDocument()
+                        doc = repo_collection[str(repo["node"]["id"].replace("/", "@"))]
+                    except Exception:
+                        doc = repo_collection.createDocument()
                     doc['repoName'] = repo["node"]["name"]
                     doc["description"] = repo["node"]["description"]
                     doc["url"] = repo["node"]["url"]
@@ -56,7 +55,7 @@ def repo_query(db, org):
                 for language in languages_repo:
                     # print(language)
                     try:
-                        doc = LanguagesCollection.createDocument()
+                        doc = languages_collection.createDocument()
                         doc["name"] = find('languageName', language)
                         doc["id"] = find('languageId', language)
                         doc._key = find('languageId', language).replace("/", "@")
@@ -66,12 +65,11 @@ def repo_query(db, org):
                     try:
                         temp = db['Languages'][str(find('languageId', language)).replace("/", "@")]
                         temp2 = db['Repo'][str(find('repoId', repo)).replace("/", "@")]
-                        doc = LanguagesRepoCollection.createEdge(
+                        doc = languages_repo_collection.createEdge(
                             {"size": round(((find('languageSize', language) / find('totalSize', repo)) * 100), 2)})
                         doc._key = (str(find('repoId', repo)) + str(find('languageId', language))).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
-                        print("FOI")
                     except Exception as exception:
                         handling_except(type(exception))
         except Exception:
@@ -82,34 +80,34 @@ def repo_query(db, org):
 
 
 def dev(db, org, query):
-    devCollection = db['Dev']
+    dev_collection = db['Dev']
     first = True
     cursor = None
     while cursor or first:
         try:
-            prox = pagination_universal(query, number_of_repo=30, next=cursor, org=org)
-            print(prox)
-            proxRepositorios = prox["data"]["organization"]["members"]["edges"]
-            for dev in proxRepositorios:
+            response = pagination_universal(query, number_of_repo=30, next_cursor=cursor, org=org)
+            print(response)
+            devs_edge = response["data"]["organization"]["members"]["edges"]
+            for dev_slice in devs_edge:
                 try:
                     try:
-                        doc = devCollection[str(dev["node"]["id"].replace("/", "@"))]
+                        doc = dev_collection[str(dev_slice["node"]["id"].replace("/", "@"))]
                     except Exception:
-                        doc = devCollection.createDocument()
-                    doc['devName'] = dev["node"]["name"]
-                    doc["followers"] = dev["node"]["followers"]["totalCount"]
-                    doc["following"] = dev["node"]["following"]["totalCount"]
-                    doc["login"] = dev["node"]["login"]
-                    doc["avatarUrl"] = dev["node"]["avatarUrl"]
-                    doc["contributedRepositories"] = dev["node"]["contributedRepositories"]["totalCount"]
-                    doc["pullRequests"] = dev["node"]["pullRequests"]["totalCount"]
-                    doc["id"] = dev["node"]["id"].replace("/", "@")
+                        doc = dev_collection.createDocument()
+                    doc['devName'] = dev_slice["node"]["name"]
+                    doc["followers"] = dev_slice["node"]["followers"]["totalCount"]
+                    doc["following"] = dev_slice["node"]["following"]["totalCount"]
+                    doc["login"] = dev_slice["node"]["login"]
+                    doc["avatarUrl"] = dev_slice["node"]["avatarUrl"]
+                    doc["contributedRepositories"] = dev_slice["node"]["contributedRepositories"]["totalCount"]
+                    doc["pullRequests"] = dev_slice["node"]["pullRequests"]["totalCount"]
+                    doc["id"] = dev_slice["node"]["id"].replace("/", "@")
                     doc["org"] = org
-                    doc._key = dev["node"]["id"].replace("/", "@")
+                    doc._key = dev_slice["node"]["id"].replace("/", "@")
                     doc.save()
                 except Exception as exception:
                     handling_except(type(exception))
-            cursor = proxRepositorios[len(proxRepositorios) - 1]["cursor"]
+            cursor = devs_edge[len(devs_edge) - 1]["cursor"]
         except Exception:
             cursor = False
             first = False
@@ -119,30 +117,28 @@ def dev(db, org, query):
 
 
 def teams(db, org):
-    TeamsCollection = db["Teams"]
-    TeamsDevCollection = db["TeamsDev"]
-    TeamsRepoCollection = db["TeamsRepo"]
+    teams_collection = db["Teams"]
+    teams_dev_collection = db["TeamsDev"]
+    teams_repo_collection = db["TeamsRepo"]
     with open("queries/teamsQuery.txt", "r") as query:
         query = query.read()
     cursor = None
-    hasNextPage = True
-    while hasNextPage:
+    has_next_page = True
+    while has_next_page:
         try:
-            prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, org=org)
+            prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, org=org)
             print(prox)
             cursor = find('endCursor', prox)
-            hasNextPage = find('hasNextPage', prox)
-            print(hasNextPage)
+            has_next_page = find('hasNextPage', prox)
+            print(has_next_page)
             proxrepositorios = prox["data"]["organization"]["teams"]["edges"]
             for team in proxrepositorios:
-                member = team["node"]["members"]
-                repos = team["node"]["repositories"]
                 team_dev_contents = find('members_edge', team)
                 team_repo_contents = find('repo_edge', team)
                 try:
-                    doc = TeamsCollection[str(team["node"]["id"].replace("/", "@"))]
+                    doc = teams_collection[str(team["node"]["id"].replace("/", "@"))]
                 except Exception:
-                    doc = TeamsCollection.createDocument()
+                    doc = teams_collection.createDocument()
                 try:
                     doc['createdAt'] = team["node"]["createdAt"]
                     doc["teamName"] = team["node"]["name"]
@@ -160,7 +156,7 @@ def teams(db, org):
                     try:
                         temp = db['Dev'][str(find('memberId', team_dev_content)).replace("/", "@")]
                         temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
-                        doc = TeamsDevCollection.createEdge()
+                        doc = teams_dev_collection.createEdge()
                         doc._key = (str(team["node"]["id"]) + str(find('memberId', team_dev_content))).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
@@ -170,7 +166,7 @@ def teams(db, org):
                     try:
                         temp = db['Repo'][str(find('repoId', team_repo_content)).replace("/", "@")]
                         temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
-                        doc = TeamsRepoCollection.createEdge()
+                        doc = teams_repo_collection.createEdge()
                         doc._key = (str(team["node"]["id"]) + str(find('repoId', team_repo_content))).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
@@ -184,12 +180,12 @@ def teams(db, org):
 
 
 def languages(db, org):
-    LanguagesCollection = db["Languages"]
-    LanguagesRepoCollection = db["LanguagesRepo"]
+    languages_collection = db["Languages"]
+    languages_repo_collection = db["LanguagesRepo"]
     with open("queries/languagesArango.txt", "r") as aql:
         aql = aql.read()
-    bindVars = {"org": org}
-    queryResult = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bindVars)
+    bind_vars = {"org": org}
+    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, ):
         while True:
@@ -201,15 +197,15 @@ def languages(db, org):
             while cursor or first:
                 first = False
                 try:
-                    prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, next2=repos,
-                                                org=org)
+                    prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
+                                                next_repo=repos, org=org)
                     print(prox)
                     cursor = find('endCursor', prox)
-                    proxNode = find('languages', prox)
-                    edges = find('edges', proxNode)
+                    prox_node = find('languages', prox)
+                    edges = find('edges', prox_node)
                     for node in edges:
                         try:
-                            doc = LanguagesCollection.createDocument()
+                            doc = languages_collection.createDocument()
                             doc["name"] = find('name', node)
                             doc["id"] = find('id', node)
                             doc._key = find('id', node).replace("/", "@")
@@ -219,7 +215,7 @@ def languages(db, org):
                         try:
                             temp = db['Languages'][str(node["node"]["id"]).replace("/", "@")]
                             temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
-                            doc = LanguagesRepoCollection.createEdge(
+                            doc = languages_repo_collection.createEdge(
                                 {"size": round(((node['size'] / find('totalSize', prox)) * 100), 2)})
                             doc._key = (str(node["node"]["id"]) + str(find('repositoryId', prox))).replace("/", "@")
                             doc.links(temp, temp2)
@@ -232,22 +228,23 @@ def languages(db, org):
 
     repositories_queue = Queue(queue_max_size)
     workers = [Thread(target=collector, args=(repositories_queue,)) for _ in range(num_of_threads)]
-    for repository in queryResult:
+    for repository in query_result:
         repositories_queue.put(repository)
     [t.start() for t in workers]
     [t.join() for t in workers]
 
 # COMMITS ###############################
 
+
 def commit_collector(db, org):
-    commitCollection = db["Commit"]
-    DevCommitCollection = db["DevCommit"]
-    RepoCommitCollection = db["RepoCommit"]
-    RepoDevCollection = db["RepoDev"]
+    commit_collection = db["Commit"]
+    dev_commit_collection = db["DevCommit"]
+    repo_commit_collection = db["RepoCommit"]
+    repo_dev_collection = db["RepoDev"]
     with open("queries/commitArango.txt", "r") as aql:
         aql = aql.read()
-    bindVars = {"org": org}
-    queryResult = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bindVars)
+    bind_vars = {"org": org}
+    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
@@ -259,8 +256,8 @@ def commit_collector(db, org):
             while cursor is not None or first:
                 first = False
                 try:
-                    prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, next2=repository,
-                                                org=org, since=since_time, until=until_time)
+                    prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
+                                                next_repo=repository, org=org, since=since_time, until=until_time)
                     print(prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
@@ -297,9 +294,9 @@ def commit_collector(db, org):
             c = commits_queue.get(timeout=commit_queue_timeout)
             try:
                 try:
-                    doc = commitCollection[str(c["commitId"].replace("/", "@"))]
+                    doc = commit_collection[str(c["commitId"].replace("/", "@"))]
                 except Exception:
-                    doc = commitCollection.createDocument()
+                    doc = commit_collection.createDocument()
                 doc["repositoryId"] = c["repositoryId"]
                 doc["repoName"] = c["repoName"]
                 doc["branchName"] = c["branchName"]
@@ -317,28 +314,28 @@ def commit_collector(db, org):
             try:
                 temp = db['Commit'][str(c["commitId"])]
                 temp2 = db['Dev'][str(c["devId"])]
-                commitDoc = DevCommitCollection.createEdge()
-                commitDoc["_key"] = (str(c["commitId"]) + str(c["devId"])).replace("/", "@")
-                commitDoc.links(temp2, temp)
-                commitDoc.save()
+                commit_doc = dev_commit_collection.createEdge()
+                commit_doc["_key"] = (str(c["commitId"]) + str(c["devId"])).replace("/", "@")
+                commit_doc.links(temp2, temp)
+                commit_doc.save()
             except Exception as exception:
                 handling_except(type(exception))
             try:
                 temp = db['Commit'][str(c["commitId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
-                RepoDoc = RepoCommitCollection.createEdge()
-                RepoDoc["_key"] = (str(c["commitId"]) + str(c["repositoryId"])).replace("/", "@")
-                RepoDoc.links(temp2, temp)
-                RepoDoc.save()
+                repo_doc = repo_commit_collection.createEdge()
+                repo_doc["_key"] = (str(c["commitId"]) + str(c["repositoryId"])).replace("/", "@")
+                repo_doc.links(temp2, temp)
+                repo_doc.save()
             except Exception as exception:
                 handling_except(type(exception))
             try:
                 temp = db['Dev'][str(c["devId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
-                DevDoc = RepoDevCollection.createEdge()
-                DevDoc["_key"] = (str(c["repositoryId"]) + str(c["devId"])).replace("/", "@")
-                DevDoc.links(temp2, temp)
-                DevDoc.save()
+                dev_doc = repo_dev_collection.createEdge()
+                dev_doc["_key"] = (str(c["repositoryId"]) + str(c["devId"])).replace("/", "@")
+                dev_doc.links(temp2, temp)
+                dev_doc.save()
             except Exception as exception:
                 handling_except(type(exception))
 
@@ -347,7 +344,7 @@ def commit_collector(db, org):
 
     workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
     workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
-    for repo in queryResult:
+    for repo in query_result:
         repositories_queue.put(repo)
     [t.start() for t in workers]
     [t.start() for t in workers2]
@@ -360,8 +357,8 @@ def commit_collector(db, org):
 def readme(db, org):
     with open("queries/readmeArango.txt", "r") as aql:
         aql = aql.read()
-    bindVars = {"org": org}
-    queryResult = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bindVars)
+    bind_vars = {"org": org}
+    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
@@ -369,7 +366,7 @@ def readme(db, org):
             with open("queries/readmeQuery.txt", "r") as query:
                 query = query.read()
             try:
-                prox = pagination_universal(query, next=repos['repoName'], org=org)
+                prox = pagination_universal(query, next_cursor=repos['repoName'], org=org)
                 print(prox)
                 output.put(1)
                 if prox.get('errors'):
@@ -378,9 +375,9 @@ def readme(db, org):
                     doc.save()
                     continue
                 try:
-                    a = find('ranges', prox)
+                    ranges = find('ranges', prox)
                     doc = db["Repo"][str(find('id', prox))]
-                    doc["readme"] = "OK" if a[-1]['endingLine'] >= 5 else "Poor"
+                    doc["readme"] = "OK" if ranges[-1]['endingLine'] >= 5 else "Poor"
                     doc.save()
                 except Exception:
                     continue
@@ -390,7 +387,7 @@ def readme(db, org):
     count_queue = Queue(queue_max_size)
     repositories_queue = Queue(queue_max_size)
     workers = [Thread(target=collector, args=(repositories_queue, count_queue)) for _ in range(num_of_threads)]
-    for repository in queryResult:
+    for repository in query_result:
         repositories_queue.put(repository)
     [t.start() for t in workers]
     [t.join() for t in workers]
@@ -399,11 +396,11 @@ def readme(db, org):
 # STATS ###############################
 
 def stats_collector(db, org):
-    commitCollection = db["Commit"]
+    commit_collection = db["Commit"]
     with open("queries/statsQuery.txt", "r") as aql:
         aql = aql.read()
-    bindVars = {"org": org, "since_time": since_time, "until_time": until_time}
-    queryResult = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bindVars)
+    bind_vars = {"org": org, "since_time": since_time, "until_time": until_time}
+    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
@@ -427,7 +424,7 @@ def stats_collector(db, org):
         while True:
             c = commits_queue.get(timeout=stats_queue_timeout)
             try:
-                doc = commitCollection[str(c["commitId"].replace("/", "@"))]
+                doc = commit_collection[str(c["commitId"].replace("/", "@"))]
                 doc['totalAddDel'] = c['totalAddDel']
                 doc['additions'] = c['additions']
                 doc['deletions'] = c['deletions']
@@ -443,7 +440,7 @@ def stats_collector(db, org):
     workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(stats_num_of_threads)]
     workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(stats_num_of_threads)]
 
-    for repo in queryResult:
+    for repo in query_result:
         repositories_queue.put(repo)
     [t.start() for t in workers]
     [t.start() for t in workers2]
@@ -455,13 +452,13 @@ def stats_collector(db, org):
 
 
 def fork_collector(db, org):
-    ForkCollection = db["Fork"]
-    DevForkCollection = db["DevFork"]
-    RepoForkCollection = db["RepoFork"]
+    fork_collection = db["Fork"]
+    dev_fork_collection = db["DevFork"]
+    repo_fork_collection = db["RepoFork"]
     with open("queries/forkArango.txt", "r") as aql:
         aql = aql.read()
-    bindVars = {"org": org}
-    queryResult = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bindVars)
+    bind_vars = {"org": org}
+    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
@@ -473,8 +470,8 @@ def fork_collector(db, org):
             while cursor is not None or first:
                 first = False
                 try:
-                    prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, next2=repository,
-                                                org=org)
+                    prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
+                                                next_repo=repository, org=org)
                     print(prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
@@ -509,9 +506,9 @@ def fork_collector(db, org):
             c = commits_queue.get(timeout=queue_timeout)
             try:
                 try:
-                    doc = ForkCollection[str(c["forkId"].replace("/", "@"))]
+                    doc = fork_collection[str(c["forkId"].replace("/", "@"))]
                 except Exception:
-                    doc = ForkCollection.createDocument()
+                    doc = fork_collection.createDocument()
                 doc["repositoryId"] = c["repositoryId"]
                 doc["repoName"] = c["repoName"]
                 doc["createdAt"] = c["createdAt"]
@@ -529,19 +526,19 @@ def fork_collector(db, org):
             try:
                 temp = db['Fork'][str(c["forkId"])]
                 temp2 = db['Dev'][str(c["devId"])]
-                commitDoc = DevForkCollection.createEdge()
-                commitDoc["_key"] = (str(c["forkId"]) + str(c["devId"])).replace("/", "@")
-                commitDoc.links(temp2, temp)
-                commitDoc.save()
+                commit_doc = dev_fork_collection.createEdge()
+                commit_doc["_key"] = (str(c["forkId"]) + str(c["devId"])).replace("/", "@")
+                commit_doc.links(temp2, temp)
+                commit_doc.save()
             except Exception as exception:
                 handling_except(type(exception))
             try:
                 temp = db['Fork'][str(c["forkId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
-                RepoDoc = RepoForkCollection.createEdge()
-                RepoDoc["_key"] = (str(c["forkId"]) + str(c["repositoryId"])).replace("/", "@")
-                RepoDoc.links(temp2, temp)
-                RepoDoc.save()
+                repo_doc = repo_fork_collection.createEdge()
+                repo_doc["_key"] = (str(c["forkId"]) + str(c["repositoryId"])).replace("/", "@")
+                repo_doc.links(temp2, temp)
+                repo_doc.save()
             except Exception as exception:
                 handling_except(type(exception))
 
@@ -550,7 +547,7 @@ def fork_collector(db, org):
 
     workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
     workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
-    for repo in queryResult:
+    for repo in query_result:
         repositories_queue.put(repo)
     [t.start() for t in workers]
     [t.start() for t in workers2]
@@ -562,12 +559,12 @@ def fork_collector(db, org):
 
 
 def issue(db, org):
-    IssueCollection = db["Issue"]
-    RepoIssueCollection = db["RepoIssue"]
+    issue_collection = db["Issue"]
+    repo_issue_collection = db["RepoIssue"]
     with open("queries/issueArango.txt", "r") as aql:
         aql = aql.read()
-    bindVars = {"org": org}
-    queryResult = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bindVars)
+    bind_vars = {"org": org}
+    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
@@ -579,8 +576,8 @@ def issue(db, org):
             while cursor is not None or first:
                 first = False
                 try:
-                    prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, next2=repository,
-                                                org=org)
+                    prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
+                                                next_repo=repository, org=org)
                     print(prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
@@ -616,9 +613,9 @@ def issue(db, org):
             c = commits_queue.get(timeout=queue_timeout)
             try:
                 try:
-                    doc = IssueCollection[str(c["issueId"].replace("/", "@"))]
+                    doc = issue_collection[str(c["issueId"].replace("/", "@"))]
                 except Exception:
-                    doc = IssueCollection.createDocument()
+                    doc = issue_collection.createDocument()
                 doc["repositoryId"] = c["repositoryId"]
                 doc["repoName"] = c["repoName"]
                 doc["state"] = c["state"]
@@ -639,7 +636,7 @@ def issue(db, org):
             try:
                 temp = db['Issue'][str(c["issueId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
-                repo_doc = RepoIssueCollection.createEdge()
+                repo_doc = repo_issue_collection.createEdge()
                 repo_doc["_key"] = (str(c["issueId"]) + str(c["repositoryId"])).replace("/", "@")
                 repo_doc.links(temp2, temp)
                 repo_doc.save()
@@ -651,7 +648,7 @@ def issue(db, org):
 
     workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
     workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
-    for repo in queryResult:
+    for repo in query_result:
         repositories_queue.put(repo)
     [t.start() for t in workers]
     [t.start() for t in workers2]

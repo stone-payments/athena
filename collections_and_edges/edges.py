@@ -5,28 +5,28 @@ from module import *
 
 
 def teams_dev(db, org):
-    TeamsDevCollection = db["TeamsDev"]
-    bindVars = {"org": org}
+    teams_dev_collection = db["TeamsDev"]
+    bind_vars = {"org": org}
     with open("queries/teamsDevArango.txt", "r") as aql:
         aql = aql.read()
-    queryResult = db.AQLQuery(aql, rawResults=True, bindVars=bindVars)
+    query_result = db.AQLQuery(aql, rawResults=True, bindVars=bind_vars)
     with open("queries/teamsDevQuery.txt", "r") as query:
         query = query.read()
-    for x in queryResult:
+    for x in query_result:
         first = True
         cursor = None
         while cursor or first:
             try:
-                prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, slug=x, org=org)
+                prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, slug=x, org=org)
                 print(prox)
-                proxNode = prox["data"]["organization"]["team"]
-                teams = proxNode["members"]["edges"]
+                prox_node = prox["data"]["organization"]["team"]
+                teams = prox_node["members"]["edges"]
                 for team in teams:
                     try:
                         temp = db['Dev'][str(team["node"]["id"]).replace("/", "@")]
-                        temp2 = db['Teams'][str(proxNode["id"]).replace("/", "@")]
-                        doc = TeamsDevCollection.createEdge()
-                        doc._key = (str(team["node"]["id"]) + str(proxNode["id"])).replace("/", "@")
+                        temp2 = db['Teams'][str(prox_node["id"]).replace("/", "@")]
+                        doc = teams_dev_collection.createEdge()
+                        doc._key = (str(team["node"]["id"]) + str(prox_node["id"])).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
                     except Exception as exception:
@@ -43,28 +43,28 @@ def teams_dev(db, org):
 
 
 def teams_repo(db, org):
-    TeamsRepoCollection = db["TeamsRepo"]
-    bindVars = {"org": org}
+    teams_repo_collection = db["TeamsRepo"]
+    bind_vars = {"org": org}
     with open("queries/teamsRepoArango.txt", "r") as aql:
         aql = aql.read()
-    queryResult = db.AQLQuery(aql, rawResults=True, bindVars=bindVars)
+    query_result = db.AQLQuery(aql, rawResults=True, bindVars=bind_vars)
     with open("queries/teamsRepoQuery.txt", "r") as query:
         query = query.read()
-    for x in queryResult:
+    for x in query_result:
         first = True
         cursor = None
         while cursor or first:
             try:
-                prox = pagination_universal(query, number_of_repo=number_of_repos, next=cursor, slug=x, org=org)
+                prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, slug=x, org=org)
                 print(prox)
-                proxNode = prox["data"]["organization"]["team"]
-                teams = proxNode["repositories"]["edges"]
+                prox_node = prox["data"]["organization"]["team"]
+                teams = prox_node["repositories"]["edges"]
                 for team in teams:
                     try:
                         temp = db['Repo'][str(team["node"]["id"]).replace("/", "@")]
-                        temp2 = db['Teams'][str(proxNode["id"]).replace("/", "@")]
-                        doc = TeamsRepoCollection.createEdge()
-                        doc._key = (str(team["node"]["id"]) + str(proxNode["id"])).replace("/", "@")
+                        temp2 = db['Teams'][str(prox_node["id"]).replace("/", "@")]
+                        doc = teams_repo_collection.createEdge()
+                        doc._key = (str(team["node"]["id"]) + str(prox_node["id"])).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
                     except Exception as exception:

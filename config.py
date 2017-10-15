@@ -1,7 +1,7 @@
 import datetime
 
-token = "896a853e110a21a6e25cbbcf1ebd2e2ce1139a8e"
-db_name = "athena_teste"
+token = ""
+db_name = "athena_teste3"
 # db_url = "http://10.152.20.89:8529"
 db_url = "http://localhost:8529"
 username = "root"
@@ -24,3 +24,12 @@ stats_num_of_threads = 1
 queue_timeout = 15
 stats_queue_timeout = 10
 commit_queue_timeout = 25
+collections = ["Repo", "Dev", "Teams", "Languages", "LanguagesRepo", "Commit", "DevCommit",
+               "RepoCommit", "RepoDev", "Fork", "DevFork", "RepoFork", "Issue", "RepoIssue",
+               "TeamsDev", "TeamsRepo"]
+hash_indexes = [["Dev", "devName"], ["Dev", "login"], ["Teams", "teamName"],
+             ["Commit", "org"], ["Issue", "repoName"], ["Repo", "readme"], ["Commit", "author"]]
+hash_indexes_unique = [["Languages", "name"]]
+skip_list_indexes = [["Issue", "closeAt"], ["Issue", "createdAt"], ["Commit", "committedDate"], ["Fork", "createdAt"]]
+full_text_indexes = [["Repo", "repoName"], ["Repo", "org"], ["Teams", "teamName"], ["Teams", "org"], ["Issue", "org"],
+                     ["Commit", "org"], ["Fork", "org"]]
