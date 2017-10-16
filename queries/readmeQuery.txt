@@ -15,4 +15,8 @@ query ($org: String!, $next: String!) {
       }
     }
   }
+  rateLimit{
+    remaining
+    resetAt
+  }
 }

@@ -1,4 +1,3 @@
-from queue import Queue
 from threading import Thread
 from module import *
 
@@ -12,17 +11,13 @@ def repo_query(db, org):
     repo_collection = db["Repo"]
     languages_collection = db["Languages"]
     languages_repo_collection = db["LanguagesRepo"]
-    db['Repo'].ensureHashIndex(['repoName'], unique=False, sparse=False)
-    db['Repo'].ensureHashIndex(['isPrivate'], unique=False, sparse=False)
-    db['Repo'].ensureHashIndex(['licenseId'], unique=False, sparse=False)
-    db['Repo'].ensureHashIndex(['licenseType'], unique=False, sparse=False)
-
     has_next_page = True
     cursor = None
     while has_next_page:
         try:
             prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, org=org)
-            # print(prox)
+            print(prox)
+            limit_validation(rate_limit=find('rateLimit', prox))
             has_next_page = find('hasNextPage', prox)
             cursor = find('endCursor', prox)
             prox_repositorios = prox["data"]["organization"]["repositories"]["edges"]
@@ -51,7 +46,7 @@ def repo_query(db, org):
                     doc._key = repo["node"]["repoId"].replace("/", "@")
                     doc.save()
                 except Exception as exception:
-                    handling_except(type(exception))
+                    handling_except(exception)
                 for language in languages_repo:
                     # print(language)
                     try:
@@ -61,7 +56,7 @@ def repo_query(db, org):
                         doc._key = find('languageId', language).replace("/", "@")
                         doc.save()
                     except Exception as exception:
-                        handling_except(type(exception))
+                        handling_except(exception)
                     try:
                         temp = db['Languages'][str(find('languageId', language)).replace("/", "@")]
                         temp2 = db['Repo'][str(find('repoId', repo)).replace("/", "@")]
@@ -71,9 +66,10 @@ def repo_query(db, org):
                         doc.links(temp, temp2)
                         doc.save()
                     except Exception as exception:
-                        handling_except(type(exception))
-        except Exception:
-            cursor = None
+                        handling_except(exception)
+        except Exception as exception:
+            handling_except(exception)
+            # cursor = None
 
 
 # DEV ###############################
@@ -86,6 +82,7 @@ def dev(db, org, query):
     while cursor or first:
         try:
             response = pagination_universal(query, number_of_repo=30, next_cursor=cursor, org=org)
+            limit_validation(rate_limit=find('rateLimit', response))
             print(response)
             devs_edge = response["data"]["organization"]["members"]["edges"]
             for dev_slice in devs_edge:
@@ -106,7 +103,7 @@ def dev(db, org, query):
                     doc._key = dev_slice["node"]["id"].replace("/", "@")
                     doc.save()
                 except Exception as exception:
-                    handling_except(type(exception))
+                    handling_except(exception)
             cursor = devs_edge[len(devs_edge) - 1]["cursor"]
         except Exception:
             cursor = False
@@ -127,6 +124,7 @@ def teams(db, org):
     while has_next_page:
         try:
             prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, org=org)
+            limit_validation(rate_limit=find('rateLimit', prox))
             print(prox)
             cursor = find('endCursor', prox)
             has_next_page = find('hasNextPage', prox)
@@ -151,7 +149,7 @@ def teams(db, org):
                     doc._key = team["node"]["id"].replace("/", "@")
                     doc.save()
                 except Exception as exception:
-                    handling_except(type(exception))
+                    handling_except(exception)
                 for team_dev_content in team_dev_contents:
                     try:
                         temp = db['Dev'][str(find('memberId', team_dev_content)).replace("/", "@")]
@@ -161,7 +159,7 @@ def teams(db, org):
                         doc.links(temp, temp2)
                         doc.save()
                     except Exception as exception:
-                        handling_except(type(exception))
+                        handling_except(exception)
                 for team_repo_content in team_repo_contents:
                     try:
                         temp = db['Repo'][str(find('repoId', team_repo_content)).replace("/", "@")]
@@ -171,7 +169,7 @@ def teams(db, org):
                         doc.links(temp, temp2)
                         doc.save()
                     except Exception as exception:
-                        handling_except(type(exception))
+                        handling_except(exception)
         except Exception:
             cursor = None
 
@@ -199,6 +197,7 @@ def languages(db, org):
                 try:
                     prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repos, org=org)
+                    limit_validation(rate_limit=find('rateLimit', prox))
                     print(prox)
                     cursor = find('endCursor', prox)
                     prox_node = find('languages', prox)
@@ -211,7 +210,7 @@ def languages(db, org):
                             doc._key = find('id', node).replace("/", "@")
                             doc.save()
                         except Exception as exception:
-                            handling_except(type(exception))
+                            handling_except(exception)
                         try:
                             temp = db['Languages'][str(node["node"]["id"]).replace("/", "@")]
                             temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
@@ -221,7 +220,7 @@ def languages(db, org):
                             doc.links(temp, temp2)
                             doc.save()
                         except Exception as exception:
-                            handling_except(type(exception))
+                            handling_except(exception)
                 except Exception:
                     cursor = False
                     first = False
@@ -258,7 +257,8 @@ def commit_collector(db, org):
                 try:
                     prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repository, org=org, since=since_time, until=until_time)
-                    print(prox)
+                    limit_validation(rate_limit=find('rateLimit', prox), output=output)
+                    # print(prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
                     cursor = find('endCursor', prox)
@@ -284,6 +284,7 @@ def commit_collector(db, org):
                             "commitId": node["commitId"].replace("/", "@"),
                             "org": org
                         }
+
                         output.put(commit)
                 except Exception:
                     cursor = None
@@ -292,6 +293,8 @@ def commit_collector(db, org):
     def save(repositories: Queue, output: Queue):
         while True:
             c = commits_queue.get(timeout=commit_queue_timeout)
+            # print(find('rate_limit', c))
+            limit_validation(rate_limit=find('rate_limit', c))
             try:
                 try:
                     doc = commit_collection[str(c["commitId"].replace("/", "@"))]
@@ -310,7 +313,7 @@ def commit_collector(db, org):
                 doc._key = c["commitId"].replace("/", "@")
                 doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
             try:
                 temp = db['Commit'][str(c["commitId"])]
                 temp2 = db['Dev'][str(c["devId"])]
@@ -319,7 +322,7 @@ def commit_collector(db, org):
                 commit_doc.links(temp2, temp)
                 commit_doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
             try:
                 temp = db['Commit'][str(c["commitId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
@@ -328,7 +331,7 @@ def commit_collector(db, org):
                 repo_doc.links(temp2, temp)
                 repo_doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
             try:
                 temp = db['Dev'][str(c["devId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
@@ -337,7 +340,7 @@ def commit_collector(db, org):
                 dev_doc.links(temp2, temp)
                 dev_doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
 
     repositories_queue = Queue(queue_max_size)
     commits_queue = Queue(queue_max_size)
@@ -367,6 +370,7 @@ def readme(db, org):
                 query = query.read()
             try:
                 prox = pagination_universal(query, next_cursor=repos['repoName'], org=org)
+                limit_validation(rate_limit=find('rateLimit', prox))
                 print(prox)
                 output.put(1)
                 if prox.get('errors'):
@@ -382,7 +386,7 @@ def readme(db, org):
                 except Exception:
                     continue
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
 
     count_queue = Queue(queue_max_size)
     repositories_queue = Queue(queue_max_size)
@@ -409,6 +413,7 @@ def stats_collector(db, org):
                 temp = repository["oid"]
                 query = org + "/" + repository["repo"] + '/commits/'
                 result = clientRest2.execute(urlCommit, query, temp)
+                print(result)
             except Exception:
                 continue
             commit = {
@@ -432,7 +437,7 @@ def stats_collector(db, org):
                 doc._key = c["commitId"].replace("/", "@")
                 doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
 
     repositories_queue = Queue(queue_max_size)
     commits_queue = Queue(queue_max_size)
@@ -472,6 +477,7 @@ def fork_collector(db, org):
                 try:
                     prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repository, org=org)
+                    limit_validation(rate_limit=find('rateLimit', prox), output=output)
                     print(prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
@@ -504,6 +510,7 @@ def fork_collector(db, org):
     def save(repositories: Queue, output: Queue):
         while True:
             c = commits_queue.get(timeout=queue_timeout)
+            limit_validation(rate_limit=c["rate_limit"])
             try:
                 try:
                     doc = fork_collection[str(c["forkId"].replace("/", "@"))]
@@ -522,7 +529,7 @@ def fork_collector(db, org):
                 doc._key = c["forkId"].replace("/", "@")
                 doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
             try:
                 temp = db['Fork'][str(c["forkId"])]
                 temp2 = db['Dev'][str(c["devId"])]
@@ -531,7 +538,7 @@ def fork_collector(db, org):
                 commit_doc.links(temp2, temp)
                 commit_doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
             try:
                 temp = db['Fork'][str(c["forkId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
@@ -540,7 +547,7 @@ def fork_collector(db, org):
                 repo_doc.links(temp2, temp)
                 repo_doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
 
     repositories_queue = Queue(queue_max_size)
     commits_queue = Queue(queue_max_size)
@@ -578,6 +585,7 @@ def issue(db, org):
                 try:
                     prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repository, org=org)
+                    limit_validation(rate_limit=find('rateLimit', prox), output=output)
                     print(prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
@@ -611,6 +619,7 @@ def issue(db, org):
     def save(repositories: Queue, output: Queue):
         while True:
             c = commits_queue.get(timeout=queue_timeout)
+            limit_validation(rate_limit=c["rate_limit"])
             try:
                 try:
                     doc = issue_collection[str(c["issueId"].replace("/", "@"))]
@@ -632,7 +641,7 @@ def issue(db, org):
                 doc._key = c["issueId"].replace("/", "@")
                 doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
             try:
                 temp = db['Issue'][str(c["issueId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
@@ -641,7 +650,7 @@ def issue(db, org):
                 repo_doc.links(temp2, temp)
                 repo_doc.save()
             except Exception as exception:
-                handling_except(type(exception))
+                handling_except(exception)
 
     repositories_queue = Queue(queue_max_size)
     commits_queue = Queue(queue_max_size)

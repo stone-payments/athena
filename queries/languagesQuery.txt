@@ -15,4 +15,8 @@ query ($number_of_repos: Int!, $next: String, $next2: String!,$org:String!) {
       }
     }
   }
+  rateLimit{
+    remaining
+    resetAt
+  }
 }

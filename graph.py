@@ -14,13 +14,13 @@ def job():
         # with open("queries/devQuery.txt", "r") as query:
         #     query = query.read()
         # dev(db, org, query)
-        teams(db, org)
+        # teams(db, org)
         # teams_dev(db, org)
         # teams_repo(db, org)
         # readme(db, org)
         # languages(db, org)
         # commit_collector(db, org)
-        # stats_collector(db, org)
+        stats_collector(db, org)
         # fork_collector(db, org)
         # issue(db, org)
 
