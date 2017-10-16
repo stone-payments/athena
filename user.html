@@ -210,50 +210,20 @@
 													</div>
 											</div>
 									</div>
-									<div class="col-md-4">
-											<div class="card ">
+									<div class="col-md-8">
+											<div class="card">
 													<div class="header">
-															<h4 class="title">Readme</h4>
-															<p class="category">Readme - Team (%)</p>
+															<h4 class="title">Commits</h4>
+															<p class="category">Commits - Team (%)</p>
 													</div>
-													<div class="content">
-															<div class="table-full-width">
-																	<table class="table">
-																			<canvas id="readmeChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
-
-
-																			</tbody>
-																	</table>
-															</div>
+													<div class="content" >
+															<canvas id="commmit_chart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 
 															<div class="footer">
+
 																	<hr>
 																	<div class="stats">
-																			<i class="fa fa-history"></i> Updated 3 minutes ago
-																	</div>
-															</div>
-													</div>
-											</div>
-									</div>
-									<div class="col-md-4">
-											<div class="card  ">
-													<div class="header">
-															<h4 class="title">License</h4>
-															<p class="category">License - Team (%)</p>
-													</div>
-													<div class="content" style="max-height:500px">
-															<div class="table-full-width">
-																	<table class="table">
-																			<canvas id="LicenseType" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
-
-																			</tbody>
-																	</table>
-															</div>
-
-															<div class="footer">
-																	<hr>
-																	<div class="stats">
-																			<i class="fa fa-history"></i> Updated 3 minutes ago
+																			<i class="fa fa-clock-o"></i> Updated 2 days ago
 																	</div>
 															</div>
 													</div>
@@ -279,24 +249,27 @@
 										</div>
 								</div>
 								<div class="col-md-8">
-										<div class="card">
+										<div class="card ">
 												<div class="header">
-														<h4 class="title">Commits</h4>
-														<p class="category">Commits - Team (%)</p>
+														<h4 class="title">Additions - Deletions</h4>
+														<p class="category">Issues - Team</p>
 												</div>
-												<div class="content" >
-														<canvas id="commmit_chart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+												<div class="content">
+														<canvas id="stats_chart" class="ct-chart"></canvas>
 
 														<div class="footer">
+																<div class="legend">
 
+																</div>
 																<hr>
 																<div class="stats">
-																		<i class="fa fa-clock-o"></i> Updated 2 days ago
+																		<i class="fa fa-check"></i> Data information certified
 																</div>
 														</div>
 												</div>
 										</div>
 								</div>
+
 							</div>
 
                 <div class="row">
@@ -352,28 +325,32 @@
                 </div>
 
 								<div class="row">
+									<div class="col-md-4">
+											<div class="card ">
+													<div class="header">
+															<h4 class="title">Teams</h4>
+															<p class="category">Teams</p>
+													</div>
+													<div class="content" style="overflow: scroll;max-height:400px;">
+															<div class="table-full-width">
+																	<table class="table">
+																			<tbody id="user_teams">
 
-                    <div class="col-md-8">
-                        <div class="card ">
-                            <div class="header">
-                                <h4 class="title">Additions - Deletions</h4>
-                                <p class="category">Issues - Team</p>
-                            </div>
-                            <div class="content">
-                                <canvas id="stats_chart" class="ct-chart"></canvas>
 
-                                <div class="footer">
-                                    <div class="legend">
+																			</tbody>
+																	</table>
+															</div>
 
-                                    </div>
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="fa fa-check"></i> Data information certified
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+															<div class="footer">
+																	<hr>
+																	<div class="stats">
+																			<i class="fa fa-history"></i> Updated 3 minutes ago
+																	</div>
+															</div>
+													</div>
+											</div>
+									</div>
+
 									</div>
 
 

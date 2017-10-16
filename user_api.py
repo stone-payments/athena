@@ -1,9 +1,4 @@
 from flask import request
-from pyArango.connection import *
-import json
-import datetime, calendar
-import datetime as dt
-from datetime import date, timedelta,datetime
 from api import *
 
 
@@ -285,6 +280,24 @@ def repo_name():
     RETURN {data:Repo.repoName}
     """
     name = "prefix:"+str(request.args.get("name"))
+    bindVars = {"name": name}
+    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
+    result = [dict(i) for i in queryResult]
+    print(result)
+    return json.dumps(result)
+
+def user_team():
+    aql = """
+    FOR Teams IN Teams
+    FOR TeamsDev in TeamsDev
+    FOR Dev IN Dev
+    FILTER TeamsDev._from == Dev._id
+    FILTER TeamsDev._to == Teams._id
+    FILTER Dev.login == @name
+    RETURN DISTINCT{teams:Teams.teamName}
+    """
+    name = request.args.get("name")
     bindVars = {"name": name}
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)

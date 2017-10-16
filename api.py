@@ -27,8 +27,8 @@ def Languages():
     FILTER Languages._id == LanguagesRepo._from
     FILTER Repo._id == LanguagesRepo._to
     FILTER Repo.repoName == @name
-    SORT LanguagesRepo.size DESC
-    RETURN {Languages:Languages.name,Size:LanguagesRepo.size}"""
+    SORT LanguagesRepo.size ASC
+    RETURN DISTINCT {Languages:Languages.name,Size:LanguagesRepo.size}"""
     name = request.args.get("name")
     bindVars = {"name" : name}
     # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
@@ -887,29 +887,40 @@ def get_user_commit():
     response = user_commit()
     return response
 
+
 @app.route('/get_user_language')
 def get_user_language():
     response = user_language()
     return response
+
 
 @app.route('/get_user_contributed_repo')
 def get_user_contributed_repo():
     response = user_contributed_repo()
     return response
 
+
 @app.route('/get_user_issue')
 def get_user_issue():
     response = user_issue()
     return response
+
 
 @app.route('/get_user_stats')
 def get_user_stats():
     response = user_stats()
     return response
 
+
 @app.route('/get_repo_name')
 def get_repo_name():
     response = repo_name()
+    return response
+
+
+@app.route('/get_user_team')
+def get_user_team():
+    response = user_team()
     return response
 
 if __name__ == '__main__':
