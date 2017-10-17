@@ -234,17 +234,6 @@ $(function() {
                     else{
                       $("#active").append("False").css("text-align", "center");
                     }
-
-                    if (readme == "OK"){
-                      $("#readme").css("background-color", "green");
-                    }
-                    else if (readme == "Poor") {
-                        $("#readme").css("background-color", "yellow");
-                    }
-                    else{
-                      $("#readme").css("background-color", "red");
-                    }
-
             },
             error: function(error) {
               console.log(error);

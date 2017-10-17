@@ -168,37 +168,6 @@ colorStone = ['#0B3B1F','#1DAC4B','#380713','#74121D','#C52233','#595708','#6572
 
             }
         });
-        $.ajax({
-            url: 'http://127.0.0.1:5000/RepoMembers?name='+name,
-            type: 'GET',
-            success: function(response) {
-                console.log(response);
-                returnedData = JSON.parse(response);
-                $("#members").empty();
-                returnedData.map(function(num) {
-                  memberName = num.member;
-              html = `<tr>
-                        <td style="width:10px;">
-
-                                <i class="pe-7s-angle-right-circle"></i>
-
-                        </td>
-                        <td>${memberName}</td>
-                        <td class="td-actions text-right">
-
-                        </td>
-                    </tr>`
-                  $("#members").append(html);
-              });
-
-
-
-            },
-            error: function(error) {
-              console.log(error);
-
-            }
-        });
             $.ajax({
                 url: 'http://127.0.0.1:5000/OpenSourceTeam?org='+orgSelector+'&team='+name,
                 type: 'GET',

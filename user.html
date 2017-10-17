@@ -66,9 +66,9 @@
 									</a>
 							</li>
                 <li>
-                    <a href="dashboard.html">
+                    <a href="repos.html">
                         <i class="pe-7s-graph"></i>
-                        <p>Repos</p>
+                        <p>Repositories</p>
                     </a>
                 </li>
                 <li class="active">
@@ -77,13 +77,6 @@
                         <p>Users</p>
                     </a>
                 </li>
-                <li>
-                    <a href="notifications.html">
-                        <i class="pe-7s-bell"></i>
-                        <p>Notifications</p>
-                    </a>
-                </li>
-
             </ul>
     	</div>
     </div>
@@ -98,77 +91,10 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Team - Dashboard</a>
-                </div>
-                <div class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav navbar-left">
-                        <li>
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-dashboard"></i>
-								<p class="hidden-lg hidden-md">Dashboard</p>
-                            </a>
-                        </li>
-                        <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    <i class="fa fa-globe"></i>
-                                    <b class="caret hidden-sm hidden-xs"></b>
-                                    <span class="notification hidden-sm hidden-xs">5</span>
-									<p class="hidden-lg hidden-md">
-										5 Notifications
-										<b class="caret"></b>
-									</p>
-                              </a>
-                              <ul class="dropdown-menu">
-                                <li><a href="#">Notification 1</a></li>
-                                <li><a href="#">Notification 2</a></li>
-                                <li><a href="#">Notification 3</a></li>
-                                <li><a href="#">Notification 4</a></li>
-                                <li><a href="#">Another notification</a></li>
-                              </ul>
-                        </li>
-                        <li>
-                           <a href="">
-                                <i class="fa fa-search"></i>
-								<p class="hidden-lg hidden-md">Search</p>
-                            </a>
-                        </li>
-                    </ul>
-
-                    <ul class="nav navbar-nav navbar-right">
-                        <li>
-                           <a href="">
-                               <p>Account</p>
-                            </a>
-                        </li>
-                        <li class="dropdown">
-                              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    <p>
-										Dropdown
-										<b class="caret"></b>
-									</p>
-                              </a>
-                              <ul class="dropdown-menu">
-                                <li><a href="#">Action</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something</a></li>
-                                <li><a href="#">Another action</a></li>
-                                <li><a href="#">Something</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#">Separated link</a></li>
-                              </ul>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <p>Log out</p>
-                            </a>
-                        </li>
-						<li class="separator hidden-lg hidden-md"></li>
-                    </ul>
+                    <a class="navbar-brand" href="#">Users - Dashboard</a>
                 </div>
             </div>
         </nav>
-
-
 				<nav class="navbar navbar-default navbar-fixed">
             <div class="container-fluid">
                 <div class="navbar-header">
@@ -176,22 +102,18 @@
                 </div>
             </div>
         </nav>
-
         <div class="content">
             <div class="container-fluid">
-                <div class="row">
+                <div class="row row-eq-height">
 									<div class="col-md-4">
 											<div class="card card-user">
 													<div class="image" style="background-color: rgb(4, 57, 28);">
-
 													</div>
 													<div class="content">
 															<div class="author">
 																	 <a href="#">
 																	<img id =avatar class="avatar border-gray" src="assets/img/default-avatar.png" alt="..."/>
-
 																		<h4 class="title" id="username">Dev<br />
-
 																		</h4>
 																	</a>
 															</div>
@@ -199,14 +121,12 @@
 																								<p id="following" class="description text-left">Following</p>
 																									<p id="contributed" class="description text-left"> Contributed Repositories </p>
 																									<p id="pullrequests" class="description text-left">PullRequests</p>
-
 													</div>
-													<hr>
-													<div class="text-center">
-															<button href="#" class="btn btn-simple"><i class="fa fa-facebook-square"></i></button>
-															<button href="#" class="btn btn-simple"><i class="fa fa-twitter"></i></button>
-															<button href="#" class="btn btn-simple"><i class="fa fa-google-plus-square"></i></button>
-
+													<div class="footer">
+															<hr>
+															<div class="stats">
+																	<i class="fa fa-clock-o"></i>
+															</div>
 													</div>
 											</div>
 									</div>
@@ -214,7 +134,7 @@
 											<div class="card">
 													<div class="header">
 															<h4 class="title">Commits</h4>
-															<p class="category">Commits - Team (%)</p>
+															<p class="category">Commits - User (%)</p>
 													</div>
 													<div class="content" >
 															<canvas id="commmit_chart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
@@ -223,36 +143,45 @@
 
 																	<hr>
 																	<div class="stats">
-																			<i class="fa fa-clock-o"></i> Updated 2 days ago
+																			<i class="fa fa-clock-o"></i>
 																	</div>
 															</div>
 													</div>
 											</div>
 									</div>
                 </div>
-							<div class="row">
+							<div class="row row-eq-height">
 								<div class="col-md-4">
-										<div class="card">
+										<div class="card ">
 												<div class="header">
-														<h4 class="title">Languages</h4>
-														<p class="category">Top 12 Languages - Team (%)</p>
+														<h4 class="title">Teams</h4>
+														<p class="category">Teams</p>
 												</div>
-												<div class="content">
-														<canvas id="languages" class="ct-chart ct-perfect-fourth" width="auto" height="210"></canvas>
+												<div class="content" style="overflow: auto;max-height:400px;">
+														<div class="table-full-width">
+																<table class="table">
+																		<tbody id="user_teams">
+
+
+																		</tbody>
+																</table>
+														</div>
+
 														<div class="footer">
 																<hr>
 																<div class="stats">
-																		<i class="fa fa-clock-o"></i> Updated 2 days ago
+																		<i class="fa fa-clock-o"></i>
 																</div>
 														</div>
 												</div>
 										</div>
 								</div>
+
 								<div class="col-md-8">
 										<div class="card ">
 												<div class="header">
 														<h4 class="title">Additions - Deletions</h4>
-														<p class="category">Issues - Team</p>
+														<p class="category">Issues - User</p>
 												</div>
 												<div class="content">
 														<canvas id="stats_chart" class="ct-chart"></canvas>
@@ -263,7 +192,7 @@
 																</div>
 																<hr>
 																<div class="stats">
-																		<i class="fa fa-check"></i> Data information certified
+																		<i class="fa fa-clock-o"></i>
 																</div>
 														</div>
 												</div>
@@ -272,13 +201,13 @@
 
 							</div>
 
-                <div class="row">
+                <div class="row row-eq-height">
 
                     <div class="col-md-8">
                         <div class="card ">
                             <div class="header">
                                 <h4 class="title">Issues</h4>
-                                <p class="category">Issues - Team</p>
+                                <p class="category">Issues - User</p>
                             </div>
                             <div class="content">
                                 <canvas id="issuesChart" class="ct-chart"></canvas>
@@ -289,7 +218,7 @@
                                     </div>
                                     <hr>
                                     <div class="stats">
-                                        <i class="fa fa-check"></i> Data information certified
+                                    <i class="fa fa-clock-o"></i>
                                     </div>
                                 </div>
                             </div>
@@ -300,14 +229,12 @@
                         <div class="card ">
                             <div class="header">
                                 <h4 class="title">Contributed Repositories</h4>
-                                <p class="category">Repositories</p>
+                                <p class="category">Repositories - User</p>
                             </div>
-                            <div class="content" style="overflow: scroll;max-height:400px;">
+                            <div class="content" style="overflow: auto;max-height:400px;">
                                 <div class="table-full-width">
                                     <table class="table">
                                         <tbody id="contributed_repo">
-
-
                                         </tbody>
                                     </table>
                                 </div>
@@ -315,45 +242,13 @@
                                 <div class="footer">
                                     <hr>
                                     <div class="stats">
-                                        <i class="fa fa-history"></i> Updated 3 minutes ago
+                                        <i class="fa fa-clock-o"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
-
-								<div class="row">
-									<div class="col-md-4">
-											<div class="card ">
-													<div class="header">
-															<h4 class="title">Teams</h4>
-															<p class="category">Teams</p>
-													</div>
-													<div class="content" style="overflow: scroll;max-height:400px;">
-															<div class="table-full-width">
-																	<table class="table">
-																			<tbody id="user_teams">
-
-
-																			</tbody>
-																	</table>
-															</div>
-
-															<div class="footer">
-																	<hr>
-																	<div class="stats">
-																			<i class="fa fa-history"></i> Updated 3 minutes ago
-																	</div>
-															</div>
-													</div>
-											</div>
-									</div>
-
-									</div>
-
-
             </div>
         </div>
 
@@ -400,7 +295,7 @@
 
         	$.notify({
             	icon: 'pe-7s-gift',
-            	message: "Welcome to <b>Athena Dashboard</b> - a beautiful openSource Github BI."
+            	message: "Welcome to <b>Athena Dashboard</b> - an openSource Github BI."
 
             },{
                 type: 'info',

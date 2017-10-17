@@ -31,37 +31,11 @@ def Languages():
     RETURN DISTINCT {Languages:Languages.name,Size:LanguagesRepo.size}"""
     name = request.args.get("name")
     bindVars = {"name" : name}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=10, bindVars=bindVars)
-    # print([f for f in queryResult])
-    result = [dict(i) for i in queryResult]
-    # print(queryResult[0])
-    print(result)
-    return json.dumps(result)
-    # return json.dumps(dict([f for f in queryResult]))
-    # return json.dumps(dict(queryResult[0]))
-@app.route('/Commits')
-def Commits():
-    aql = """
-    FOR Commit IN Commit
-    FILTER Commit.repoName == @name
-    FILTER Commit.committedDate >= "2017-08-01T00:00:00Z"
-    FILTER Commit.committedDate <= "2017-08-31T00:00:00Z"
-    COLLECT
-    day = DATE_FORMAT(Commit.committedDate,"%dd - %www")
-    WITH COUNT INTO number
-    SORT day ASC
-    RETURN {
-      month: day,
-      number: number
-    }"""
-    name = request.args.get("name")
-    bindVars = {"name" : name}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
     return json.dumps(result)
+
 
 @app.route('/Commits2')
 def Commits2():
@@ -83,7 +57,6 @@ def Commits2():
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
     bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
@@ -101,7 +74,6 @@ def Commits2():
         return day
     for x in days:
         lst.append(recur(x))
-    # print(lst)
     return json.dumps(lst)
 
 @app.route('/RepoMembers')
@@ -110,10 +82,10 @@ def RepoMembers():
     FOR Commit IN Commit
     FILTER Commit.repoName == @name
     FILTER Commit.committedDate > "2017-01-01T00:00:00Z"
+    FILTER Commit.author != "anonimo"
     RETURN DISTINCT {member:Commit.author}"""
     name = request.args.get("name")
     bindVars = {"name" : name}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
@@ -137,7 +109,6 @@ def BestPractices():
     date = (dt.datetime.now() + dt.timedelta(-60)).strftime('%Y-%m-%d')
     print(date)
     bindVars = {"name" : name,"date":date}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
@@ -164,7 +135,6 @@ def Issues():
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
     bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
@@ -199,7 +169,6 @@ def Issues():
       number: number
     }"""
     bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
@@ -239,29 +208,16 @@ def LanguagesOrg():
     COLLECT ageGroup = Languages.name 
     AGGREGATE soma = SUM(LanguagesRepo.size)
     SORT soma DESC
-    LIMIT 12
     RETURN {name:ageGroup,size:soma}"""
-    aql2 = """
-    FOR Languages IN Languages
-    FOR LanguagesRepo IN LanguagesRepo
-    FOR Repo IN Repo
-    FILTER Repo.org == @name
-    FILTER Languages._id == LanguagesRepo._from
-    FILTER Repo._id == LanguagesRepo._to
-    RETURN DISTINCT Repo._id"""
-    name = request.args.get("name")
+    name = "stone-payments"
     bindVars = {"name" : name}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bindVars)
-    queryResult2 = db.AQLQuery(aql2, rawResults=True, batchSize=100000, bindVars=bindVars)
-    # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
-    result2 = len(queryResult2)
-    print(queryResult2)
+    soma = sum(item['size'] for item in result)
     for x in result:
-        x['size'] = round(x['size']/result2,2)
-    print(result)
-    return json.dumps(result)
+        x['size'] = round((x['size']/soma*100), 2)
+    print(result[:12])
+    return json.dumps(result[:12])
 
 @app.route('/OpenSource')
 def OpenSource():
@@ -285,7 +241,6 @@ def OpenSource():
     RETURN {openSource,notOpenSource}"""
     name = request.args.get("name")
     bindVars = {"name" : name}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
     # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
@@ -317,7 +272,6 @@ def CommitsOrg():
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
     bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
@@ -368,7 +322,6 @@ def readmeOrg():
     RETURN {ok,poor,bad}"""
     name = request.args.get("name")
     bindVars = {"name" : name}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
     # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
@@ -396,7 +349,6 @@ def LicenseType():
     }"""
     name = request.args.get("name")
     bindVars = {"name" : name}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=10000, bindVars=bindVars)
     # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
@@ -412,13 +364,13 @@ def LicenseType():
 
 @app.route('/IssuesOrg')
 def IssuesOrg():
-    global value
+    # global value
     aql = """
     FOR Issue IN Issue
     FILTER Issue.org == @name
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
-    COLLECT 
+    COLLECT
     day = DATE_FORMAT(Issue.closedAt,"%www %dd-%mmm")
     WITH COUNT INTO number
     SORT day ASC
@@ -431,7 +383,6 @@ def IssuesOrg():
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
     bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
@@ -448,7 +399,7 @@ def IssuesOrg():
         day['day'] = x
         day['number'] = 0 + value
         return day
-    value = 0
+    value = [0]
     for x in days:
         lst.append(recur(x))
 
@@ -457,7 +408,7 @@ def IssuesOrg():
     FILTER Issue.org == @name
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
-    COLLECT 
+    COLLECT
     day = DATE_FORMAT(Issue.createdAt,"%www %dd-%mmm")
     WITH COUNT INTO number
     SORT day ASC
@@ -466,7 +417,6 @@ def IssuesOrg():
       number: number
     }"""
     bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
@@ -492,6 +442,7 @@ def IssuesOrg():
     print(lista)
     return json.dumps(lista)
 
+
 ################# Teams ############################################################################################
 
 @app.route('/LanguagesOrgTeam')
@@ -511,35 +462,17 @@ def LanguagesOrgTeam():
     COLLECT ageGroup = Languages.name 
     AGGREGATE soma = SUM(LanguagesRepo.size)
     SORT soma DESC
-    LIMIT 12
     RETURN {name:ageGroup,size:soma}"""
-    aql2 = """
-    FOR Languages IN Languages
-    FOR LanguagesRepo IN LanguagesRepo
-    FOR Repo IN Repo
-    FOR Teams In Teams
-    FOR TeamsRepo IN TeamsRepo
-    FILTER TeamsRepo._from == Repo._id
-    FILTER TeamsRepo._to == Teams._id
-    FILTER Languages._id == LanguagesRepo._from
-    FILTER Repo._id == LanguagesRepo._to
-    FILTER Repo.org == @org
-    FILTER Teams.teamName == @team
-    RETURN DISTINCT Repo._id"""
     org = request.args.get("org")
     team = request.args.get("team")
     bindVars = {"team" : team, "org":org}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bindVars)
-    queryResult2 = db.AQLQuery(aql2, rawResults=True, batchSize=100000, bindVars=bindVars)
-    # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
-    result2 = len(queryResult2)
-    print(queryResult2)
+    soma = sum(item['size'] for item in result)
     for x in result:
-        x['size'] = round(x['size']/result2,2)
+        x['size'] = round((x['size']/soma*100), 2)
     print(result)
-    return json.dumps(result)
+    return json.dumps(result[:12])
 
 @app.route('/OpenSourceTeam')
 def OpenSourceTeam():
@@ -574,7 +507,6 @@ def OpenSourceTeam():
     team = request.args.get("team")
     org = request.args.get("org")
     bindVars = {"team" : team, "org":org}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     try:
@@ -621,7 +553,6 @@ def CommitsTeam():
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
     bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate), "org":org}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
@@ -688,9 +619,7 @@ def readmeOrgTeam():
     team = request.args.get("team")
     org = request.args.get("org")
     bindVars = {"team" : team, "org":org}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
-    # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
     try:
         resultOk = int(result[0]["ok"][0])
@@ -734,9 +663,7 @@ def LicenseTypeTeam():
     team = request.args.get("team")
     org = request.args.get("org")
     bindVars = {"team" : team, "org":org}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=10000, bindVars=bindVars)
-    # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
     soma = sum([x['number'] for x in result])
     for x in result:
@@ -744,7 +671,6 @@ def LicenseTypeTeam():
             x['day'] = "None"
         x['number'] = round(x['number']/soma*100,2)
     print(soma)
-    # print(queryResult[0])
     print(result)
     return json.dumps(result)
 
@@ -761,12 +687,12 @@ def RepoMembersTeam():
     FILTER TeamsDev._from == Dev._id
     FILTER TeamsDev._to == Teams._id
     FILTER Repo.org == @org
+    FILTER Dev.login != "anonimo"
     FILTER Teams.teamName == @team
     RETURN DISTINCT {member:Dev.login}"""
     team = request.args.get("team")
     org = request.args.get("org")
     bindVars = {"team" : team, "org":org}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
@@ -803,7 +729,6 @@ def IssuesTeam():
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
     bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate),"org":org}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
@@ -847,7 +772,6 @@ def IssuesTeam():
       number: number
     }"""
     bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate),"org":org}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
@@ -922,6 +846,7 @@ def get_repo_name():
 def get_user_team():
     response = user_team()
     return response
+
 
 if __name__ == '__main__':
     app.run()

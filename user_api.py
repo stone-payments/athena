@@ -73,33 +73,16 @@ def user_language():
     COLLECT ageGroup = Languages.name 
     AGGREGATE soma = SUM(LanguagesRepo.size)
     SORT soma DESC
-    LIMIT 12
     RETURN {name:ageGroup,size:soma}"""
-    aql2 = """
-    FOR Languages IN Languages
-    FOR LanguagesRepo IN LanguagesRepo
-    FOR Repo IN Repo
-    FOR Dev In Dev
-    FOR RepoDev IN RepoDev
-    FILTER RepoDev._from == Repo._id
-    FILTER RepoDev._to == Dev._id
-    FILTER Languages._id == LanguagesRepo._from
-    FILTER Repo._id == LanguagesRepo._to
-    FILTER Dev.login == @dev
-    RETURN DISTINCT Repo._id"""
     dev = request.args.get("name")
     bindVars = {"dev" : dev}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bindVars)
-    queryResult2 = db.AQLQuery(aql2, rawResults=True, batchSize=100000, bindVars=bindVars)
-    # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
-    result2 = len(queryResult2)
-    print(queryResult2)
+    soma = sum(item['size'] for item in result)
     for x in result:
-        x['size'] = round(x['size']/result2,2)
+        x['size'] = round((x['size']/soma*100), 2)
     print(result)
-    return json.dumps(result)
+    return json.dumps(result[:12])
 
 
 def user_contributed_repo():
