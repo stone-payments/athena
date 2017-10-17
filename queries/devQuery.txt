@@ -1,27 +1,29 @@
-query($number_of_repos:Int! $next:String, $org:String!){
-  organization(login:$org) {
-    members(first:$number_of_repos after:$next) {
+query ($number_of_repos: Int!, $next: String, $org: String!) {
+  organization(login: $org) {
+    members(first: $number_of_repos, after: $next) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
       edges {
         node {
           id
           name
-          followers (first:1){
+          followers(first: 1) {
             totalCount
-            }
-          following(first:1){
+          }
+          following(first: 1) {
             totalCount
           }
           login
           avatarUrl
-          contributedRepositories(last:1){
-              totalCount
-          }
-          pullRequests (last:1){
-              totalCount
-          }
         }
         cursor
       }
     }
+  }
+  rateLimit {
+    remaining
+    resetAt
   }
 }

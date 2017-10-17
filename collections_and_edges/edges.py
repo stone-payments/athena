@@ -13,12 +13,15 @@ def teams_dev(db, org):
     with open("queries/teamsDevQuery.txt", "r") as query:
         query = query.read()
     for x in query_result:
-        first = True
         cursor = None
-        while cursor or first:
+        has_next_page = True
+        while has_next_page:
             try:
                 prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, slug=x, org=org)
+                limit_validation(rate_limit=find('rateLimit', prox))
                 print(prox)
+                cursor = find('endCursor', prox)
+                has_next_page = find('hasNextPage', prox)
                 prox_node = prox["data"]["organization"]["team"]
                 teams = prox_node["members"]["edges"]
                 for team in teams:
@@ -30,13 +33,9 @@ def teams_dev(db, org):
                         doc.links(temp, temp2)
                         doc.save()
                     except Exception as exception:
-                        handling_except(type(exception))
-                cursor = prox["data"]["organization"]["team"]["members"]["pageInfo"]["endCursor"]
-                if cursor is None:
-                    cursor = False
-            except Exception:
-                cursor = False
-                first = False
+                        handling_except(exception)
+            except Exception as exception:
+                handling_except(exception)
 
 
 # TEAMS_REPO ###############################
@@ -51,12 +50,15 @@ def teams_repo(db, org):
     with open("queries/teamsRepoQuery.txt", "r") as query:
         query = query.read()
     for x in query_result:
-        first = True
         cursor = None
-        while cursor or first:
+        has_next_page = True
+        while has_next_page:
             try:
                 prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, slug=x, org=org)
                 print(prox)
+                limit_validation(rate_limit=find('rateLimit', prox))
+                cursor = find('endCursor', prox)
+                has_next_page = find('hasNextPage', prox)
                 prox_node = prox["data"]["organization"]["team"]
                 teams = prox_node["repositories"]["edges"]
                 for team in teams:
@@ -68,10 +70,6 @@ def teams_repo(db, org):
                         doc.links(temp, temp2)
                         doc.save()
                     except Exception as exception:
-                        handling_except(type(exception))
-                cursor = prox["data"]["organization"]["team"]["repositories"]["pageInfo"]["endCursor"]
-                if cursor is None:
-                    cursor = False
-            except Exception:
-                cursor = False
-                first = False
+                        handling_except(exception)
+            except Exception as exception:
+                handling_except(exception)

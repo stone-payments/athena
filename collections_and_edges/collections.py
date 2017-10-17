@@ -77,37 +77,35 @@ def repo_query(db, org):
 
 def dev(db, org, query):
     dev_collection = db['Dev']
-    first = True
     cursor = None
-    while cursor or first:
+    has_next_page = True
+    while has_next_page:
         try:
             response = pagination_universal(query, number_of_repo=30, next_cursor=cursor, org=org)
             limit_validation(rate_limit=find('rateLimit', response))
+            cursor = find('endCursor', response)
+            has_next_page = find('hasNextPage', response)
             print(response)
             devs_edge = response["data"]["organization"]["members"]["edges"]
             for dev_slice in devs_edge:
                 try:
-                    try:
-                        doc = dev_collection[str(dev_slice["node"]["id"].replace("/", "@"))]
-                    except Exception:
-                        doc = dev_collection.createDocument()
+                    doc = dev_collection[str(dev_slice["node"]["id"].replace("/", "@"))]
+                except Exception:
+                    doc = dev_collection.createDocument()
+                try:
                     doc['devName'] = dev_slice["node"]["name"]
                     doc["followers"] = dev_slice["node"]["followers"]["totalCount"]
                     doc["following"] = dev_slice["node"]["following"]["totalCount"]
                     doc["login"] = dev_slice["node"]["login"]
                     doc["avatarUrl"] = dev_slice["node"]["avatarUrl"]
-                    doc["contributedRepositories"] = dev_slice["node"]["contributedRepositories"]["totalCount"]
-                    doc["pullRequests"] = dev_slice["node"]["pullRequests"]["totalCount"]
                     doc["id"] = dev_slice["node"]["id"].replace("/", "@")
                     doc["org"] = org
                     doc._key = dev_slice["node"]["id"].replace("/", "@")
                     doc.save()
                 except Exception as exception:
                     handling_except(exception)
-            cursor = devs_edge[len(devs_edge) - 1]["cursor"]
         except Exception:
-            cursor = False
-            first = False
+            cursor = None
 
 
 # TEAMS ###############################
@@ -293,8 +291,7 @@ def commit_collector(db, org):
     def save(repositories: Queue, output: Queue):
         while True:
             c = commits_queue.get(timeout=commit_queue_timeout)
-            # print(find('rate_limit', c))
-            limit_validation(rate_limit=find('rate_limit', c))
+            limit_validation(rate_limit=c.get("rate_limit", None))
             try:
                 try:
                     doc = commit_collection[str(c["commitId"].replace("/", "@"))]
@@ -446,6 +443,7 @@ def stats_collector(db, org):
     workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(stats_num_of_threads)]
 
     for repo in query_result:
+        print(repo)
         repositories_queue.put(repo)
     [t.start() for t in workers]
     [t.start() for t in workers2]
@@ -510,7 +508,8 @@ def fork_collector(db, org):
     def save(repositories: Queue, output: Queue):
         while True:
             c = commits_queue.get(timeout=queue_timeout)
-            limit_validation(rate_limit=c["rate_limit"])
+            limit_validation(rate_limit=c.get("rate_limit", None))
+            print("FOI3")
             try:
                 try:
                     doc = fork_collection[str(c["forkId"].replace("/", "@"))]
@@ -576,17 +575,17 @@ def issue(db, org):
     def collector(repositories: Queue, output: Queue):
         while True:
             repository = repositories.get_nowait()
-            first = True
+            has_next_page = True
             cursor = None
             with open("queries/issueQuery.txt", "r") as query:
                 query = query.read()
-            while cursor is not None or first:
-                first = False
+            while has_next_page:
                 try:
                     prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repository, org=org)
                     limit_validation(rate_limit=find('rateLimit', prox), output=output)
-                    print(prox)
+                    # print(prox)
+                    has_next_page = find('hasNextPage', prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
                     cursor = find('endCursor', prox)
@@ -611,20 +610,22 @@ def issue(db, org):
                             "title": find('title', node),
                             "org": org
                         }
+
                         output.put(commit)
-                except Exception:
-                    cursor = None
-                    first = False
+                        print("FOI")
+                except Exception as exception:
+                    handling_except(exception)
 
     def save(repositories: Queue, output: Queue):
         while True:
             c = commits_queue.get(timeout=queue_timeout)
-            limit_validation(rate_limit=c["rate_limit"])
+            limit_validation(rate_limit=c.get("rate_limit", None))
+            print("FOI3")
             try:
-                try:
-                    doc = issue_collection[str(c["issueId"].replace("/", "@"))]
-                except Exception:
-                    doc = issue_collection.createDocument()
+                doc = issue_collection[str(c["issueId"].replace("/", "@"))]
+            except Exception:
+                doc = issue_collection.createDocument()
+            try:
                 doc["repositoryId"] = c["repositoryId"]
                 doc["repoName"] = c["repoName"]
                 doc["state"] = c["state"]
@@ -655,8 +656,8 @@ def issue(db, org):
     repositories_queue = Queue(queue_max_size)
     commits_queue = Queue(queue_max_size)
 
-    workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
-    workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
+    workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(issue_num_of_threads)]
+    workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(issue_num_of_threads)]
     for repo in query_result:
         repositories_queue.put(repo)
     [t.start() for t in workers]

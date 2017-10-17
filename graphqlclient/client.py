@@ -1,5 +1,4 @@
 import json
-import sys
 import requests
 
 
@@ -20,7 +19,6 @@ class GraphQLClient:
             raise NameError("Token is not Defined")
 
 
-
 class ClientRest:
     def __init__(self, token, timeout=100.001):
         self.token = token
@@ -31,11 +29,11 @@ class ClientRest:
         if self.token != "":
             headers = {'Authorization': 'token %s' % self.token}
             req = requests.get(query, headers=headers, timeout=self.timeout)
-            # print(req)
             return req.json()
         else:
             raise NameError("Token is not Defined")
-            sys.exit(1)
-            # clientRest2 = ClientRest("896a853e110a21a6e25cbbcf1ebd2e2ce1139a8e")
-            # print(clientRest2.execute('https://api.github.com/repos/', 'stone-payments/', 'pombo-correio-api/events'))
-            # # /repos/:owner/:repo/events
+
+#
+# clientRest2 = ClientRest("896a853e110a21a6e25cbbcf1ebd2e2ce1139a8e")
+# print(clientRest2.execute(url='https://api.github.com/rate_limit', query='', temp=''))
+# /repos/:owner/:repo/events

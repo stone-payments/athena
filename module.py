@@ -61,11 +61,6 @@ def handling_except(exception):
 
 
 def limit_validation(rate_limit=None, output=None):
-    # if rate_limit is None:
-    #     with open("queries/repoQuery.txt", "r") as query:
-    #         query = query.read()
-    #     pagination_universal(query)
-    #     find('rateLimit', pagination_universal(query))
     if rate_limit is not None and rate_limit["remaining"] < rate_limit_to_sleep:
         limit_time = (datetime.datetime.strptime(rate_limit["resetAt"], '%Y-%m-%dT%H:%M:%SZ') -
                       datetime.datetime.utcnow()).total_seconds()
@@ -74,8 +69,3 @@ def limit_validation(rate_limit=None, output=None):
             return time.sleep(limit_time), output.put(rate_limit)
         elif output is None:
             return time.sleep(limit_time)
-            # elif rate_limit["remaining"] < rate_limit_to_sleep and output is None:
-            #     limit_time = (datetime.datetime.strptime(rate_limit["resetAt"], '%Y-%m-%dT%H:%M:%SZ') -
-            #                   datetime.datetime.utcnow()).total_seconds()
-            #     print("wait "+str(limit_time/60)+" mins")
-            #

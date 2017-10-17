@@ -1,10 +1,10 @@
-query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!){
+query ($number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
   organization(login: $org) {
     repository(name: $next2) {
-      repositoryId:id
-      repoName:name
-      forks(first: $number_of_repos , after:$next) {
-      pageInfo{
+      repositoryId: id
+      repoName: name
+      forks(first: $number_of_repos, after: $next) {
+        pageInfo {
           endCursor
         }
         edges {
@@ -15,12 +15,16 @@ query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!){
             isLocked
             lockReason
             owner {
-             devId: id
+              devId: id
               login
             }
           }
         }
       }
     }
+  }
+  rateLimit {
+    remaining
+    resetAt
   }
 }

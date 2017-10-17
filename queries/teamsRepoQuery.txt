@@ -12,8 +12,13 @@ query ($number_of_repos: Int!, $next: String, $slug: String!, $org: String!) {
         }
         pageInfo {
           endCursor
+          hasNextPage
         }
       }
     }
+  }
+  rateLimit {
+    remaining
+    resetAt
   }
 }
