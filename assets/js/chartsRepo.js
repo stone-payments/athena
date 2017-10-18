@@ -110,7 +110,7 @@ $(function() {
               let dataCommits = returnedData.map(function(num) {
                 return num.number;
             });
-            var ctx = document.getElementById("myChart").getContext('2d');
+            let ctx = document.getElementById("myChart").getContext('2d');
 
             if(myChart != null){
                     myChart.destroy();
@@ -259,7 +259,7 @@ $(function() {
         });
 
 
-            var ctx = document.getElementById("issuesChart").getContext('2d');
+            let ctx = document.getElementById("issuesChart").getContext('2d');
 
             if(issuesChart != null){
                     issuesChart.destroy();
