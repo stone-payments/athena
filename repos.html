@@ -78,11 +78,11 @@
 			<nav class="navbar navbar-default navbar-fixed">
 				<div class="container-fluid">
 					<div class="navbar-header">
-						<a class="navbar-brand"><input autofocus type="text" type="text" id="name" placeholder="Insert repo name"> <input id="e1" name="e1"> <i id="find" class="fa fa-search"></i> </a>
+						<a class="navbar-brand"><input autofocus type="text" type="text" id="name" placeholder="Insert repo name"> <input id="repoRangeDate" name="repoRangeDate"> <i id="find" class="fa fa-search"></i> </a>
 					</div>
 				</div>
 			</nav>
-			<div class="content">
+			<div class="content" style="display: none;">
 				<div class="container-fluid">
 					<div class="row row-eq-height">
 						<div class="col-md-3">
@@ -272,23 +272,12 @@
 <script src="assets/js/light-bootstrap-dashboard.js"></script>
 <!-- Light Bootstrap Table DEMO methods, don't include it in your project! -->
 <script src="assets/js/demo.js"></script>
-<script type="text/javascript">
-	$(document).ready(function() {
-		$.notify({
-			icon: 'pe-7s-gift',
-			message: "Welcome to <b>Athena Dashboard</b> - an openSource Github BI."
-		}, {
-			type: 'info',
-			timer: 4000
-		});
-	});
-</script>
 <script src="assets/js/moment.js"></script>
 <script src="assets/js/jquery-ui.min.js"></script>
 <script src="assets/js/jquery.comiseo.daterangepicker.js"></script>
 <script>
 	$(function() {
-		$("#e1").daterangepicker();
+		$("#repoRangeDate").daterangepicker();
 	});
 </script>
 <script src="assets/js/jquery.auto-complete.min.js"></script>

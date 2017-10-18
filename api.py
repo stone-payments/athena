@@ -5,7 +5,7 @@ from pyArango.connection import *
 import json
 import datetime, calendar
 import datetime as dt
-from datetime import date, timedelta,datetime
+from datetime import date, timedelta, datetime
 from user_api import *
 
 
@@ -16,7 +16,8 @@ value = 0
 app = Flask(__name__)
 CORS(app)
 
-################# Repos ############################################################################################
+# Repos #####
+
 
 @app.route('/Languages')
 def Languages():
@@ -26,13 +27,13 @@ def Languages():
     FOR Repo IN Repo
     FILTER Languages._id == LanguagesRepo._from
     FILTER Repo._id == LanguagesRepo._to
-    FILTER Repo.repoName == @name
+    FILTER LOWER(Repo.repoName) == @name
     SORT LanguagesRepo.size ASC
     RETURN DISTINCT {Languages:Languages.name,Size:LanguagesRepo.size}"""
     name = request.args.get("name")
-    bindVars = {"name" : name}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=10, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
+    bind_vars = {"name": str.lower(name)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=10, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
     print(result)
     return json.dumps(result)
 
@@ -41,7 +42,7 @@ def Languages():
 def Commits2():
     aql = """
     FOR Commit IN Commit
-    FILTER Commit.repoName == @name
+    FILTER LOWER(Commit.repoName) == @name
     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
     COLLECT
@@ -53,15 +54,17 @@ def Commits2():
       number: number
     }"""
     name = request.args.get("name")
-    startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    delta = endDate - startDate
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
+    start_date = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    end_date = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    delta = end_date - start_date
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
     print(result)
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+            for i in range(delta.days + 1)]
     lst = []
+
     def recur(x):
         day = {}
         for y in result:
@@ -76,31 +79,33 @@ def Commits2():
         lst.append(recur(x))
     return json.dumps(lst)
 
+
 @app.route('/RepoMembers')
 def RepoMembers():
     aql = """
     FOR Commit IN Commit
-    FILTER Commit.repoName == @name
+    FILTER LOWER(Commit.repoName) == @name
     FILTER Commit.committedDate > "2017-01-01T00:00:00Z"
     FILTER Commit.author != "anonimo"
     RETURN DISTINCT {member:Commit.author}"""
     name = request.args.get("name")
-    bindVars = {"name" : name}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
+    bind_vars = {"name": str.lower(name)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
     print(result)
     return json.dumps(result)
+
 
 @app.route('/BestPractices')
 def BestPractices():
     aql = """
     LET a =(
     FOR Repo IN Repo
-    FILTER Repo.repoName == @name
+    FILTER LOWER(Repo.repoName) == @name
     RETURN {openSource:Repo.openSource,readme:Repo.readme,licenseType:Repo.licenseType})
     LET b =(
     FOR Commit IN Commit
-    FILTER Commit.repoName == @name
+    FILTER LOWER(Commit.repoName) == @name
     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") > @date
        COLLECT WITH COUNT INTO length
     RETURN length)
@@ -108,18 +113,21 @@ def BestPractices():
     name = request.args.get("name")
     date = (dt.datetime.now() + dt.timedelta(-60)).strftime('%Y-%m-%d')
     print(date)
-    bindVars = {"name" : name,"date":date}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
+    bind_vars = {"name": str.lower(name), "date": date}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
+    if not result[0]["open"]:
+        return json.dumps([{'open': [404], 'active': [404]}])
     print(result)
     return json.dumps(result)
+
 
 @app.route('/Issues')
 def Issues():
     global value
     aql = """
     FOR Issue IN Issue
-    FILTER Issue.repoName == @name
+    FILTER LOWER(Issue.repoName) == @name
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
     COLLECT 
@@ -131,14 +139,16 @@ def Issues():
       number: number
     }"""
     name = request.args.get("name")
-    startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    delta = endDate - startDate
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    start_date = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    end_date = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    delta = end_date - start_date
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
+    days = [datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+            for i in range(delta.days + 1)]
     lst = []
+
     def recur(x):
         global value
         day = {}
@@ -157,7 +167,7 @@ def Issues():
 
         aql = """
     FOR Issue IN Issue
-    FILTER Issue.repoName == @name
+    FILTER LOWER(Issue.repoName) == @name
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
     COLLECT 
@@ -168,11 +178,13 @@ def Issues():
       day: day,
       number: number
     }"""
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
+    days = [datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+            for i in range(delta.days + 1)]
     lst2 = []
+
     def recur(x):
         global value
         day = {}
@@ -188,13 +200,12 @@ def Issues():
     value = 0
     for x in days:
         lst2.append(recur(x))
-    lista = []
-    lista.append(lst)
-    lista.append(lst2)
-    print(lista)
-    return json.dumps(lista)
+    response = [lst, lst2]
+    print(response)
+    return json.dumps(response)
 
-################# Orgs ############################################################################################
+# Orgs ############
+
 
 @app.route('/LanguagesOrg')
 def LanguagesOrg():
@@ -204,27 +215,28 @@ def LanguagesOrg():
     FOR Repo IN Repo
     FILTER Languages._id == LanguagesRepo._from
     FILTER Repo._id == LanguagesRepo._to
-    FILTER Repo.org == @name
+    FILTER LOWER(Repo.org) == @name
     COLLECT ageGroup = Languages.name 
     AGGREGATE soma = SUM(LanguagesRepo.size)
     SORT soma DESC
     RETURN {name:ageGroup,size:soma}"""
     name = "stone-payments"
-    bindVars = {"name" : name}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
+    bind_vars = {"name": str.lower(name)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
     soma = sum(item['size'] for item in result)
     for x in result:
         x['size'] = round((x['size']/soma*100), 2)
     print(result[:12])
     return json.dumps(result[:12])
 
+
 @app.route('/OpenSource')
 def OpenSource():
     aql = """
     LET openSource = (
     FOR Repo IN Repo
-    FILTER Repo.org == @name
+    FILTER LOWER(Repo.org) == @name
     FILTER Repo.openSource == True
         COLLECT 
         day = Repo.openSource
@@ -232,7 +244,7 @@ def OpenSource():
     RETURN number)
     LET notOpenSource = (
     FOR Repo IN Repo
-    FILTER Repo.org == @name
+    FILTER LOWER(Repo.org) == @name
     FILTER Repo.openSource == False
         COLLECT 
         day = Repo.openSource
@@ -240,23 +252,24 @@ def OpenSource():
     RETURN number)
     RETURN {openSource,notOpenSource}"""
     name = request.args.get("name")
-    bindVars = {"name" : name}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
+    bind_vars = {"name": str.lower(name)}
+    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bind_vars)
     # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
     soma = int(result[0]["openSource"][0]) + int(result[0]["notOpenSource"][0])
     print(result)
     for x in result:
-        x['openSource'] = round(int(x['openSource'][0])/soma*100,1)
-        x['notOpenSource'] = round(int(x['notOpenSource'][0])/soma*100,1)
+        x['openSource'] = round(int(x['openSource'][0])/soma*100, 1)
+        x['notOpenSource'] = round(int(x['notOpenSource'][0])/soma*100, 1)
     print(result)
     return json.dumps(result)
+
 
 @app.route('/CommitsOrg')
 def CommitsOrg():
     aql = """
     FOR Commit IN Commit
-    FILTER Commit.org == @name
+    FILTER LOWER(Commit.org) == @name
     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
     COLLECT
@@ -271,12 +284,14 @@ def CommitsOrg():
     startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+            for i in range(delta.days + 1)]
     lst = []
+
     def recur(x):
         day = {}
         for y in result:
@@ -292,12 +307,13 @@ def CommitsOrg():
     # print(lst)
     return json.dumps(lst)
 
+
 @app.route('/readmeOrg')
 def readmeOrg():
     aql = """
     LET ok = (
     FOR Repo IN Repo
-    FILTER Repo.org == @name
+    FILTER LOWER(Repo.org) == @name
     FILTER Repo.readme == 'OK'
         COLLECT 
         day = Repo.readme
@@ -305,7 +321,7 @@ def readmeOrg():
     RETURN number)
     LET poor = (
     FOR Repo IN Repo
-    FILTER Repo.org == @name
+    FILTER LOWER(Repo.org) == @name
     FILTER Repo.readme == 'Poor'
         COLLECT 
         day = Repo.readme
@@ -313,7 +329,7 @@ def readmeOrg():
     RETURN number)
         LET bad = (
     FOR Repo IN Repo
-    FILTER Repo.org == @name
+    FILTER LOWER(Repo.org) == @name
     FILTER Repo.readme == null
         COLLECT 
         day = Repo.readme
@@ -321,24 +337,25 @@ def readmeOrg():
     RETURN number)
     RETURN {ok,poor,bad}"""
     name = request.args.get("name")
-    bindVars = {"name" : name}
+    bindVars = {"name": str.lower(name)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
     # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
     soma = int(result[0]["ok"][0]) + int(result[0]["poor"][0]) + int(result[0]["bad"][0])
     print(result)
     for x in result:
-        x['ok'] = round(int(x['ok'][0])/soma*100,1)
-        x['poor'] = round(int(x['poor'][0])/soma*100,1)
-        x['bad'] = round(int(x['bad'][0])/soma*100,1)
+        x['ok'] = round(int(x['ok'][0])/soma*100, 1)
+        x['poor'] = round(int(x['poor'][0])/soma*100, 1)
+        x['bad'] = round(int(x['bad'][0])/soma*100, 1)
     print(result)
     return json.dumps(result)
+
 
 @app.route('/LicenseType')
 def LicenseType():
     aql = """
     FOR Repo IN Repo
-    FILTER Repo.org == @name
+    FILTER LOWER(Repo.org) == @name
     COLLECT
     day = Repo.licenseType
     WITH COUNT INTO number
@@ -348,26 +365,27 @@ def LicenseType():
     number: number
     }"""
     name = request.args.get("name")
-    bindVars = {"name" : name}
+    bindVars = {"name": str.lower(name)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=10000, bindVars=bindVars)
     # print([f for f in queryResult])
     result = [dict(i) for i in queryResult]
     soma = sum([x['number'] for x in result])
     for x in result:
-        if x['day'] == None:
+        if x['day'] is None:
             x['day'] = "None"
-        x['number'] = round(x['number']/soma*100,2)
+        x['number'] = round(x['number']/soma*100, 2)
     print(soma)
     # print(queryResult[0])
     print(result)
     return json.dumps(result)
 
+
 @app.route('/IssuesOrg')
 def IssuesOrg():
-    # global value
+    global value
     aql = """
     FOR Issue IN Issue
-    FILTER Issue.org == @name
+    FILTER LOWER(Issue.org) == @name
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
     COLLECT
@@ -382,11 +400,13 @@ def IssuesOrg():
     startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+            for i in range(delta.days + 1)]
     lst = []
+
     def recur(x):
         global value
         day = {}
@@ -399,13 +419,13 @@ def IssuesOrg():
         day['day'] = x
         day['number'] = 0 + value
         return day
-    value = [0]
+    value = 0
     for x in days:
         lst.append(recur(x))
 
         aql = """
     FOR Issue IN Issue
-    FILTER Issue.org == @name
+    FILTER LOWER(Issue.org) == @name
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
     COLLECT
@@ -416,11 +436,13 @@ def IssuesOrg():
       day: day,
       number: number
     }"""
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+            for i in range(delta.days + 1)]
     lst2 = []
+
     def recur(x):
         global value
         day = {}
@@ -436,14 +458,12 @@ def IssuesOrg():
     value = 0
     for x in days:
         lst2.append(recur(x))
-    lista = []
-    lista.append(lst)
-    lista.append(lst2)
-    print(lista)
-    return json.dumps(lista)
+    response = [lst, lst2]
+    print(response)
+    return json.dumps(response)
 
 
-################# Teams ############################################################################################
+# Teams ############################################################################################
 
 @app.route('/LanguagesOrgTeam')
 def LanguagesOrgTeam():
@@ -457,15 +477,15 @@ def LanguagesOrgTeam():
     FILTER TeamsRepo._to == Teams._id
     FILTER Languages._id == LanguagesRepo._from
     FILTER Repo._id == LanguagesRepo._to
-    FILTER Repo.org == @org
-    FILTER Teams.teamName == @team
+    FILTER LOWER(Repo.org) == @org
+    FILTER LOWER(Teams.teamName) == @team
     COLLECT ageGroup = Languages.name 
     AGGREGATE soma = SUM(LanguagesRepo.size)
     SORT soma DESC
     RETURN {name:ageGroup,size:soma}"""
     org = request.args.get("org")
     team = request.args.get("team")
-    bindVars = {"team" : team, "org":org}
+    bindVars = {"team": str.lower(team), "org": str.lower(org)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     soma = sum(item['size'] for item in result)
@@ -473,6 +493,7 @@ def LanguagesOrgTeam():
         x['size'] = round((x['size']/soma*100), 2)
     print(result)
     return json.dumps(result[:12])
+
 
 @app.route('/OpenSourceTeam')
 def OpenSourceTeam():
@@ -483,9 +504,9 @@ def OpenSourceTeam():
     FOR TeamsRepo IN TeamsRepo
     FILTER TeamsRepo._from == Repo._id
     FILTER TeamsRepo._to == Teams._id
-    FILTER Repo.org ==@org
+    FILTER LOWER(Repo.org) == @org
     FILTER Repo.openSource == True
-    FILTER Teams.teamName == @team
+    FILTER LOWER(Teams.teamName) == @team
         COLLECT 
         day = Repo.openSource
     WITH COUNT INTO number
@@ -496,9 +517,9 @@ def OpenSourceTeam():
     FOR TeamsRepo IN TeamsRepo
     FILTER TeamsRepo._from == Repo._id
     FILTER TeamsRepo._to == Teams._id
-    FILTER Repo.org ==@org
+    FILTER LOWER(Repo.org) == @org
     FILTER Repo.openSource == False
-    FILTER Teams.teamName == @team
+    FILTER LOWER(Teams.teamName) == @team
         COLLECT 
         day = Repo.openSource
     WITH COUNT INTO number
@@ -506,9 +527,11 @@ def OpenSourceTeam():
     RETURN {openSource,notOpenSource}"""
     team = request.args.get("team")
     org = request.args.get("org")
-    bindVars = {"team" : team, "org":org}
+    bindVars = {"team": str.lower(team), "org": str.lower(org)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
+    if not result[0]["openSource"]:
+        return json.dumps([{'openSource': [404], 'notOpenSource': [404]}])
     try:
         resultOpenSource = int(result[0]["openSource"][0])
     except:
@@ -519,9 +542,10 @@ def OpenSourceTeam():
         resultnotOpenSource = 0
     soma = resultOpenSource + resultnotOpenSource
     for x in result:
-        x['openSource'] = round(resultOpenSource/soma*100,1)
-        x['notOpenSource'] = round(resultnotOpenSource/soma*100,1)
+        x['openSource'] = round(resultOpenSource/soma*100, 1)
+        x['notOpenSource'] = round(resultnotOpenSource/soma*100, 1)
     return json.dumps(result)
+
 
 @app.route('/CommitsTeam')
 def CommitsTeam():
@@ -531,8 +555,8 @@ def CommitsTeam():
     FOR RepoCommit IN RepoCommit
     FOR Teams IN Teams
     FOR TeamsRepo IN TeamsRepo
-    FILTER Commit.org == @org
-    FILTER Teams.teamName == @name
+    FILTER LOWER(Commit.org) == @org
+    FILTER LOWER(Teams.teamName) == @name
     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <=  @endDate
     FILTER TeamsRepo._from == Repo._id
@@ -552,12 +576,14 @@ def CommitsTeam():
     startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate), "org":org}
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate), "org": str.lower(org)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+            for i in range(delta.days + 1)]
     lst = []
+
     def recur(x):
         day = {}
         for y in result:
@@ -573,6 +599,7 @@ def CommitsTeam():
     # print(lst)
     return json.dumps(lst)
 
+
 @app.route('/readmeOrgTeam')
 def readmeOrgTeam():
     aql = """
@@ -582,8 +609,8 @@ def readmeOrgTeam():
     FOR TeamsRepo IN TeamsRepo
     FILTER TeamsRepo._from == Repo._id
     FILTER TeamsRepo._to == Teams._id
-    FILTER Repo.org == @org
-    FILTER Teams.teamName == @team
+    FILTER LOWER(Repo.org) == @org
+    FILTER LOWER(Teams.teamName) == @team
     FILTER Repo.readme == 'OK'
         COLLECT 
         day = Repo.readme
@@ -595,8 +622,8 @@ def readmeOrgTeam():
     FOR TeamsRepo IN TeamsRepo
     FILTER TeamsRepo._from == Repo._id
     FILTER TeamsRepo._to == Teams._id
-    FILTER Repo.org == @org
-    FILTER Teams.teamName == @team
+    FILTER LOWER(Repo.org) == @org
+    FILTER LOWER(Teams.teamName) == @team
     FILTER Repo.readme == 'Poor'
         COLLECT 
         day = Repo.readme
@@ -608,8 +635,8 @@ def readmeOrgTeam():
     FOR TeamsRepo IN TeamsRepo
     FILTER TeamsRepo._from == Repo._id
     FILTER TeamsRepo._to == Teams._id
-    FILTER Repo.org == @org
-    FILTER Teams.teamName == @team
+    FILTER LOWER(Repo.org) == @org
+    FILTER LOWER(Teams.teamName) == @team
     FILTER Repo.readme == null
         COLLECT 
         day = Repo.readme
@@ -618,9 +645,11 @@ def readmeOrgTeam():
     RETURN {ok,poor,bad}"""
     team = request.args.get("team")
     org = request.args.get("org")
-    bindVars = {"team" : team, "org":org}
+    bindVars = {"team": str.lower(team), "org": str.lower(org)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
+    if not result[0]["ok"]:
+        return json.dumps([{'ok': [404], 'poor': [404], 'bad': [404]}])
     try:
         resultOk = int(result[0]["ok"][0])
     except:
@@ -633,14 +662,15 @@ def readmeOrgTeam():
         resultBad = int(result[0]["bad"][0])
     except:
         resultBad = 0
-    soma =resultOk + resultPoor + resultBad
+    soma = resultOk + resultPoor + resultBad
     print(result)
     for x in result:
-        x['ok'] = round(resultOk/soma*100,1)
-        x['poor'] = round(resultPoor/soma*100,1)
-        x['bad'] = round(resultBad/soma*100,1)
+        x['ok'] = round(resultOk/soma*100, 1)
+        x['poor'] = round(resultPoor/soma*100, 1)
+        x['bad'] = round(resultBad/soma*100, 1)
     print(result)
     return json.dumps(result)
+
 
 @app.route('/LicenseTypeTeam')
 def LicenseTypeTeam():
@@ -650,8 +680,8 @@ def LicenseTypeTeam():
     FOR TeamsRepo IN TeamsRepo
     FILTER TeamsRepo._from == Repo._id
     FILTER TeamsRepo._to == Teams._id
-    FILTER Repo.org == @org
-    FILTER Teams.teamName == @team
+    FILTER LOWER(Repo.org) == @org
+    FILTER LOWER(Teams.teamName) == @team
     COLLECT
     day = Repo.licenseType
     WITH COUNT INTO number
@@ -662,17 +692,18 @@ def LicenseTypeTeam():
     }"""
     team = request.args.get("team")
     org = request.args.get("org")
-    bindVars = {"team" : team, "org":org}
+    bindVars = {"team": str.lower(team), "org": str.lower(org)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=10000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     soma = sum([x['number'] for x in result])
     for x in result:
-        if x['day'] == None:
+        if x['day'] is None:
             x['day'] = "None"
-        x['number'] = round(x['number']/soma*100,2)
+        x['number'] = round(x['number']/soma*100, 2)
     print(soma)
     print(result)
     return json.dumps(result)
+
 
 @app.route('/RepoMembersTeam')
 def RepoMembersTeam():
@@ -686,17 +717,18 @@ def RepoMembersTeam():
     FILTER TeamsRepo._to == Teams._id
     FILTER TeamsDev._from == Dev._id
     FILTER TeamsDev._to == Teams._id
-    FILTER Repo.org == @org
+    FILTER LOWER(Repo.org) == @org
     FILTER Dev.login != "anonimo"
-    FILTER Teams.teamName == @team
+    FILTER LOWER(Teams.teamName) == @team
     RETURN DISTINCT {member:Dev.login}"""
     team = request.args.get("team")
     org = request.args.get("org")
-    bindVars = {"team" : team, "org":org}
+    bindVars = {"team": str.lower(team), "org": str.lower(org)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
     return json.dumps(result)
+
 
 @app.route('/IssuesTeam')
 def IssuesTeam():
@@ -707,8 +739,8 @@ def IssuesTeam():
     FOR Teams IN Teams
     FOR RepoIssue IN RepoIssue
     FOR TeamsRepo IN TeamsRepo
-    FILTER Issue.org == @org
-    FILTER Teams.teamName == @name
+    FILTER LOWER(Issue.org) == @org
+    FILTER LOWER(Teams.teamName) == @name
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
     FILTER TeamsRepo._from == Repo._id
@@ -728,11 +760,13 @@ def IssuesTeam():
     startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate),"org":org}
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate), "org": str.lower(org)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+            for i in range(delta.days + 1)]
     lst = []
+
     def recur(x):
         global value
         day = {}
@@ -755,8 +789,8 @@ def IssuesTeam():
     FOR Teams IN Teams
     FOR RepoIssue IN RepoIssue
     FOR TeamsRepo IN TeamsRepo
-    FILTER Issue.org == @org
-    FILTER Teams.teamName == @name
+    FILTER LOWER(Issue.org) == @org
+    FILTER LOWER(Teams.teamName) == @name
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
     FILTER TeamsRepo._from == Repo._id
@@ -771,11 +805,13 @@ def IssuesTeam():
       day: day,
       number: number
     }"""
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate),"org":org}
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate), "org": str.lower(org)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+            for i in range(delta.days + 1)]
     lst2 = []
+
     def recur(x):
         global value
         day = {}
@@ -791,13 +827,11 @@ def IssuesTeam():
     value = 0
     for x in days:
         lst2.append(recur(x))
-    lista = []
-    lista.append(lst)
-    lista.append(lst2)
-    print(lista)
-    return json.dumps(lista)
+    response = [lst, lst2]
+    print(response)
+    return json.dumps(response)
 
-########## Users #########################
+# Users #########################
 
 
 @app.route('/get_avatar')

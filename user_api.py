@@ -2,17 +2,19 @@ from flask import request
 from api import *
 
 
-
 def avatar():
     aql = """
     FOR Dev IN Dev
-    FILTER Dev.login == @login
+    FILTER LOWER(Dev.login) == @login
     RETURN {login:Dev.login,avatar:Dev.avatarUrl,followers:Dev.followers,following:Dev.following,
             contributed:Dev.contributedRepositories,pullrequests:Dev.pullRequests}"""
     login = request.args.get("login")
-    bindvars = {"login" : login}
+    bindvars = {"login": str.lower(login)}
     queryresult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindvars)
     result = [dict(i) for i in queryresult]
+    if not result:
+        return json.dumps([{'login': 'user does not exist', 'avatar': 'assets/img/default-avatar.png', 'followers': "-",
+                            'following': "-", 'contributed': "-", 'pullrequests': "-"}])
     print(result)
     return json.dumps(result)
 
@@ -20,7 +22,7 @@ def avatar():
 def user_commit():
     aql = """
     FOR Commit IN Commit
-    FILTER Commit.author == @name
+    FILTER LOWER(Commit.author) == @name
     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
     COLLECT
@@ -35,13 +37,14 @@ def user_commit():
     startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
+            range(delta.days + 1)]
     lst = []
+
     def recur(x):
         day = {}
         for y in result:
@@ -52,6 +55,7 @@ def user_commit():
         day['day'] = x
         day['number'] = 0
         return day
+
     for x in days:
         lst.append(recur(x))
     # print(lst)
@@ -69,18 +73,18 @@ def user_language():
     FILTER RepoDev._to == Dev._id
     FILTER Languages._id == LanguagesRepo._from
     FILTER Repo._id == LanguagesRepo._to
-    FILTER Dev.login == @dev
+    FILTER LOWER(Dev.login) == @dev
     COLLECT ageGroup = Languages.name 
     AGGREGATE soma = SUM(LanguagesRepo.size)
     SORT soma DESC
     RETURN {name:ageGroup,size:soma}"""
     dev = request.args.get("name")
-    bindVars = {"dev" : dev}
+    bindVars = {"dev": str.lower(dev)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     soma = sum(item['size'] for item in result)
     for x in result:
-        x['size'] = round((x['size']/soma*100), 2)
+        x['size'] = round((x['size'] / soma * 100), 2)
     print(result)
     return json.dumps(result[:12])
 
@@ -88,15 +92,14 @@ def user_language():
 def user_contributed_repo():
     aql = """
     FOR Commit IN Commit
-    FILTER Commit.author == @name
+    FILTER LOWER(Commit.author) == @name
     FILTER Commit.committedDate >= @startDate
     FILTER Commit.committedDate <= @endDate
     RETURN DISTINCT {member:Commit.repoName}"""
     name = request.args.get("name")
     startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    bindVars = {"name": name, "startDate": str(startDate), "endDate": str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
@@ -107,7 +110,7 @@ def user_issue():
     global value
     aql = """
     FOR Issue IN Issue
-    FILTER Issue.closed_login == @name
+    FILTER LOWER(Issue.closed_login) == @name
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
     COLLECT 
@@ -122,12 +125,13 @@ def user_issue():
     startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
+            range(delta.days + 1)]
     lst = []
+
     def recur(x):
         global value
         day = {}
@@ -140,13 +144,14 @@ def user_issue():
         day['day'] = x
         day['number'] = 0 + value
         return day
+
     value = 0
     for x in days:
         lst.append(recur(x))
 
         aql = """
     FOR Issue IN Issue
-    FILTER Issue.created_login == @name
+    FILTER LOWER(Issue.created_login) == @name
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
     FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
     COLLECT 
@@ -157,12 +162,13 @@ def user_issue():
       day: day,
       number: number
     }"""
-    bindVars = {"name" : name,"startDate": str(startDate),"endDate":str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in range(delta.days + 1)]
+    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
+            range(delta.days + 1)]
     lst2 = []
+
     def recur(x):
         global value
         day = {}
@@ -175,19 +181,19 @@ def user_issue():
         day['day'] = x
         day['number'] = 0 + value
         return day
+
     value = 0
     for x in days:
         lst2.append(recur(x))
-    lista = []
-    lista.append(lst)
-    lista.append(lst2)
-    print(lista)
-    return json.dumps(lista)
+    response = [lst, lst2]
+    print(response)
+    return json.dumps(response)
+
 
 def user_stats():
     aql = """
         FOR Commit IN Commit
-        FILTER Commit.author == @name
+        FILTER LOWER(Commit.author) == @name
         FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
         FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
         COLLECT day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
@@ -197,8 +203,7 @@ def user_stats():
     startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = endDate - startDate
-    bindVars = {"name": name, "startDate": str(startDate), "endDate": str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
@@ -222,14 +227,13 @@ def user_stats():
 
         aql = """
                 FOR Commit IN Commit
-                FILTER Commit.author == @name
+                FILTER LOWER(Commit.author) == @name
                 FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
                 FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
                 COLLECT day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
                 AGGREGATE deletions = SUM(Commit.deletions)
                 RETURN {day:day,number:deletions}"""
-    bindVars = {"name": name, "startDate": str(startDate), "endDate": str(endDate)}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
@@ -250,11 +254,10 @@ def user_stats():
     value = 0
     for x in days:
         lst2.append(recur(x))
-    lista = []
-    lista.append(lst)
-    lista.append(lst2)
-    print(lista)
-    return json.dumps(lista)
+    response = [lst, lst2]
+    print(response)
+    return json.dumps(response)
+
 
 def repo_name():
     aql = """
@@ -262,13 +265,13 @@ def repo_name():
     LIMIT 6
     RETURN {data:Repo.repoName}
     """
-    name = "prefix:"+str(request.args.get("name"))
+    name = "prefix:" + str(request.args.get("name"))
     bindVars = {"name": name}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)
     return json.dumps(result)
+
 
 def user_team():
     aql = """
@@ -277,12 +280,11 @@ def user_team():
     FOR Dev IN Dev
     FILTER TeamsDev._from == Dev._id
     FILTER TeamsDev._to == Teams._id
-    FILTER Dev.login == @name
+    FILTER LOWER(Dev.login) == @name
     RETURN DISTINCT{teams:Teams.teamName}
     """
     name = request.args.get("name")
-    bindVars = {"name": name}
-    # by setting rawResults to True you'll get dictionaries instead of Document objects, useful if you want to result to set of fields for example
+    bindVars = {"name": str.lower(name)}
     queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
     result = [dict(i) for i in queryResult]
     print(result)

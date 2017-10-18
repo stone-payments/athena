@@ -77,11 +77,21 @@
 			<nav class="navbar navbar-default navbar-fixed">
 				<div class="container-fluid">
 					<div class="navbar-header">
-						<a class="navbar-brand"><input type="text" id="name" placeholder="Insert org name"> <input id="e1" name="e1"> <i id="find" class="fa fa-search"></i> </a>
+						<a class="navbar-brand">
+							<!-- <input type="text" id="name" placeholder="Insert org name"> -->
+							<select id="name">
+									<option value="stone-payments">stone-payments</option>
+									<option value="pagarme">pagarme</option>
+									<option value="mundipagg">mundipagg</option>
+									<option value="equals-conc">equals-con</option>
+									<option value="cappta">cappta</option>
+									</select>
+							<input id="org" name="org">
+							<i id="find" class="fa fa-search"></i> </a>
 					</div>
 				</div>
 			</nav>
-			<div class="content">
+			<div class="content" style="display: none">
 				<div class="container-fluid">
 					<div class="row row-eq-height">
 						<div class="col-md-4">
@@ -247,7 +257,7 @@
 <script src="assets/js/jquery.comiseo.daterangepicker.js"></script>
 <script>
 	$(function() {
-		$("#e1").daterangepicker();
+		$("#org").daterangepicker();
 	});
 </script>
 <script src="assets/js/chartsOrg.js"></script>

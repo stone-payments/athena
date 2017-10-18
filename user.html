@@ -77,11 +77,11 @@
 			<nav class="navbar navbar-default navbar-fixed">
 				<div class="container-fluid">
 					<div class="navbar-header">
-						<a class="navbar-brand"><input type="text" id="name" placeholder="Insert devs login"> <input id="e1" name="e1"> <i id="find" class="fa fa-search"></i> </a>
+						<a class="navbar-brand"><input type="text" id="name" placeholder="Insert devs login"> <input id="userRangeDate" name="userRangeDate"> <i id="find" class="fa fa-search"></i> </a>
 					</div>
 				</div>
 			</nav>
-			<div class="content">
+			<div class="content" style="display:none;">
 				<div class="container-fluid">
 					<div class="row row-eq-height">
 						<div class="col-md-4">
@@ -90,11 +90,9 @@
 								</div>
 								<div class="content">
 									<div class="author">
-										<a href="#">
 																	<img id =avatar class="avatar border-gray" src="assets/img/default-avatar.png" alt="..."/>
-																		<h4 class="title" id="username">User<br />
+																		<h4 class="title" id="username"><br />
 																		</h4>
-																	</a>
 									</div>
 									<p class="description text-left"></p>
 									<p id="followers" class="description text-left"> Followers </p>
@@ -108,87 +106,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-8">
-							<div class="card">
-								<div class="header">
-									<h4 class="title">Commits</h4>
-									<p class="category">Commits - User</p>
-								</div>
-								<div class="content">
-									<canvas id="commmit_chart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
-									<div class="footer">
-										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="row row-eq-height">
-						<div class="col-md-4">
-							<div class="card ">
-								<div class="header">
-									<h4 class="title">Teams</h4>
-									<p class="category">Teams</p>
-								</div>
-								<div class="content" style="overflow: auto;max-height:400px;">
-									<div class="table-full-width">
-										<table class="table">
-											<tbody id="user_teams">
-											</tbody>
-										</table>
-									</div>
-									<div class="footer">
-										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-md-8">
-							<div class="card ">
-								<div class="header">
-									<h4 class="title">Additions - Deletions</h4>
-									<p class="category">Issues - User</p>
-								</div>
-								<div class="content">
-									<canvas id="stats_chart" class="ct-chart"></canvas>
-									<div class="footer">
-										<div class="legend">
-										</div>
-										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="row row-eq-height">
-						<div class="col-md-8">
-							<div class="card ">
-								<div class="header">
-									<h4 class="title">Issues</h4>
-									<p class="category">Issues - User</p>
-								</div>
-								<div class="content">
-									<canvas id="issuesChart" class="ct-chart"></canvas>
-									<div class="footer">
-										<div class="legend">
-										</div>
-										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
+
 						<div class="col-md-4">
 							<div class="card ">
 								<div class="header">
@@ -211,6 +129,71 @@
 								</div>
 							</div>
 						</div>
+						<div class="col-md-4">
+							<div class="card ">
+								<div class="header">
+									<h4 class="title">Teams</h4>
+									<p class="category">Teams</p>
+								</div>
+								<div class="content" style="overflow: auto;max-height:400px;">
+									<div class="table-full-width">
+										<table class="table">
+											<tbody id="user_teams">
+											</tbody>
+										</table>
+									</div>
+									<div class="footer">
+										<hr>
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row row-eq-height">
+
+						<div class="col-md-12">
+							<div class="card ">
+								<div class="header">
+									<h4 class="title">Additions - Deletions</h4>
+									<p class="category">Issues - User</p>
+								</div>
+								<div class="content">
+									<canvas id="stats_chart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+									<div class="footer">
+										<div class="legend">
+										</div>
+										<hr>
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row row-eq-height">
+						<div class="col-md-12">
+							<div class="card">
+								<div class="header">
+									<h4 class="title">Commits</h4>
+									<p class="category">Commits - User</p>
+								</div>
+								<div class="content">
+									<canvas id="commmit_chart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+									<div class="footer">
+										<hr>
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
 					</div>
 				</div>
 			</div>
@@ -235,23 +218,12 @@
 <script src="assets/js/light-bootstrap-dashboard.js"></script>
 <!-- Light Bootstrap Table DEMO methods, don't include it in your project! -->
 <script src="assets/js/demo.js"></script>
-<script type="text/javascript">
-	$(document).ready(function() {
-		$.notify({
-			icon: 'pe-7s-gift',
-			message: "Welcome to <b>Athena Dashboard</b> - an openSource Github BI."
-		}, {
-			type: 'info',
-			timer: 4000
-		});
-	});
-</script>
 <script src="assets/js/moment.js"></script>
 <script src="assets/js/jquery-ui.min.js"></script>
 <script src="assets/js/jquery.comiseo.daterangepicker.js"></script>
 <script>
 	$(function() {
-		$("#e1").daterangepicker();
+		$("#userRangeDate").daterangepicker();
 	});
 </script>
 <script src="assets/js/chartsUser.js"></script>

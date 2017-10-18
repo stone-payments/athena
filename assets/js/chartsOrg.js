@@ -18,11 +18,12 @@ $(function() {
     }
   });
   $("#find").click(function() {
+      $(".content").show();
     name = $("#name").val();
     console.log(name);
-    if ($("#e1").val()) {
-      startDay = JSON.parse($("#e1").val()).start;
-      lastDay = JSON.parse($("#e1").val()).end;
+    if ($("#org").val()) {
+      startDay = JSON.parse($("#org").val()).start;
+      lastDay = JSON.parse($("#org").val()).end;
     }
     $.ajax({
       url: 'http://127.0.0.1:5000/LanguagesOrg?name=' + name,
@@ -78,6 +79,9 @@ $(function() {
       },
       error: function(error) {
         console.log(error);
+        if (languages != null) {
+          languages.destroy();
+        }
       }
     });
     $.ajax({
@@ -155,6 +159,9 @@ $(function() {
       },
       error: function(error) {
         console.log(error);
+        if (myChart != null) {
+          myChart.destroy();
+        }
       }
     });
     $.ajax({
@@ -182,6 +189,7 @@ $(function() {
       },
       error: function(error) {
         console.log(error);
+        $("#members").empty();
       }
     });
     $.ajax({
@@ -214,6 +222,9 @@ $(function() {
       },
       error: function(error) {
         console.log(error);
+        if (openSourceChart != null) {
+          openSourceChart.destroy();
+        }
       }
     });
     $.ajax({
@@ -246,6 +257,9 @@ $(function() {
       },
       error: function(error) {
         console.log(error);
+        if (readmeChart != null) {
+          readmeChart.destroy();
+        }
       }
     });
     $.ajax({
@@ -300,6 +314,9 @@ $(function() {
       },
       error: function(error) {
         console.log(error);
+        if (LicenseType != null) {
+          LicenseType.destroy();
+        }
       }
     });
     $.ajax({

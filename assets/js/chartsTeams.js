@@ -20,17 +20,63 @@ $(function() {
   $("#find").click(function() {
     name = $("#name").val();
     orgSelector = $("#orgSelector").val();
-    console.log(orgSelector);
-    console.log(name);
-    if ($("#e1").val()) {
-      startDay = JSON.parse($("#e1").val()).start;
-      lastDay = JSON.parse($("#e1").val()).end;
+    if ($("#teamsRangeDate").val()) {
+      startDay = JSON.parse($("#teamsRangeDate").val()).start;
+      lastDay = JSON.parse($("#teamsRangeDate").val()).end;
     }
+    $.ajax({
+      url: 'http://127.0.0.1:5000/OpenSourceTeam?org=' + orgSelector + '&team=' + name,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        let openSource = Number(returnedData[0]['openSource']);
+        let notOpenSource = Number(returnedData[0]['notOpenSource']);
+        if (openSourceChart != null) {
+          openSourceChart.destroy();
+        }
+        if (openSource == 404){
+          $(".content").hide();
+          $(document).ready(function() {
+            $.notify({
+              icon: 'pe-7s-close-circle',
+              message: "User does not exist"
+            }, {
+              type: 'danger',
+              timer: 1000,
+              placement: {
+            		from: 'top',
+            		align: 'right'
+            	},
+            });
+          });
+        }
+        else {
+          $(".content").show();
+        }
+        openSourceChart = new Chart(document.getElementById("openSourceChart"), {
+          type: 'doughnut',
+          data: {
+            labels: ['openSource', 'Private'],
+            datasets: [{
+              label: "Languages (%)",
+              backgroundColor: ['#0B3B1F', '#C52233'],
+              borderWidth: 1,
+              data: [openSource, notOpenSource]
+            }]
+          },
+          options: {
+            responsive: true
+          }
+        });
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
     $.ajax({
       url: 'http://127.0.0.1:5000/LanguagesOrgTeam?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
         let labels = returnedData.map(function(num) {
           return num.name;
@@ -38,7 +84,6 @@ $(function() {
         let dataSize = returnedData.map(function(num) {
           return num.size;
         });
-        console.log(dataSize);
         if (languages != null) {
           languages.destroy();
         }
@@ -86,9 +131,7 @@ $(function() {
       url: 'http://127.0.0.1:5000/CommitsTeam?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
-        console.log(response);
         let labelsCommit = returnedData.map(function(num) {
           return num.day;
         });
@@ -161,42 +204,9 @@ $(function() {
       }
     });
     $.ajax({
-      url: 'http://127.0.0.1:5000/OpenSourceTeam?org=' + orgSelector + '&team=' + name,
-      type: 'GET',
-      success: function(response) {
-        console.log(response);
-        returnedData = JSON.parse(response);
-        let openSource = Number(returnedData[0]['openSource']);
-        let notOpenSource = Number(returnedData[0]['notOpenSource']);
-        console.log(notOpenSource);
-        if (openSourceChart != null) {
-          openSourceChart.destroy();
-        }
-        openSourceChart = new Chart(document.getElementById("openSourceChart"), {
-          type: 'doughnut',
-          data: {
-            labels: ['openSource', 'Private'],
-            datasets: [{
-              label: "Languages (%)",
-              backgroundColor: ['#0B3B1F', '#C52233'],
-              borderWidth: 1,
-              data: [openSource, notOpenSource]
-            }]
-          },
-          options: {
-            responsive: true
-          }
-        });
-      },
-      error: function(error) {
-        console.log(error);
-      }
-    });
-    $.ajax({
       url: 'http://127.0.0.1:5000/readmeOrgTeam?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
         let ok = Number(returnedData[0]['ok']);
         let poor = Number(returnedData[0]['poor']);
@@ -228,7 +238,6 @@ $(function() {
       url: 'http://127.0.0.1:5000/LicenseTypeTeam?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
         let labelsLicense = returnedData.map(function(num) {
           return num.day;
@@ -244,7 +253,7 @@ $(function() {
           data: {
             labels: labelsLicense,
             datasets: [{
-              label: "Languages (%)",
+              label: "License (%)",
               backgroundColor: ['rgb(168,169,173)', '#0B3B1F', '#1DAC4B', '#380713', '#74121D', '#C52233', '#595708', '#657212', '#ABC421'],
               borderWidth: 1,
               data: dataLicense
@@ -283,7 +292,6 @@ $(function() {
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
-        console.log(returnedData[0]);
         let labelsIssues1 = returnedData[0].map(function(num) {
           return num.day;
         });
@@ -379,7 +387,6 @@ $(function() {
       url: 'http://127.0.0.1:5000/RepoMembersTeam?org=' + 'stone-payments' + '&team=' + name,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
         $("#members").empty();
         returnedData.map(function(num) {
@@ -399,5 +406,6 @@ $(function() {
         console.log(error);
       }
     });
+    $(".content").show();
   });
 });

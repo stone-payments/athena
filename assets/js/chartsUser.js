@@ -2,7 +2,6 @@ $(function() {
   let commmit_chart = null;
   let stats_chart = null;
   let avatar = null;
-  let issuesChart = null;
   let startDay = moment().startOf('month').format('YYYY-MM-DD');
   let lastDay = moment().format("YYYY-MM-") + moment().daysInMonth();
   colors = ['#0e6251', '#117864', '#148f77', '#17a589', '#1abc9c', '#48c9b0', '#76d7c4', '#a3e4d7', '#d1f2eb',
@@ -17,9 +16,9 @@ $(function() {
   });
   $("#find").click(function() {
     name = $("#name").val();
-    if ($("#e1").val()) {
-      startDay = JSON.parse($("#e1").val()).start;
-      lastDay = JSON.parse($("#e1").val()).end;
+    if ($("#userRangeDate").val()) {
+      startDay = JSON.parse($("#userRangeDate").val()).start;
+      lastDay = JSON.parse($("#userRangeDate").val()).end;
     }
     $.ajax({
       url: 'http://127.0.0.1:5000/get_avatar?login=' + name,
@@ -27,18 +26,34 @@ $(function() {
       success: function(response) {
         returnedData = JSON.parse(response);
         let url = String(returnedData[0]['avatar']);
-        let login = String(returnedData[0]['login']);
+        let username = String(returnedData[0]['login']);
         let following = String(returnedData[0]['following']);
         let followers = String(returnedData[0]['followers']);
         let pullrequests = String(returnedData[0]['pullrequests']);
         let contributed = String(returnedData[0]['contributed']);
         $('#avatar').attr("src", url);
-        $('#login').text(login);
+        $('#username').text(username);
         $('#contributed').text(contributed + " Contributed Repositories");
         $('#pullrequests').text(pullrequests + " Pull Requests");
         $('#followers').text(followers + " Followers");
         $('#following').text(following + " Following");
+        if (following == '-'){
+          $(".content").hide();
+          $(document).ready(function() {
+        		$.notify({
+        			icon: 'pe-7s-close-circle',
+        			message: "User does not exist"
+        		}, {
+        			type: 'danger',
+        			timer: 4000
+        		});
+        	});
+        }
+        else {
+          $(".content").show();
+        }
       },
+
       error: function(error) {
         console.log(error);
       }
@@ -112,103 +127,6 @@ $(function() {
               }]
             }
           },
-        });
-      },
-      error: function(error) {
-        console.log(error);
-      }
-    });
-    $.ajax({
-      url: 'http://127.0.0.1:5000/get_user_issue?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
-      type: 'GET',
-      success: function(response) {
-        returnedData = JSON.parse(response);
-        let labelsIssues1 = returnedData[0].map(function(num) {
-          return num.day;
-        });
-        let dataIssues1 = returnedData[0].map(function(num) {
-          return num.number;
-        });
-        let dataIssues2 = returnedData[1].map(function(num) {
-          return num.number;
-        });
-        let ctx = document.getElementById("issuesChart").getContext('2d');
-        if (issuesChart != null) {
-          issuesChart.destroy();
-        }
-        issuesChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labelsIssues1,
-            datasets: [{
-                label: 'num of Closed Issues',
-                data: dataIssues1,
-                backgroundColor: [
-                  'rgba(54, 162, 235, 0.2)',
-                  'rgba(255, 206, 86, 0.2)',
-                  'rgba(75, 192, 192, 0.2)',
-                  'rgba(153, 102, 255, 0.2)',
-                  'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                  'rgba(54, 162, 235, 1)',
-                  'rgba(255, 206, 86, 1)',
-                  'rgba(75, 192, 192, 1)',
-                  'rgba(153, 102, 255, 1)',
-                  'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1,
-                lineTension: 0
-              },
-              {
-                label: 'num of Created Issues',
-                data: dataIssues2,
-                backgroundColor: [
-                  'rgba(255, 99, 132, 0.2)',
-                  'rgba(54, 162, 235, 0.2)',
-                  'rgba(255, 206, 86, 0.2)',
-                  'rgba(75, 192, 192, 0.2)',
-                  'rgba(153, 102, 255, 0.2)',
-                  'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                  'rgba(255,99,132,1)',
-                  'rgba(54, 162, 235, 1)',
-                  'rgba(255, 206, 86, 1)',
-                  'rgba(75, 192, 192, 1)',
-                  'rgba(153, 102, 255, 1)',
-                  'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1,
-                lineTension: 0
-              }
-            ]
-          },
-          options: {
-            tooltips: {
-              mode: 'index',
-              intersect: false
-            },
-            scales: {
-              xAxes: [{
-                ticks: {
-                  autoSkip: labelsIssues1.length > 31 ? true : false,
-                  responsive: true
-                }
-              }],
-              yAxes: [{
-                ticks: {
-                  suggestedMax: 10,
-                  beginAtZero: true,
-                  callback: function(value, index, values) {
-                    if (Math.floor(value) === value) {
-                      return value;
-                    }
-                  }
-                }
-              }]
-            },
-          }
         });
       },
       error: function(error) {
@@ -358,5 +276,6 @@ $(function() {
         console.log(error);
       }
     });
+      $(".content").show();
   });
 });
