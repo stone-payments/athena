@@ -1,7 +1,6 @@
 from flask import request
 from api import *
 
-
 def avatar():
     aql = """
     FOR Dev IN Dev
@@ -34,14 +33,14 @@ def user_commit():
       number: number
     }"""
     name = request.args.get("name")
-    startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    delta = endDate - startDate
-    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
+    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    delta = end_date - start_date
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
     print(result)
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
+    days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
             range(delta.days + 1)]
     lst = []
 
@@ -79,9 +78,9 @@ def user_language():
     SORT soma DESC
     RETURN {name:ageGroup,size:soma}"""
     dev = request.args.get("name")
-    bindVars = {"dev": str.lower(dev)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
+    bind_vars = {"dev": str.lower(dev)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
     soma = sum(item['size'] for item in result)
     for x in result:
         x['size'] = round((x['size'] / soma * 100), 2)
@@ -97,11 +96,11 @@ def user_contributed_repo():
     FILTER Commit.committedDate <= @endDate
     RETURN DISTINCT {member:Commit.repoName}"""
     name = request.args.get("name")
-    startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
+    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
     print(result)
     return json.dumps(result)
 
@@ -122,13 +121,13 @@ def user_issue():
       number: number
     }"""
     name = request.args.get("name")
-    startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    delta = endDate - startDate
-    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
+    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    delta = end_date - start_date
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
+    days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
             range(delta.days + 1)]
     lst = []
 
@@ -162,10 +161,10 @@ def user_issue():
       day: day,
       number: number
     }"""
-    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
+    days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
             range(delta.days + 1)]
     lst2 = []
 
@@ -200,13 +199,13 @@ def user_stats():
         AGGREGATE additions = SUM(Commit.additions)
         RETURN {day:day,number:additions}"""
     name = request.args.get("name")
-    startDate = datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    endDate = datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    delta = endDate - startDate
-    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
+    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    delta = end_date - start_date
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
+    days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
             range(delta.days + 1)]
     lst = []
 
@@ -233,10 +232,10 @@ def user_stats():
                 COLLECT day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
                 AGGREGATE deletions = SUM(Commit.deletions)
                 RETURN {day:day,number:deletions}"""
-    bindVars = {"name": str.lower(name), "startDate": str(startDate), "endDate": str(endDate)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
-    days = [datetime.strptime(str(startDate + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
+    days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
             range(delta.days + 1)]
     lst2 = []
 
@@ -259,20 +258,6 @@ def user_stats():
     return json.dumps(response)
 
 
-def repo_name():
-    aql = """
-    FOR Repo IN FULLTEXT(Repo, "repoName",@name)
-    LIMIT 6
-    RETURN {data:Repo.repoName}
-    """
-    name = "prefix:" + str(request.args.get("name"))
-    bindVars = {"name": name}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
-    print(result)
-    return json.dumps(result)
-
-
 def user_team():
     aql = """
     FOR Teams IN Teams
@@ -284,8 +269,22 @@ def user_team():
     RETURN DISTINCT{teams:Teams.teamName}
     """
     name = request.args.get("name")
-    bindVars = {"name": str.lower(name)}
-    queryResult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindVars)
-    result = [dict(i) for i in queryResult]
+    bind_vars = {"name": str.lower(name)}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
+    print(result)
+    return json.dumps(result)
+
+
+def user_login():
+    aql = """
+    FOR Dev IN FULLTEXT(Dev, "login",@name)
+    LIMIT 6
+    RETURN {data:Dev.login}
+    """
+    name = "prefix:" + str(request.args.get("name"))
+    bind_vars = {"name": name}
+    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    result = [dict(i) for i in query_result]
     print(result)
     return json.dumps(result)

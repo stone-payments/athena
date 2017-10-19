@@ -7,11 +7,30 @@ $(function() {
   let LicenseType = null;
   let startDay = moment().startOf('month').format('YYYY-MM-DD');
   let lastDay = moment().format("YYYY-MM-") + moment().daysInMonth();
+  var orgSelector = "stone-payments";
+   $('#orgSelector').on('change', function() {
+     orgSelector = $('#orgSelector').val();
+  }),
   colors = ['#0e6251', '#117864', '#148f77', '#17a589', '#1abc9c', '#48c9b0', '#76d7c4', '#a3e4d7', '#d1f2eb',
     '#fef5e7', '#fdebd0', '#fad7a0', '#f8c471', '#f5b041', '#f39c12', '#d68910', '#b9770e', '#9c640c', '#7e5109'
   ]
   colorStone = ['#0B3B1F', '#1DAC4B', '#380713', '#74121D', '#C52233', '#595708', '#657212', '#ABC421']
 
+  let xhr;
+  $('#name').autoComplete({
+    minChars: 1,
+    source: function(term, response) {
+      try {
+        xhr.abort();
+      } catch (e) {}
+      xhr = $.getJSON('http://127.0.0.1:5000/get_team_name?name=' + term+'&org='+ orgSelector, function(result) {
+        let returnedData = result.map(function(num) {
+          return num.data;
+        });
+        response(returnedData);
+      });
+    }
+  });
   $('#name').keypress(function(e) {
     if (e.which == 13) { //Enter key pressed
       $('#find').click(); //Trigger search button click event
@@ -58,7 +77,7 @@ $(function() {
           data: {
             labels: ['openSource', 'Private'],
             datasets: [{
-              label: "Languages (%)",
+              label: "",
               backgroundColor: ['#0B3B1F', '#C52233'],
               borderWidth: 1,
               data: [openSource, notOpenSource]
@@ -67,136 +86,6 @@ $(function() {
           options: {
             responsive: true
           }
-        });
-      },
-      error: function(error) {
-        console.log(error);
-      }
-    });
-    $.ajax({
-      url: 'http://127.0.0.1:5000/LanguagesOrgTeam?org=' + orgSelector + '&team=' + name,
-      type: 'GET',
-      success: function(response) {
-        returnedData = JSON.parse(response);
-        let labels = returnedData.map(function(num) {
-          return num.name;
-        });
-        let dataSize = returnedData.map(function(num) {
-          return num.size;
-        });
-        if (languages != null) {
-          languages.destroy();
-        }
-        languages = new Chart(document.getElementById("languages"), {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: "Languages (%)",
-              backgroundColor: colors,
-              borderWidth: 1,
-              data: dataSize
-            }]
-          },
-          options: {
-            tooltips: {
-              mode: 'index',
-              intersect: false
-            },
-            scales: {
-              yAxes: [{
-                ticks: {
-                  suggestedMax: 100,
-                  beginAtZero: true,
-                  autoSkip: false,
-                  maxTicksLimit: 100,
-                  responsive: true
-                }
-              }],
-              xAxes: [{
-                ticks: {
-                  autoSkip: false,
-                  responsive: true
-                }
-              }]
-            }
-          }
-        });
-      },
-      error: function(error) {
-        console.log(error);
-      }
-    });
-    $.ajax({
-      url: 'http://127.0.0.1:5000/CommitsTeam?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
-      type: 'GET',
-      success: function(response) {
-        returnedData = JSON.parse(response);
-        let labelsCommit = returnedData.map(function(num) {
-          return num.day;
-        });
-        let dataCommits = returnedData.map(function(num) {
-          return num.number;
-        });
-        let ctx = document.getElementById("myChart").getContext('2d');
-
-        if (myChart != null) {
-          myChart.destroy();
-        }
-        myChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labelsCommit,
-            datasets: [{
-              label: 'num of Commits',
-              data: dataCommits,
-              backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-              ],
-              borderColor: [
-                'rgba(255,99,132,1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-              ],
-              borderWidth: 1,
-              lineTension: 0
-            }]
-          },
-          options: {
-            maintainAspectRatio: true,
-            tooltips: {
-              mode: 'index',
-              intersect: false
-            },
-            scales: {
-              xAxes: [{
-                ticks: {
-                  autoSkip: labelsCommit.length > 31 ? true : false,
-                  responsive: true,
-                }
-              }],
-              yAxes: [{
-                ticks: {
-                  suggestedMax: 10,
-                  responsive: true,
-                  beginAtZero: true,
-                  callback: function(value, index, values) {
-                    if (Math.floor(value) === value) {
-                      return value;
-                    }
-                  }
-                }
-              }]
-            }
-          },
         });
       },
       error: function(error) {
@@ -281,6 +170,82 @@ $(function() {
               }]
             },
           }
+        });
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
+    $.ajax({
+      url: 'http://127.0.0.1:5000/LanguagesOrgTeam?org=' + orgSelector + '&team=' + name,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        let labels = returnedData.map(function(num) {
+          return num.name;
+        });
+        let dataSize = returnedData.map(function(num) {
+          return num.size;
+        });
+        if (languages != null) {
+          languages.destroy();
+        }
+        languages = new Chart(document.getElementById("languages"), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Languages (%)",
+              backgroundColor: colors,
+              borderWidth: 1,
+              data: dataSize
+            }]
+          },
+          options: {
+            tooltips: {
+              mode: 'index',
+              intersect: false
+            },
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true,
+                  autoSkip: false,
+                  maxTicksLimit: 100,
+                  responsive: true
+                }
+              }],
+              xAxes: [{
+                ticks: {
+                  autoSkip: false,
+                  responsive: true
+                }
+              }]
+            }
+          }
+        });
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
+    $.ajax({
+      url: 'http://127.0.0.1:5000/RepoMembersTeam?org=' + 'stone-payments' + '&team=' + name,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        $("#members").empty();
+        returnedData.map(function(num) {
+          memberName = num.member;
+          html = `<tr>
+                        <td style="width:10px;">
+                                <i class="pe-7s-angle-right-circle"></i>
+                        </td>
+                        <td>${memberName}</td>
+                        <td class="td-actions text-right">
+                        </td>
+                    </tr>`
+          $("#members").append(html);
         });
       },
       error: function(error) {
@@ -384,22 +349,75 @@ $(function() {
       }
     });
     $.ajax({
-      url: 'http://127.0.0.1:5000/RepoMembersTeam?org=' + 'stone-payments' + '&team=' + name,
+      url: 'http://127.0.0.1:5000/CommitsTeam?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
-        $("#members").empty();
-        returnedData.map(function(num) {
-          memberName = num.member;
-          html = `<tr>
-                        <td style="width:10px;">
-                                <i class="pe-7s-angle-right-circle"></i>
-                        </td>
-                        <td>${memberName}</td>
-                        <td class="td-actions text-right">
-                        </td>
-                    </tr>`
-          $("#members").append(html);
+        let labelsCommit = returnedData.map(function(num) {
+          return num.day;
+        });
+        let dataCommits = returnedData.map(function(num) {
+          return num.number;
+        });
+        let ctx = document.getElementById("myChart").getContext('2d');
+
+        if (myChart != null) {
+          myChart.destroy();
+        }
+        myChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labelsCommit,
+            datasets: [{
+              label: 'num of Commits',
+              data: dataCommits,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1,
+              lineTension: 0
+            }]
+          },
+          options: {
+            maintainAspectRatio: true,
+            tooltips: {
+              mode: 'index',
+              intersect: false
+            },
+            scales: {
+              xAxes: [{
+                ticks: {
+                  autoSkip: labelsCommit.length > 31 ? true : false,
+                  responsive: true,
+                }
+              }],
+              yAxes: [{
+                ticks: {
+                  suggestedMax: 10,
+                  responsive: true,
+                  beginAtZero: true,
+                  callback: function(value, index, values) {
+                    if (Math.floor(value) === value) {
+                      return value;
+                    }
+                  }
+                }
+              }]
+            }
+          },
         });
       },
       error: function(error) {

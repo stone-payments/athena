@@ -9,6 +9,21 @@ $(function() {
   ]
   colorStone = ['#0B3B1F', '#1DAC4B', '#380713', '#74121D', '#C52233', '#595708', '#657212', '#ABC421']
 
+  let xhr;
+  $('#name').autoComplete({
+    minChars: 1,
+    source: function(term, response) {
+      try {
+        xhr.abort();
+      } catch (e) {}
+      xhr = $.getJSON('http://127.0.0.1:5000/get_user_login?name=' + term, function(result) {
+        let returnedData = result.map(function(num) {
+          return num.data;
+        });
+        response(returnedData);
+      });
+    }
+  });
   $('#name').keypress(function(e) {
     if (e.which == 13) { //Enter key pressed
       $('#find').click(); //Trigger search button click event

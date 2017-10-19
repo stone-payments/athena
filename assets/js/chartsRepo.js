@@ -68,7 +68,6 @@ $(function() {
             scales: {
               yAxes: [{
                 ticks: {
-                  suggestedMax: 100,
                   beginAtZero: true,
                   autoSkip: false,
                   maxTicksLimit: 100,
@@ -235,6 +234,7 @@ $(function() {
         let labelsIssues1 = returnedData[0].map(function(num) {
           return num.day;
         });
+        console.log(labelsIssues1);
         let dataIssues1 = returnedData[0].map(function(num) {
           return num.number;
         });

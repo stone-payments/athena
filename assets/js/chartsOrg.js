@@ -20,7 +20,6 @@ $(function() {
   $("#find").click(function() {
       $(".content").show();
     name = $("#name").val();
-    console.log(name);
     if ($("#org").val()) {
       startDay = JSON.parse($("#org").val()).start;
       lastDay = JSON.parse($("#org").val()).end;
@@ -29,7 +28,6 @@ $(function() {
       url: 'http://127.0.0.1:5000/LanguagesOrg?name=' + name,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
         let labels = returnedData.map(function(num) {
           return num.name;
@@ -37,7 +35,6 @@ $(function() {
         let dataSize = returnedData.map(function(num) {
           return num.size;
         });
-        console.log(dataSize);
         if (languages != null) {
           languages.destroy();
         }
@@ -60,7 +57,7 @@ $(function() {
             scales: {
               yAxes: [{
                 ticks: {
-                  suggestedMax: 100,
+                
                   beginAtZero: true,
                   autoSkip: false,
                   maxTicksLimit: 100,
@@ -88,9 +85,7 @@ $(function() {
       url: 'http://127.0.0.1:5000/CommitsOrg?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
-        console.log(response);
         let labelsCommit = returnedData.map(function(num) {
           return num.day;
         });
@@ -168,7 +163,6 @@ $(function() {
       url: 'http://127.0.0.1:5000/RepoMembers?name=' + name,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
         $("#members").empty();
         returnedData.map(function(num) {
@@ -196,11 +190,9 @@ $(function() {
       url: 'http://127.0.0.1:5000/OpenSource?name=' + name,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
         let openSource = Number(returnedData[0]['openSource']);
         let notOpenSource = Number(returnedData[0]['notOpenSource']);
-        console.log(notOpenSource);
         if (openSourceChart != null) {
           openSourceChart.destroy();
         }
@@ -209,7 +201,7 @@ $(function() {
           data: {
             labels: ['openSource', 'Private'],
             datasets: [{
-              label: "Languages (%)",
+              label: "",
               backgroundColor: ['#0B3B1F', '#C52233'],
               borderWidth: 1,
               data: [openSource, notOpenSource]
@@ -231,7 +223,6 @@ $(function() {
       url: 'http://127.0.0.1:5000/readmeOrg?name=' + name,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
         let ok = Number(returnedData[0]['ok']);
         let poor = Number(returnedData[0]['poor']);
@@ -244,7 +235,7 @@ $(function() {
           data: {
             labels: ['OK', 'Poor', 'None'],
             datasets: [{
-              label: "Languages (%)",
+              label: "",
               backgroundColor: ['#0B3B1F', '#ABC421', '#C52233'],
               borderWidth: 1,
               data: [ok, poor, none]
@@ -266,7 +257,6 @@ $(function() {
       url: 'http://127.0.0.1:5000/LicenseType?name=' + name,
       type: 'GET',
       success: function(response) {
-        console.log(response);
         returnedData = JSON.parse(response);
         let labelsLicense = returnedData.map(function(num) {
           return num.day;
@@ -282,7 +272,7 @@ $(function() {
           data: {
             labels: labelsLicense,
             datasets: [{
-              label: "Languages (%)",
+              label: "",
               backgroundColor: ['rgb(168,169,173)', '#0B3B1F', '#1DAC4B', '#380713', '#74121D', '#C52233', '#595708', '#657212', '#ABC421'],
               borderWidth: 1,
               data: dataLicense
@@ -324,7 +314,6 @@ $(function() {
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
-        console.log(returnedData[0]);
         let labelsIssues1 = returnedData[0].map(function(num) {
           return num.day;
         });
