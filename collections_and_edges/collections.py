@@ -24,10 +24,10 @@ def repo_query(db, org):
             for repo in prox_repositorios:
                 languages_repo = find('language_edges', repo)
                 try:
-                    try:
-                        doc = repo_collection[str(repo["node"]["id"].replace("/", "@"))]
-                    except Exception:
-                        doc = repo_collection.createDocument()
+                    doc = repo_collection[str(repo["node"]["repoId"].replace("/", "@"))]
+                except Exception:
+                    doc = repo_collection.createDocument()
+                try:
                     doc['repoName'] = repo["node"]["name"]
                     doc["description"] = repo["node"]["description"]
                     doc["url"] = repo["node"]["url"]
@@ -43,6 +43,7 @@ def repo_query(db, org):
                     doc["licenseType"] = find('licenseType', repo)
                     doc["id"] = repo["node"]["repoId"].replace("/", "@")
                     doc["org"] = org
+                    doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
                     doc._key = repo["node"]["repoId"].replace("/", "@")
                     doc.save()
                 except Exception as exception:
@@ -53,15 +54,24 @@ def repo_query(db, org):
                         doc = languages_collection.createDocument()
                         doc["name"] = find('languageName', language)
                         doc["id"] = find('languageId', language)
+                        doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
                         doc._key = find('languageId', language).replace("/", "@")
                         doc.save()
                     except Exception as exception:
                         handling_except(exception)
                     try:
+                        doc = languages_repo_collection[(str(find('repoId', repo)) +
+                                                         str(find('languageId', language))).replace("/", "@")]
+                    except Exception:
+                        doc = languages_repo_collection.createEdge()
+                    try:
                         temp = db['Languages'][str(find('languageId', language)).replace("/", "@")]
                         temp2 = db['Repo'][str(find('repoId', repo)).replace("/", "@")]
-                        doc = languages_repo_collection.createEdge(
-                            {"size": round(((find('languageSize', language) / find('totalSize', repo)) * 100), 2)})
+                        doc["size"] = round(((find('languageSize', language) / find('totalSize', repo)) * 100), 2)
+                        # doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                        # doc = languages_repo_collection.createEdge(
+                        #     {"size": round(((find('languageSize', language) / find('totalSize', repo)) * 100), 2),
+                        #      "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))})
                         doc._key = (str(find('repoId', repo)) + str(find('languageId', language))).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
@@ -100,12 +110,13 @@ def dev(db, org, query):
                     doc["avatarUrl"] = dev_slice["node"]["avatarUrl"]
                     doc["id"] = dev_slice["node"]["id"].replace("/", "@")
                     doc["org"] = org
+                    doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
                     doc._key = dev_slice["node"]["id"].replace("/", "@")
                     doc.save()
                 except Exception as exception:
                     handling_except(exception)
-        except Exception:
-            cursor = None
+        except Exception as exception:
+            handling_except(exception)
 
 
 # TEAMS ###############################
@@ -144,15 +155,24 @@ def teams(db, org):
                     doc["repoCount"] = find('repoCount', team)
                     doc["id"] = team["node"]["id"].replace("/", "@")
                     doc["org"] = org
+                    doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
                     doc._key = team["node"]["id"].replace("/", "@")
                     doc.save()
                 except Exception as exception:
                     handling_except(exception)
                 for team_dev_content in team_dev_contents:
                     try:
+                        doc = teams_dev_collection[(str(team["node"]["id"]) +
+                                                    str(find('memberId', team_dev_content))).replace("/", "@")]
+                    except Exception:
+                        doc = teams_dev_collection.createEdge()
+                    try:
                         temp = db['Dev'][str(find('memberId', team_dev_content)).replace("/", "@")]
                         temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
-                        doc = teams_dev_collection.createEdge()
+                        doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                        # doc = teams_dev_collection.createEdge(
+                        #     {"db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))}
+                        # )
                         doc._key = (str(team["node"]["id"]) + str(find('memberId', team_dev_content))).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
@@ -160,16 +180,24 @@ def teams(db, org):
                         handling_except(exception)
                 for team_repo_content in team_repo_contents:
                     try:
+                        doc = teams_repo_collection[(str(team["node"]["id"]) +
+                                                     str(find('repoId', team_repo_content))).replace("/", "@")]
+                    except Exception:
+                        doc = teams_repo_collection.createEdge()
+                    try:
                         temp = db['Repo'][str(find('repoId', team_repo_content)).replace("/", "@")]
                         temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
-                        doc = teams_repo_collection.createEdge()
+                        doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                        # doc = teams_repo_collection.createEdge(
+                        #     {"db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))}
+                        # )
                         doc._key = (str(team["node"]["id"]) + str(find('repoId', team_repo_content))).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
                     except Exception as exception:
                         handling_except(exception)
-        except Exception:
-            cursor = None
+        except Exception as exception:
+            handling_except(exception)
 
 
 # LANGUAGES ###############################
@@ -196,27 +224,52 @@ def languages(db, org):
                     prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repos, org=org)
                     limit_validation(rate_limit=find('rateLimit', prox))
-                    print(prox)
+                    # print(prox)
                     cursor = find('endCursor', prox)
                     prox_node = find('languages', prox)
                     edges = find('edges', prox_node)
                     for node in edges:
                         try:
+                            doc = languages_collection[str(find('id', node).replace("/", "@"))]
+                        except Exception:
                             doc = languages_collection.createDocument()
+                        try:
                             doc["name"] = find('name', node)
                             doc["id"] = find('id', node)
+                            doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
                             doc._key = find('id', node).replace("/", "@")
                             doc.save()
                         except Exception as exception:
                             handling_except(exception)
                         try:
-                            temp = db['Languages'][str(node["node"]["id"]).replace("/", "@")]
+                            doc = languages_repo_collection[(str(find('id', node).replace("/", "@")) +
+                                                             str(find('repositoryId', prox))).replace("/", "@")]
+                            # doc['size'] = round(((find('size', prox) / find('totalSize', prox)) * 100), 2)
+                            # doc['db_last_updated'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                            # temp = db['Languages'][str(find('id', node).replace("/", "@"))]
+                            # temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
+                            # doc._key = (str(find('id', node).replace("/", "@")) +
+                            #             str(find('repositoryId', prox))).replace("/", "@")
+                            # doc.links(temp, temp2)
+                            # doc.save()
+                        except Exception:
+                            doc = languages_repo_collection.createEdge()
+                            # temp = db['Languages'][str(find('id', node).replace("/", "@"))]
+                            # temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
+                            # doc._key = (str(find('id', node).replace("/", "@")) +
+                            #             str(find('repositoryId', prox))).replace("/", "@")
+                            # doc.links(temp, temp2)
+                            # doc.save()
+                        try:
+                            doc['size'] = round(((find('size', prox) / find('totalSize', prox)) * 100), 2)
+                            doc['db_last_updated'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                            temp = db['Languages'][str(find('id', node).replace("/", "@"))]
                             temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
-                            doc = languages_repo_collection.createEdge(
-                                {"size": round(((node['size'] / find('totalSize', prox)) * 100), 2)})
-                            doc._key = (str(node["node"]["id"]) + str(find('repositoryId', prox))).replace("/", "@")
+                            doc._key = (str(find('id', node).replace("/", "@")) +
+                                        str(find('repositoryId', prox))).replace("/", "@")
                             doc.links(temp, temp2)
                             doc.save()
+                            print("FOI")
                         except Exception as exception:
                             handling_except(exception)
                 except Exception:
@@ -229,6 +282,7 @@ def languages(db, org):
         repositories_queue.put(repository)
     [t.start() for t in workers]
     [t.join() for t in workers]
+
 
 # COMMITS ###############################
 
@@ -307,6 +361,7 @@ def commit_collector(db, org):
                 doc["devId"] = c["devId"]
                 doc["GitHubId"] = c["commitId"]
                 doc["org"] = c["org"]
+                doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
                 doc._key = c["commitId"].replace("/", "@")
                 doc.save()
             except Exception as exception:
@@ -525,6 +580,7 @@ def fork_collector(db, org):
                 doc["login"] = c["login"]
                 doc["forkId"] = c["forkId"]
                 doc["org"] = c["org"]
+                doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
                 doc._key = c["forkId"].replace("/", "@")
                 doc.save()
             except Exception as exception:
@@ -532,7 +588,9 @@ def fork_collector(db, org):
             try:
                 temp = db['Fork'][str(c["forkId"])]
                 temp2 = db['Dev'][str(c["devId"])]
-                commit_doc = dev_fork_collection.createEdge()
+                commit_doc = dev_fork_collection.createEdge(
+                    {"db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))}
+                )
                 commit_doc["_key"] = (str(c["forkId"]) + str(c["devId"])).replace("/", "@")
                 commit_doc.links(temp2, temp)
                 commit_doc.save()
@@ -541,7 +599,9 @@ def fork_collector(db, org):
             try:
                 temp = db['Fork'][str(c["forkId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
-                repo_doc = repo_fork_collection.createEdge()
+                repo_doc = repo_fork_collection.createEdge(
+                    {"db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))}
+                )
                 repo_doc["_key"] = (str(c["forkId"]) + str(c["repositoryId"])).replace("/", "@")
                 repo_doc.links(temp2, temp)
                 repo_doc.save()
@@ -639,6 +699,7 @@ def issue(db, org):
                 doc["label"] = c["label"]
                 doc["title"] = c["title"]
                 doc["org"] = c["org"]
+                doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
                 doc._key = c["issueId"].replace("/", "@")
                 doc.save()
             except Exception as exception:
@@ -646,7 +707,9 @@ def issue(db, org):
             try:
                 temp = db['Issue'][str(c["issueId"])]
                 temp2 = db['Repo'][str(c["repositoryId"])]
-                repo_doc = repo_issue_collection.createEdge()
+                repo_doc = repo_issue_collection.createEdge(
+                    {"db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))}
+                )
                 repo_doc["_key"] = (str(c["issueId"]) + str(c["repositoryId"])).replace("/", "@")
                 repo_doc.links(temp2, temp)
                 repo_doc.save()

@@ -26,9 +26,17 @@ def teams_dev(db, org):
                 teams = prox_node["members"]["edges"]
                 for team in teams:
                     try:
+                        doc = teams_dev_collection[(str(team["node"]["id"]) +
+                                                    str(prox_node["id"])).replace("/", "@")]
+                    except Exception:
+                        doc = teams_dev_collection.createEdge()
+                    try:
                         temp = db['Dev'][str(team["node"]["id"]).replace("/", "@")]
                         temp2 = db['Teams'][str(prox_node["id"]).replace("/", "@")]
-                        doc = teams_dev_collection.createEdge()
+                        doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                        # doc = teams_dev_collection.createEdge(
+                        #     {"db_last_updated": datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
+                        # )
                         doc._key = (str(team["node"]["id"]) + str(prox_node["id"])).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
@@ -63,9 +71,17 @@ def teams_repo(db, org):
                 teams = prox_node["repositories"]["edges"]
                 for team in teams:
                     try:
+                        doc = teams_repo_collection[(str(team["node"]["id"]) +
+                                                     str(prox_node["id"])).replace("/", "@")]
+                    except Exception:
+                        doc = teams_repo_collection.createEdge()
+                    try:
                         temp = db['Repo'][str(team["node"]["id"]).replace("/", "@")]
                         temp2 = db['Teams'][str(prox_node["id"]).replace("/", "@")]
-                        doc = teams_repo_collection.createEdge()
+                        doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                        # doc = teams_repo_collection.createEdge(
+                        #     {"db_last_updated": datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
+                        # )
                         doc._key = (str(team["node"]["id"]) + str(prox_node["id"])).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()

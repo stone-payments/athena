@@ -1,6 +1,6 @@
 import datetime
 
-token = ""
+token = "896a853e110a21a6e25cbbcf1ebd2e2ce1139a8e"
 db_name = "athena_teste"
 # db_url = "http://10.152.20.89:8529"
 db_url = "http://localhost:8529"
@@ -35,4 +35,4 @@ hash_indexes = [["Dev", "devName"], ["Dev", "login"], ["Teams", "teamName"],
 hash_indexes_unique = [["Languages", "name"]]
 skip_list_indexes = [["Issue", "closeAt"], ["Issue", "createdAt"], ["Commit", "committedDate"], ["Fork", "createdAt"]]
 full_text_indexes = [["Repo", "repoName"], ["Repo", "org"], ["Teams", "teamName"], ["Teams", "org"], ["Issue", "org"],
-                     ["Commit", "org"], ["Fork", "org"]]
+                     ["Commit", "org"], ["Fork", "org"], ["Dev", "login"]]

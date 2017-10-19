@@ -18,7 +18,6 @@ def job():
         teams_dev(db, org)
         teams_repo(db, org)
         readme(db, org)
-        languages(db, org)
         commit_collector(db, org)
         stats_collector(db, org)
         fork_collector(db, org)

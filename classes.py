@@ -11,6 +11,7 @@ class TeamsDev(Edges):
         'allow_foreign_fields': False
     }
     _fields = dict(
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -22,6 +23,7 @@ class TeamsRepo(Edges):
         'allow_foreign_fields': False
     }
     _fields = dict(
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -33,6 +35,7 @@ class DevCommit(Edges):
         'allow_foreign_fields': False
     }
     _fields = dict(
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -44,6 +47,7 @@ class RepoCommit(Edges):
         'allow_foreign_fields': False
     }
     _fields = dict(
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -55,6 +59,7 @@ class RepoFork(Edges):
         'allow_foreign_fields': False
     }
     _fields = dict(
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -66,6 +71,7 @@ class DevFork(Edges):
         'allow_foreign_fields': False
     }
     _fields = dict(
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -77,18 +83,20 @@ class RepoIssue(Edges):
         'allow_foreign_fields': False
     }
     _fields = dict(
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
 class LanguagesRepo(Edges):
     """
-    LANGUAGES_DEV
+    LANGUAGES_REPO
     """
     _validation = {
         'allow_foreign_fields': False
     }
     _fields = dict(
         size=Field(validators=[val.NotNull(), IntValidator()]),
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -100,6 +108,7 @@ class RepoDev(Edges):
         'allow_foreign_fields': False
     }
     _fields = dict(
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -112,7 +121,8 @@ class Languages(Collection):
     }
     _fields = dict(
         name=Field(validators=[val.NotNull(), StringValidator()]),
-        id=Field(validators=[val.NotNull(), StringValidator()])
+        id=Field(validators=[val.NotNull(), StringValidator()]),
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -131,7 +141,8 @@ class Teams(Collection):
         membersCount=Field(validators=[IntValidator()]),
         repoCount=Field(validators=[IntValidator()]),
         id=Field(validators=[val.NotNull(), StringValidator()]),
-        org=Field(validators=[val.NotNull(), StringValidator()])
+        org=Field(validators=[val.NotNull(), StringValidator()]),
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -158,6 +169,7 @@ class Commit(Collection):
         additions=Field(validators=[val.NotNull(), IntValidator()]),
         deletions=Field(validators=[val.NotNull(), IntValidator()]),
         numFiles=Field(validators=[val.NotNull(), IntValidator()]),
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -178,6 +190,7 @@ class Dev(Collection):
         pullRequests=Field(IntValidator()),
         id=Field(validators=[val.NotNull(), StringValidator()]),
         org=Field(validators=[val.NotNull(), StringValidator()]),
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -204,7 +217,8 @@ class Repo(Collection):
         licenseType=Field(validators=[StringValidator()]),
         id=Field(validators=[val.NotNull()]),
         org=Field(validators=[val.NotNull()]),
-        readme=Field(validators=[StringValidator()])
+        readme=Field(validators=[StringValidator()]),
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -222,7 +236,8 @@ class Fork(Collection):
         devId=Field(validators=[val.NotNull(), StringValidator()]),
         login=Field(validators=[StringValidator()]),
         forkId=Field(validators=[val.NotNull(), StringValidator()]),
-        org=Field(validators=[val.NotNull(), StringValidator()])
+        org=Field(validators=[val.NotNull(), StringValidator()]),
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
 
 
@@ -243,5 +258,6 @@ class Issue(Collection):
         closed=Field(validators=[BoolValidator()]),
         label=Field(validators=[StringValidator()]),
         title=Field(validators=[StringValidator()]),
-        org=Field(validators=[val.NotNull(), StringValidator()])
+        org=Field(validators=[val.NotNull(), StringValidator()]),
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
     )
