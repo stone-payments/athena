@@ -7,6 +7,7 @@
 	<title>Athena</title>
 	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
 	<meta name="viewport" content="width=device-width" />
+	<link rel="stylesheet" href="assets/css/jquery.auto-complete.css">
 	<!-- date-picker   -->
 	<link href="assets/css/jquery.comiseo.daterangepicker.css" rel="stylesheet">
 	<link href="assets/css/jquery-ui.min.css" rel="stylesheet">
@@ -33,7 +34,7 @@
                 </a>
 				</div>
 				<ul class="nav">
-					<li class="active">
+					<li>
 						<a href="orgs.html">
 											<i class="pe-7s-news-paper"></i>
 											<p>Orgs</p>
@@ -45,7 +46,7 @@
 											<p>Teams</p>
 									</a>
 					</li>
-					<li>
+					<li class="active">
 						<a href="repos.html">
                         <i class="pe-7s-graph"></i>
                         <p>Repositories</p>
@@ -70,7 +71,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-						<a class="navbar-brand" href="#">Orgs - Dashboard</a>
+						<a class="navbar-brand" href="#">Repositories - Dashboard</a>
 					</div>
 				</div>
 			</nav>
@@ -78,32 +79,24 @@
 				<div class="container-fluid">
 					<div class="navbar-header">
 						<a class="navbar-brand">
-							<!-- <input type="text" id="name" placeholder="Insert org name"> -->
-							<select id="name">
-									<option value="stone-payments">stone-payments</option>
-									<option value="pagarme">pagarme</option>
-									<option value="mundipagg">mundipagg</option>
-									<option value="equals-conc">equals-conc</option>
-									<option value="cappta">cappta</option>
-									</select>
-							<input id="org" name="org">
-							<i id="find" class="fa fa-search"></i> </a>
+							<input autofocus type="text" type="text" id="name" placeholder="Insert repo name">
+							<input id="repoRangeDate" name="repoRangeDate">
+							 <i id="find" class="fa fa-search"></i> </a>
 					</div>
 				</div>
 			</nav>
-			<div class="content" style="display: none">
+			<div class="content" style="display: none;">
 				<div class="container-fluid">
 					<div class="row row-eq-height">
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="card ">
 								<div class="header">
 									<h4 class="title">OpenSource</h4>
-									<p class="category">OpenSource - Org (%)</p>
 								</div>
 								<div class="content">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<tbody id="openSource">
 											</tbody>
 										</table>
 									</div>
@@ -116,16 +109,15 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="card ">
 								<div class="header">
 									<h4 class="title">Readme</h4>
-									<p class="category">Readme - Org (%)</p>
 								</div>
 								<div class="content">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="readmeChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<tbody id="readme">
 											</tbody>
 										</table>
 									</div>
@@ -138,16 +130,36 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="card  ">
 								<div class="header">
 									<h4 class="title">License</h4>
-									<p class="category">License - Org (%)</p>
 								</div>
-								<div class="content" style="max-height:500px">
+								<div class="content">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="LicenseType" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<tbody id="license">
+											</tbody>
+										</table>
+									</div>
+									<div class="footer">
+										<hr>
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="card  ">
+								<div class="header">
+									<h4 class="title">Active</h4>
+								</div>
+								<div class="content">
+									<div class="table-full-width">
+										<table class="table">
+											<tbody id="active">
 											</tbody>
 										</table>
 									</div>
@@ -166,10 +178,10 @@
 							<div class="card">
 								<div class="header">
 									<h4 class="title">Languages</h4>
-									<p class="category">Top 12 Languages - Org (%)</p>
+									<p class="category">Languages - Repository (%)</p>
 								</div>
 								<div class="content">
-									<canvas id="languages" class="ct-chart ct-perfect-fourth" width="auto" height="210"></canvas>
+									<canvas id="pie-chart" class="ct-chart ct-perfect-fourth" width="400" height="400"></canvas>
 									<div class="footer">
 										<hr>
 										<div class="stats">
@@ -183,10 +195,10 @@
 							<div class="card">
 								<div class="header">
 									<h4 class="title">Commits</h4>
-									<p class="category">Commits - Org</p>
+									<p class="category">Commits - Repository</p>
 								</div>
 								<div class="content">
-									<canvas id="myChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+									<canvas id="myChart" class="ct-chart"></canvas>
 									<div class="footer">
 										<hr>
 										<div class="stats">
@@ -198,17 +210,39 @@
 						</div>
 					</div>
 					<div class="row row-eq-height">
-						<div class="col-md-12">
+						<div class="col-md-8">
 							<div class="card ">
 								<div class="header">
 									<h4 class="title">Issues</h4>
-									<p class="category">Issues - Org</p>
+									<p class="category">Issues - Repository</p>
 								</div>
 								<div class="content">
-									<canvas id="issuesChart" class="ct-chart" width="auto" height="100"></canvas>
+									<canvas id="issuesChart" class="ct-chart"></canvas>
 									<div class="footer">
 										<div class="legend">
 										</div>
+										<hr>
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="card ">
+								<div class="header">
+									<h4 class="title">Members</h4>
+									<p class="category">Repository Members</p>
+								</div>
+								<div class="content">
+									<div class="table-full-width">
+										<table class="table">
+											<tbody id="members">
+											</tbody>
+										</table>
+									</div>
+									<div class="footer">
 										<hr>
 										<div class="stats">
 											<i class="fa fa-clock-o"></i>
@@ -241,24 +275,15 @@
 <script src="assets/js/light-bootstrap-dashboard.js"></script>
 <!-- Light Bootstrap Table DEMO methods, don't include it in your project! -->
 <script src="assets/js/demo.js"></script>
-<script type="text/javascript">
-	$(document).ready(function() {
-		$.notify({
-			icon: 'pe-7s-gift',
-			message: "Welcome to <b>Athena Dashboard</b> - an openSource Github BI."
-		}, {
-			type: 'info',
-			timer: 4000
-		});
-	});
-</script>
 <script src="assets/js/moment.js"></script>
 <script src="assets/js/jquery-ui.min.js"></script>
 <script src="assets/js/jquery.comiseo.daterangepicker.js"></script>
 <script>
 	$(function() {
-		$("#org").daterangepicker();
+		$("#repoRangeDate").daterangepicker();
 	});
 </script>
-<script src="assets/js/chartsOrg.js"></script>
+<script src="assets/js/jquery.auto-complete.min.js"></script>
+<script src="assets/js/chartsRepo.js"></script>
+<script src="assets/js/configs.js"></script>
 </html>

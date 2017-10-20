@@ -1,5 +1,6 @@
 from flask import request
 from api import *
+from .config import *
 
 
 def repo_name():

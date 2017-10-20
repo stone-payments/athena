@@ -1,6 +1,7 @@
 from flask import request
-from config import *
+from .config import *
 import datetime as dt
+from api import *
 
 
 def team_languages():

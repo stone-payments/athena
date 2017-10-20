@@ -23,7 +23,7 @@ $(function() {
       try {
         xhr.abort();
       } catch (e) {}
-      xhr = $.getJSON('http://127.0.0.1:5000/get_team_name?name=' + term+'&org='+ orgSelector, function(result) {
+      xhr = $.getJSON(address+'/get_team_name?name=' + term+'&org='+ orgSelector, function(result) {
         let returnedData = result.map(function(num) {
           return num.data;
         });
@@ -44,7 +44,7 @@ $(function() {
       lastDay = JSON.parse($("#teamsRangeDate").val()).end;
     }
     $.ajax({
-      url: 'http://127.0.0.1:5000/OpenSourceTeam?org=' + orgSelector + '&team=' + name,
+      url: address+'/OpenSourceTeam?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -93,7 +93,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: 'http://127.0.0.1:5000/readmeOrgTeam?org=' + orgSelector + '&team=' + name,
+      url: address+'/readmeOrgTeam?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -124,7 +124,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: 'http://127.0.0.1:5000/LicenseTypeTeam?org=' + orgSelector + '&team=' + name,
+      url: address+'/LicenseTypeTeam?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -177,7 +177,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: 'http://127.0.0.1:5000/LanguagesOrgTeam?org=' + orgSelector + '&team=' + name,
+      url: address+'/LanguagesOrgTeam?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -230,7 +230,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: 'http://127.0.0.1:5000/RepoMembersTeam?org=' + 'stone-payments' + '&team=' + name,
+      url: address+'/RepoMembersTeam?org=' + 'stone-payments' + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -253,7 +253,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: 'http://127.0.0.1:5000/IssuesTeam?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
+      url: address+'/IssuesTeam?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -349,7 +349,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: 'http://127.0.0.1:5000/CommitsTeam?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
+      url: address+'/CommitsTeam?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);

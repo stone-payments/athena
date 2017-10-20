@@ -1,5 +1,10 @@
+import datetime as dt
+import datetime
+import json
+
 from flask import request
-from api import *
+
+from api_modules import db
 
 
 def org_languages():
@@ -78,14 +83,14 @@ def org_commits():
       number: number
     }"""
     name = request.args.get("name")
-    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = end_date - start_date
     bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
     query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
     result = [dict(i) for i in query_result]
     print(result)
-    days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+    days = [dt.datetime.strptime(str(start_date + dt.timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
             for i in range(delta.days + 1)]
     lst = []
 

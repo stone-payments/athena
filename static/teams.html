@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
 	<meta charset="utf-8" />
 	<link rel="icon" type="image/png" href="assets/img/favicon.ico">
@@ -24,6 +25,7 @@
 	<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
 	<link href="assets/css/pe-icon-7-stroke.css" rel="stylesheet" />
 </head>
+
 <body>
 	<div class="wrapper">
 		<div class="sidebar" data-color="" data-image="assets/img/stone-new.png">
@@ -40,7 +42,7 @@
 											<p>Orgs</p>
 									</a>
 					</li>
-					<li>
+					<li class="active">
 						<a href="teams.html">
 											<i class="pe-7s-note2"></i>
 											<p>Teams</p>
@@ -52,7 +54,7 @@
                         <p>Repositories</p>
                     </a>
 					</li>
-					<li class="active">
+					<li>
 						<a href="user.html">
                         <i class="pe-7s-user"></i>
                         <p>Users</p>
@@ -71,7 +73,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-						<a class="navbar-brand" href="#">Users - Dashboard</a>
+						<a class="navbar-brand" href="#">Team - Dashboard</a>
 					</div>
 				</div>
 			</nav>
@@ -79,48 +81,31 @@
 				<div class="container-fluid">
 					<div class="navbar-header">
 						<a class="navbar-brand">
-							<input autofocus type="text" type="text" id="name" placeholder="Insert repo name">
-							 <input id="userRangeDate" name="userRangeDate"> 
-							 <i id="find" class="fa fa-search"></i> </a>
+											<select id="orgSelector">
+													<option value="stone-payments">stone-payments</option>
+													<option value="pagarme">pagarme</option>
+													<option value="mundipagg">mundipagg</option>
+													<option value="equals-conc">equals-con</option>
+													<option value="cappta">cappta</option>
+													</select>
+											<input autofocus type="text" type="text" id="name" placeholder="Insert repo name">
+											 <input id="teamsRangeDate" name="teamsRangeDate"> <i id="find" class="fa fa-search"></i> </a>
 					</div>
 				</div>
 			</nav>
-			<div class="content" style="display:none;">
+			<div class="content" style="display: none;">
 				<div class="container-fluid">
 					<div class="row row-eq-height">
 						<div class="col-md-4">
-							<div class="card card-user">
-								<div class="image" style="background-color: rgb(4, 57, 28);">
-								</div>
-								<div class="content">
-									<div class="author">
-																	<img id =avatar class="avatar border-gray" src="assets/img/default-avatar.png" alt="..."/>
-																		<h4 class="title" id="username"><br />
-																		</h4>
-									</div>
-									<p class="description text-left"></p>
-									<p id="followers" class="description text-left"> Followers </p>
-									<p id="following" class="description text-left">Following</p>
-								</div>
-								<div class="footer">
-									<hr>
-									<div class="stats">
-										<i class="fa fa-clock-o"></i>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="col-md-4">
 							<div class="card ">
 								<div class="header">
-									<h4 class="title">Contributed Repositories</h4>
-									<p class="category">Repositories - User</p>
+									<h4 class="title">OpenSource</h4>
+									<p class="category">OpenSource - Team (%)</p>
 								</div>
-								<div class="content" style="overflow: auto;max-height:400px;">
+								<div class="content">
 									<div class="table-full-width">
 										<table class="table">
-											<tbody id="contributed_repo">
+											<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
 											</tbody>
 										</table>
 									</div>
@@ -136,13 +121,35 @@
 						<div class="col-md-4">
 							<div class="card ">
 								<div class="header">
-									<h4 class="title">Teams</h4>
-									<p class="category">Teams</p>
+									<h4 class="title">Readme</h4>
+									<p class="category">Readme - Team (%)</p>
 								</div>
-								<div class="content" style="overflow: auto;max-height:400px;">
+								<div class="content">
 									<div class="table-full-width">
 										<table class="table">
-											<tbody id="user_teams">
+											<canvas id="readmeChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											</tbody>
+										</table>
+									</div>
+									<div class="footer">
+										<hr>
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="card  ">
+								<div class="header">
+									<h4 class="title">License</h4>
+									<p class="category">License - Team (%)</p>
+								</div>
+								<div class="content" style="max-height:500px">
+									<div class="table-full-width">
+										<table class="table">
+											<canvas id="LicenseType" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
 											</tbody>
 										</table>
 									</div>
@@ -157,15 +164,55 @@
 						</div>
 					</div>
 					<div class="row row-eq-height">
-
+						<div class="col-md-8">
+							<div class="card">
+								<div class="header">
+									<h4 class="title">Languages</h4>
+									<p class="category">Top 12 Languages - Team (%)</p>
+								</div>
+								<div class="content">
+									<canvas id="languages" class="ct-chart ct-perfect-fourth" width="auto" max-height:500px;></canvas>
+									<div class="footer">
+										<hr>
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="card ">
+								<div class="header">
+									<h4 class="title">Members</h4>
+									<p class="category">Team Members</p>
+								</div>
+								<div class="content" style="overflow: auto;max-height:500px;">
+									<div class="table-full-width">
+										<table class="table">
+											<tbody id="members">
+											</tbody>
+										</table>
+									</div>
+									<div class="footer">
+										<hr>
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row row-eq-height">
 						<div class="col-md-12">
 							<div class="card ">
 								<div class="header">
-									<h4 class="title">Additions - Deletions</h4>
-									<p class="category">Issues - User</p>
+									<h4 class="title">Issues</h4>
+									<p class="category">Issues - Team</p>
 								</div>
 								<div class="content">
-									<canvas id="stats_chart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+									<canvas id="issuesChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 									<div class="footer">
 										<div class="legend">
 										</div>
@@ -183,10 +230,10 @@
 							<div class="card">
 								<div class="header">
 									<h4 class="title">Commits</h4>
-									<p class="category">Commits - User</p>
+									<p class="category">Commits - Team</p>
 								</div>
 								<div class="content">
-									<canvas id="commmit_chart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+									<canvas id="myChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 									<div class="footer">
 										<hr>
 										<div class="stats">
@@ -196,8 +243,6 @@
 								</div>
 							</div>
 						</div>
-
-
 					</div>
 				</div>
 			</div>
@@ -227,9 +272,10 @@
 <script src="assets/js/jquery.comiseo.daterangepicker.js"></script>
 <script>
 	$(function() {
-		$("#userRangeDate").daterangepicker();
+		$("#teamsRangeDate").daterangepicker();
 	});
 </script>
 <script src="assets/js/jquery.auto-complete.min.js"></script>
-<script src="assets/js/chartsUser.js"></script>
+<script src="assets/js/chartsTeams.js"></script>
+<script src="assets/js/configs.js"></script>
 </html>

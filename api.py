@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask import request
 from flask_cors import CORS
@@ -6,19 +7,21 @@ import json
 import datetime, calendar
 import datetime as dt
 from datetime import date, timedelta, datetime
-from user_api import *
-from team_api import *
-from repo_api import *
-from orgs_api import *
-from config import *
-import collections
+from api_modules import *
+# from team_api import *
+# from repo_api import *
+# from orgs_api import *
+# from config import *
+# import collections
 # conn = Connection(username="root", password="")
 # db = conn["athena_teste"]
 value = 0
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 CORS(app)
 
+with open("static/assets/js/configs.js", "w") as config_js:
+    config_js.write('let address = "'+os.getenv("API_URL")+'"')
 
 # Repos #####
 
@@ -558,4 +561,5 @@ def get_user_login():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=os.getenv("PORT"))
+
