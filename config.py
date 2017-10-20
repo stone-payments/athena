@@ -1,13 +1,19 @@
 import datetime
+import os
 
-token = "896a853e110a21a6e25cbbcf1ebd2e2ce1139a8e"
-db_name = "athena_teste"
+token = os.getenv("GRAPHQL_TOKEN")
+db_name = "athena"
 # db_url = "http://10.152.20.89:8529"
-db_url = "http://localhost:8529"
-username = "root"
-password = ""
-url = 'https://api.github.com/graphql'  # GitHub GraphQL API url
-urlCommit = 'https://api.github.com/repos/'  # GitHub Rest API url
+db_url = os.getenv("ARANGODB_URL")
+# db_url = "http://localhost:8529"
+username = os.getenv("ARANGODB_USER")
+# username = "root"
+password = os.getenv("ARANGODB_PASS")
+# password = ""
+# url = 'https://api.github.com/graphql'  # GitHub GraphQL API url
+url = os.getenv("GITHUB_GRAPHQL_URL")
+# urlCommit = 'https://api.github.com/repos/'  # GitHub Rest API url
+urlCommit = os.getenv("GITHUB_REST_URL")
 number_of_repos = 100
 timeout = 100.001
 since_time = (datetime.datetime.utcnow() + datetime.timedelta(-1)).strftime('%Y-%m-%dT%H:%M:%SZ')
