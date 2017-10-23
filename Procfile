@@ -1,1 +1,1 @@
-web: sh python graph.py
+web: python graph.py

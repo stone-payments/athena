@@ -2,6 +2,7 @@ import datetime
 import os
 
 token = os.getenv("GRAPHQL_TOKEN")
+# token = ""
 db_name = "athena"
 # db_url = "http://10.152.20.89:8529"
 db_url = os.getenv("ARANGODB_URL")
@@ -16,10 +17,10 @@ url = os.getenv("GITHUB_GRAPHQL_URL")
 urlCommit = os.getenv("GITHUB_REST_URL")
 number_of_repos = 100
 timeout = 100.001
-since_time = (datetime.datetime.utcnow() + datetime.timedelta(-1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-until_time = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-# since_time = "2017-09-01T17:58:18Z"
-# until_time = "2017-10-12T17:58:18Z"
+# since_time = (datetime.datetime.utcnow() + datetime.timedelta(-1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+# until_time = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+since_time = "2017-10-19T17:58:18Z"
+until_time = "2017-10-23T17:58:18Z"
 orgs = ["stone-payments", "mundipagg", "cappta", "equals-conc", "pagarme"]
 datetime.datetime.utcnow().strftime("%Y-%m-%d")
 update = 1  # update every x hours

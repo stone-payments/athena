@@ -10,6 +10,7 @@ create_collection_if_not_exists(db, collections, hash_indexes, hash_indexes_uniq
 
 def job():
     for org in orgs:
+        print(org)
         repo_query(db, org)
         with open("queries/devQuery.txt", "r") as query:
             query = query.read()
@@ -29,8 +30,3 @@ while True:
     job()
     print("--- %s seconds ---" % (time.time() - start_time))
 
-
-# schedule.every(update).hour.do(job)
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)

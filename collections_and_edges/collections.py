@@ -300,6 +300,7 @@ def commit_collector(db, org):
     def collector(repositories: Queue, output: Queue):
         while True:
             repository = repositories.get_nowait()
+            print(repository)
             first = True
             cursor = None
             with open("queries/commitQuery.txt", "r") as query:
