@@ -1,1 +1,4 @@
-FOR Repo in Repo FILTER Repo.org == @org return Repo.repoName
+FOR Repo in Repo
+    FILTER Repo.org == @org
+    FILTER Repo.committed_today == true
+    return Repo.repoName

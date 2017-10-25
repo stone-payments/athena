@@ -1,14 +1,13 @@
 from collections_and_edges import *
 from createDB import create_database_if_not_exists, create_collection_if_not_exists
 from config import *
-import time
 
 db = create_database_if_not_exists(db_name, db_url, username, password)
 create_collection_if_not_exists(db, collections, hash_indexes, hash_indexes_unique, skip_list_indexes,
                                 full_text_indexes)
 
 
-def job():
+def job(orgs):
     for org in orgs:
         print(org)
         repo_query(db, org)
@@ -27,6 +26,6 @@ def job():
 
 while True:
     start_time = time.time()
-    job()
+    job(orgs)
     print("--- %s seconds ---" % (time.time() - start_time))
 

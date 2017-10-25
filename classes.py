@@ -218,7 +218,8 @@ class Repo(Collection):
         id=Field(validators=[val.NotNull()]),
         org=Field(validators=[val.NotNull()]),
         readme=Field(validators=[StringValidator()]),
-        db_last_updated=Field(validators=[val.NotNull(), StringValidator()])
+        db_last_updated=Field(validators=[val.NotNull(), StringValidator()]),
+        committed_today=Field(validators=[val.NotNull(), BoolValidator()])
     )
 
 

@@ -1,4 +1,4 @@
-query ($number_of_repos: Int!, $next: String, $org: String!) {
+query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimestamp!, $untilTime:GitTimestamp!) {
   organization(login: $org) {
     repositories(first: $number_of_repos, after: $next) {
       pageInfo {
@@ -9,6 +9,15 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
         node {
           defaultBranchRef {
             target {
+              ...on Commit{
+                history(first:1,since:$sinceTime,until:$untilTime){
+        					edges{
+                    node{
+                      committedDate
+                    }
+                  }
+                }
+              }
               repository {
                 licenseInfo {
                   licenseId: id

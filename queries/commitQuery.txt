@@ -9,6 +9,7 @@ query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!, $sinceTi
           history(first: $number_of_repos, after: $next, since: $sinceTime, until: $untilTime) {
             pageInfo {
               endCursor
+              hasNextPage
             }
             edges {
               node {

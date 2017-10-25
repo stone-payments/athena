@@ -15,7 +15,8 @@ def repo_query(db, org):
     cursor = None
     while has_next_page:
         try:
-            prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, org=org)
+            prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, org=org,
+                                        since=since_time, until=until_time)
             print(prox)
             limit_validation(rate_limit=find('rateLimit', prox))
             has_next_page = find('hasNextPage', prox)
@@ -44,6 +45,7 @@ def repo_query(db, org):
                     doc["id"] = repo["node"]["repoId"].replace("/", "@")
                     doc["org"] = org
                     doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                    doc["committed_today"] = False if find('committedDate', repo) is None else True
                     doc._key = repo["node"]["repoId"].replace("/", "@")
                     doc.save()
                 except Exception as exception:
@@ -299,27 +301,31 @@ def commit_collector(db, org):
 
     def collector(repositories: Queue, output: Queue):
         while True:
-            repository = repositories.get_nowait()
+            repository = repositories.get(timeout=commit_queue_timeout)
             print(repository)
-            first = True
+            # first = True
             cursor = None
+            has_next_page = True
             with open("queries/commitQuery.txt", "r") as query:
                 query = query.read()
-            while cursor is not None or first:
-                first = False
+            while has_next_page:
+                # first = False
                 try:
                     prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repository, org=org, since=since_time, until=until_time)
                     limit_validation(rate_limit=find('rateLimit', prox), output=output)
                     # print(prox)
+                    has_next_page = find('hasNextPage', prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
                     cursor = find('endCursor', prox)
                     prox_node = find('repository', prox)
                     commits = find('edges', prox_node)
-                    repository_id = prox_node["repositoryId"]
-                    repo_name = prox_node["repoName"]
-                    branch_name = prox_node["defaultBranchRef"]["branchName"]
+                    if not commits:
+                        continue
+                    repository_id = find('repositoryId', prox)
+                    repo_name = find('repoName', prox)
+                    branch_name = find('branchName', prox)
                     for c in commits:
                         node = c["node"]
                         author = node["author"]
@@ -339,13 +345,15 @@ def commit_collector(db, org):
                         }
 
                         output.put(commit)
-                except Exception:
-                    cursor = None
-                    first = False
+                except Exception as exception:
+                    return handling_except(exception)
+                    # cursor = None
+                    # first = False
 
     def save(repositories: Queue, output: Queue):
         while True:
             c = commits_queue.get(timeout=commit_queue_timeout)
+            print("FOI")
             limit_validation(rate_limit=c.get("rate_limit", None))
             try:
                 try:
@@ -392,6 +400,7 @@ def commit_collector(db, org):
                 dev_doc["_key"] = (str(c["repositoryId"]) + str(c["devId"])).replace("/", "@")
                 dev_doc.links(temp2, temp)
                 dev_doc.save()
+                print("FOI")
             except Exception as exception:
                 handling_except(exception)
 
@@ -401,7 +410,7 @@ def commit_collector(db, org):
     workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
     workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(num_of_threads)]
     for repo in query_result:
-        repositories_queue.put(repo)
+        repositories_queue.put(str(repo))
     [t.start() for t in workers]
     [t.start() for t in workers2]
     [t.join() for t in workers]
@@ -423,10 +432,11 @@ def readme(db, org):
                 query = query.read()
             try:
                 prox = pagination_universal(query, next_cursor=repos['repoName'], org=org)
-                limit_validation(rate_limit=find('rateLimit', prox))
+                limit_validation(readme_limit=find('rateLimit', prox))
                 print(prox)
                 output.put(1)
                 if prox.get('errors'):
+                    limit_validation(rate_limit=find('type', prox))
                     doc = db['Repo'][str(repos['key'])]
                     doc["readme"] = None
                     doc.save()
