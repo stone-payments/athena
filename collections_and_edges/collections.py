@@ -15,11 +15,12 @@ def repo_query(db, org):
     cursor = None
     while has_next_page:
         try:
-            prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, org=org,
+            prox = pagination_universal(query, number_of_repo=repo_number_of_repos, next_cursor=cursor, org=org,
                                         since=since_time, until=until_time)
-            print(prox)
+            # print(prox)
             limit_validation(rate_limit=find('rateLimit', prox))
             has_next_page = find('hasNextPage', prox)
+            print(has_next_page)
             cursor = find('endCursor', prox)
             prox_repositorios = prox["data"]["organization"]["repositories"]["edges"]
             for repo in prox_repositorios:
@@ -53,7 +54,11 @@ def repo_query(db, org):
                 for language in languages_repo:
                     # print(language)
                     try:
+                        doc = languages_collection[str(find('languageId', language).replace("/", "@"))]
+                    except Exception:
                         doc = languages_collection.createDocument()
+                    try:
+                        # doc = languages_collection.createDocument()
                         doc["name"] = find('languageName', language)
                         doc["id"] = find('languageId', language)
                         doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
