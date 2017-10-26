@@ -17,6 +17,9 @@ $(function() {
       $('#find').click(); //Trigger search button click event
     }
   });
+  setInterval(function(){
+   $('#find').click();
+ }, 300000);
   $("#find").click(function() {
       $(".content").show();
     name = $("#name").val();
@@ -272,7 +275,7 @@ $(function() {
           data: {
             labels: labelsLicense,
             datasets: [{
-              label: "",
+              label: "License type",
               backgroundColor: ['rgb(168,169,173)', '#0B3B1F', '#1DAC4B', '#380713', '#74121D', '#C52233', '#595708', '#657212', '#ABC421'],
               borderWidth: 1,
               data: dataLicense

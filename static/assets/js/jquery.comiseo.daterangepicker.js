@@ -29,7 +29,7 @@
 				{text: 'Previous Month', dateStart: function() { return moment().subtract('month', 1).startOf('month') }, dateEnd: function() { return moment().subtract('month', 1).endOf('month') } },
 				{text: 'Year to Date', dateStart: function() { return moment().startOf('year') }, dateEnd: function() { return moment() } }
 			],
-			initialText: 'Select date range...', // placeholder text - shown when nothing is selected
+			initialText: "Date range: "+String(moment().startOf('month').format('MMMM')), // placeholder text - shown when nothing is selected
 			icon: 'ui-icon-triangle-1-s',
 			applyButtonText: 'Apply', // use '' to get rid of the button
 			clearButtonText: 'Clear', // use '' to get rid of the button
@@ -51,7 +51,7 @@
 			onChange: null, // @deprecated callback that executes when the date range changes
 			onClear: null, // @deprecated callback that executes when the clear button is used
 			datepickerOptions: { // object containing datepicker options. See http://api.jqueryui.com/datepicker/#options
-				numberOfMonths: 3,
+				numberOfMonths: 1,
 //				showCurrentAtPos: 1 // bug; use maxDate instead
 				maxDate: 0 // the maximum selectable date is today (also current month is displayed on the last position)
 			}

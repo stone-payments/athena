@@ -4,7 +4,10 @@ $(function() {
   let issuesChart = null;
   let startDay = moment().startOf('month').format('YYYY-MM-DD');
   let lastDay = moment().format("YYYY-MM-") + moment().daysInMonth();
-
+  var orgSelector = "stone-payments";
+   $('#orgSelector').on('change', function() {
+     orgSelector = $('#orgSelector').val();
+  }),
   colors = ['#0e6251', '#117864', '#148f77', '#17a589', '#1abc9c', '#48c9b0', '#76d7c4', '#a3e4d7', '#d1f2eb',
     '#fef5e7', '#fdebd0', '#fad7a0', '#f8c471', '#f5b041', '#f39c12', '#d68910', '#b9770e', '#9c640c', '#7e5109'
   ]
@@ -16,7 +19,8 @@ $(function() {
       try {
         xhr.abort();
       } catch (e) {}
-      xhr = $.getJSON(address+'/get_repo_name?name=' + term, function(result) {
+      xhr = $.getJSON(address+'/get_repo_name?name=' + term+'&org='+ orgSelector, function(result) {
+        console.log(orgSelector);
         let returnedData = result.map(function(num) {
           return num.data;
         });
@@ -36,7 +40,7 @@ $(function() {
       lastDay = JSON.parse($("#repoRangeDate").val()).end;
     }
     $.ajax({
-      url: address+'/Languages?name=' + name,
+      url: address+'/Languages?name=' + name+'&org='+ orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -89,7 +93,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/Commits2?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
+      url: address+'/Commits_Repo?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay+'&org='+ orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -164,7 +168,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/RepoMembers?name=' + name,
+      url: address+'/RepoMembers?name=' + name+'&org='+ orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -187,7 +191,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/BestPractices?name=' + name,
+      url: address+'/BestPractices?name=' + name+'&org='+ orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);

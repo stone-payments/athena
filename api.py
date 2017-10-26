@@ -32,8 +32,8 @@ def Languages():
     return response
 
 
-@app.route('/Commits2')
-def Commits2():
+@app.route('/Commits_Repo')
+def Commits_Repo():
     response = repo_commits()
     return response
 

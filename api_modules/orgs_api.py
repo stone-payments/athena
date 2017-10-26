@@ -86,12 +86,14 @@ def org_commits():
     start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
     delta = end_date - start_date
-    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
+    bind_vars = {"name": str.lower(name), "startDate": str(start_date.strftime('%Y-%m-%d')), "endDate":
+                 str(end_date.strftime('%Y-%m-%d'))}
     query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
     result = [dict(i) for i in query_result]
     print(result)
     days = [dt.datetime.strptime(str(start_date + dt.timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
             for i in range(delta.days + 1)]
+    # print(days)
     lst = []
 
     def recur(x):
