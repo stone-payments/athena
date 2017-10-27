@@ -1,12 +1,12 @@
 import datetime
 import os
 
-token = os.getenv("GRAPHQL_TOKEN")
-# token = "16d5b8dc3cdf1ae8e7c64aa2aec88551b0191dd4"
+# token = os.getenv("GRAPHQL_TOKEN")
+token = "8936c188e021529d673953d3d4dceba7ebbdefe4"
 db_name = "athena"
 # db_url = "http://10.152.20.89:8555"
-db_url = os.getenv("ARANGODB_URL")
-# db_url = "http://localhost:8529"
+# db_url = os.getenv("ARANGODB_URL")
+db_url = "http://localhost:8529"
 username = os.getenv("ARANGODB_USER")
 # username = "root"
 password = os.getenv("ARANGODB_PASS")
@@ -16,7 +16,7 @@ url = os.getenv("GITHUB_GRAPHQL_URL")
 # urlCommit = 'https://api.github.com/repos/'  # GitHub Rest API url
 urlCommit = os.getenv("GITHUB_REST_URL")
 number_of_repos = 100
-repo_number_of_repos = 25
+repo_number_of_repos = 100
 timeout = 100.001
 since_time = (datetime.datetime.utcnow() + datetime.timedelta(-3)).strftime('%Y-%m-%d') + "T00:00:00Z"
 until_time = (datetime.datetime.utcnow() + datetime.timedelta(+1)).strftime('%Y-%m-%d') + "T00:00:00Z"

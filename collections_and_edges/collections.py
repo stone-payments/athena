@@ -5,9 +5,7 @@ from module import *
 # REPO ###############################
 
 
-def repo_query(db, org):
-    with open("queries/repoQuery.txt", "r") as query:
-        query = query.read()
+def repo(db, org, query):
     repo_collection = db["Repo"]
     languages_collection = db["Languages"]
     languages_repo_collection = db["LanguagesRepo"]
@@ -17,7 +15,7 @@ def repo_query(db, org):
         try:
             prox = pagination_universal(query, number_of_repo=repo_number_of_repos, next_cursor=cursor, org=org,
                                         since=since_time, until=until_time)
-            # print(prox)
+            print(prox)
             limit_validation(rate_limit=find('rateLimit', prox))
             has_next_page = find('hasNextPage', prox)
             print(has_next_page)
@@ -58,7 +56,6 @@ def repo_query(db, org):
                     except Exception:
                         doc = languages_collection.createDocument()
                     try:
-                        # doc = languages_collection.createDocument()
                         doc["name"] = find('languageName', language)
                         doc["id"] = find('languageId', language)
                         doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
@@ -75,10 +72,6 @@ def repo_query(db, org):
                         temp = db['Languages'][str(find('languageId', language)).replace("/", "@")]
                         temp2 = db['Repo'][str(find('repoId', repo)).replace("/", "@")]
                         doc["size"] = round(((find('languageSize', language) / find('totalSize', repo)) * 100), 2)
-                        # doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                        # doc = languages_repo_collection.createEdge(
-                        #     {"size": round(((find('languageSize', language) / find('totalSize', repo)) * 100), 2),
-                        #      "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))})
                         doc._key = (str(find('repoId', repo)) + str(find('languageId', language))).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
@@ -86,7 +79,6 @@ def repo_query(db, org):
                         handling_except(exception)
         except Exception as exception:
             handling_except(exception)
-            # cursor = None
 
 
 # DEV ###############################
@@ -129,12 +121,10 @@ def dev(db, org, query):
 # TEAMS ###############################
 
 
-def teams(db, org):
+def teams(db, org, query):
     teams_collection = db["Teams"]
     teams_dev_collection = db["TeamsDev"]
     teams_repo_collection = db["TeamsRepo"]
-    with open("queries/teamsQuery.txt", "r") as query:
-        query = query.read()
     cursor = None
     has_next_page = True
     while has_next_page:
@@ -177,9 +167,6 @@ def teams(db, org):
                         temp = db['Dev'][str(find('memberId', team_dev_content)).replace("/", "@")]
                         temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
                         doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                        # doc = teams_dev_collection.createEdge(
-                        #     {"db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))}
-                        # )
                         doc._key = (str(team["node"]["id"]) + str(find('memberId', team_dev_content))).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
@@ -195,9 +182,6 @@ def teams(db, org):
                         temp = db['Repo'][str(find('repoId', team_repo_content)).replace("/", "@")]
                         temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
                         doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                        # doc = teams_repo_collection.createEdge(
-                        #     {"db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))}
-                        # )
                         doc._key = (str(team["node"]["id"]) + str(find('repoId', team_repo_content))).replace("/", "@")
                         doc.links(temp, temp2)
                         doc.save()
@@ -207,119 +191,28 @@ def teams(db, org):
             handling_except(exception)
 
 
-# LANGUAGES ###############################
-
-
-def languages(db, org):
-    languages_collection = db["Languages"]
-    languages_repo_collection = db["LanguagesRepo"]
-    with open("queries/languagesArango.txt", "r") as aql:
-        aql = aql.read()
-    bind_vars = {"org": org}
-    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
-
-    def collector(repositories: Queue, ):
-        while True:
-            repos = repositories.get_nowait()
-            with open("queries/languagesQuery.txt", "r") as query:
-                query = query.read()
-            first = True
-            cursor = None
-            while cursor or first:
-                first = False
-                try:
-                    prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
-                                                next_repo=repos, org=org)
-                    limit_validation(rate_limit=find('rateLimit', prox))
-                    # print(prox)
-                    cursor = find('endCursor', prox)
-                    prox_node = find('languages', prox)
-                    edges = find('edges', prox_node)
-                    for node in edges:
-                        try:
-                            doc = languages_collection[str(find('id', node).replace("/", "@"))]
-                        except Exception:
-                            doc = languages_collection.createDocument()
-                        try:
-                            doc["name"] = find('name', node)
-                            doc["id"] = find('id', node)
-                            doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                            doc._key = find('id', node).replace("/", "@")
-                            doc.save()
-                        except Exception as exception:
-                            handling_except(exception)
-                        try:
-                            doc = languages_repo_collection[(str(find('id', node).replace("/", "@")) +
-                                                             str(find('repositoryId', prox))).replace("/", "@")]
-                            # doc['size'] = round(((find('size', prox) / find('totalSize', prox)) * 100), 2)
-                            # doc['db_last_updated'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                            # temp = db['Languages'][str(find('id', node).replace("/", "@"))]
-                            # temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
-                            # doc._key = (str(find('id', node).replace("/", "@")) +
-                            #             str(find('repositoryId', prox))).replace("/", "@")
-                            # doc.links(temp, temp2)
-                            # doc.save()
-                        except Exception:
-                            doc = languages_repo_collection.createEdge()
-                            # temp = db['Languages'][str(find('id', node).replace("/", "@"))]
-                            # temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
-                            # doc._key = (str(find('id', node).replace("/", "@")) +
-                            #             str(find('repositoryId', prox))).replace("/", "@")
-                            # doc.links(temp, temp2)
-                            # doc.save()
-                        try:
-                            doc['size'] = round(((find('size', prox) / find('totalSize', prox)) * 100), 2)
-                            doc['db_last_updated'] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                            temp = db['Languages'][str(find('id', node).replace("/", "@"))]
-                            temp2 = db['Repo'][str(find('repositoryId', prox)).replace("/", "@")]
-                            doc._key = (str(find('id', node).replace("/", "@")) +
-                                        str(find('repositoryId', prox))).replace("/", "@")
-                            doc.links(temp, temp2)
-                            doc.save()
-                            print("FOI")
-                        except Exception as exception:
-                            handling_except(exception)
-                except Exception:
-                    cursor = False
-                    first = False
-
-    repositories_queue = Queue(queue_max_size)
-    workers = [Thread(target=collector, args=(repositories_queue,)) for _ in range(num_of_threads)]
-    for repository in query_result:
-        repositories_queue.put(repository)
-    [t.start() for t in workers]
-    [t.join() for t in workers]
-
-
 # COMMITS ###############################
 
 
-def commit_collector(db, org):
+def commit_collector(db, org, query_arango, query_graphql):
     commit_collection = db["Commit"]
     dev_commit_collection = db["DevCommit"]
     repo_commit_collection = db["RepoCommit"]
     repo_dev_collection = db["RepoDev"]
-    with open("queries/commitArango.txt", "r") as aql:
-        aql = aql.read()
     bind_vars = {"org": org}
-    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
+    query_result = db.AQLQuery(query_arango, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
             repository = repositories.get(timeout=commit_queue_timeout)
             print(repository)
-            # first = True
             cursor = None
             has_next_page = True
-            with open("queries/commitQuery.txt", "r") as query:
-                query = query.read()
             while has_next_page:
-                # first = False
                 try:
-                    prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
+                    prox = pagination_universal(query_graphql, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repository, org=org, since=since_time, until=until_time)
                     limit_validation(rate_limit=find('rateLimit', prox), output=output)
-                    # print(prox)
                     has_next_page = find('hasNextPage', prox)
                     if prox.get("documentation_url"):
                         print("ERROR")
@@ -352,8 +245,6 @@ def commit_collector(db, org):
                         output.put(commit)
                 except Exception as exception:
                     return handling_except(exception)
-                    # cursor = None
-                    # first = False
 
     def save(repositories: Queue, output: Queue):
         while True:
@@ -424,19 +315,15 @@ def commit_collector(db, org):
 
 # README ###############################
 
-def readme(db, org):
-    with open("queries/readmeArango.txt", "r") as aql:
-        aql = aql.read()
+def readme(db, org, query_arango, query_graphql):
     bind_vars = {"org": org}
-    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
+    query_result = db.AQLQuery(query_arango, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
             repos = repositories.get_nowait()
-            with open("queries/readmeQuery.txt", "r") as query:
-                query = query.read()
             try:
-                prox = pagination_universal(query, next_cursor=repos['repoName'], org=org)
+                prox = pagination_universal(query_graphql, next_cursor=repos['repoName'], org=org)
                 limit_validation(readme_limit=find('rateLimit', prox))
                 print(prox)
                 output.put(1)
@@ -467,20 +354,18 @@ def readme(db, org):
 
 # STATS ###############################
 
-def stats_collector(db, org):
+def stats_collector(db, org, query):
     commit_collection = db["Commit"]
-    with open("queries/statsQuery.txt", "r") as aql:
-        aql = aql.read()
     bind_vars = {"org": org, "since_time": since_time, "until_time": until_time}
-    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
+    query_result = db.AQLQuery(query, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
             repository = repositories.get_nowait()
             try:
                 temp = repository["oid"]
-                query = org + "/" + repository["repo"] + '/commits/'
-                result = clientRest2.execute(urlCommit, query, temp)
+                rest_query = org + "/" + repository["repo"] + '/commits/'
+                result = clientRest2.execute(urlCommit, rest_query, temp)
                 print(result)
             except Exception:
                 continue
@@ -525,26 +410,22 @@ def stats_collector(db, org):
 # FORK ###############################
 
 
-def fork_collector(db, org):
+def fork_collector(db, org, query_arango, query_graphql):
     fork_collection = db["Fork"]
     dev_fork_collection = db["DevFork"]
     repo_fork_collection = db["RepoFork"]
-    with open("queries/forkArango.txt", "r") as aql:
-        aql = aql.read()
     bind_vars = {"org": org}
-    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
+    query_result = db.AQLQuery(query_arango, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
             repository = repositories.get_nowait()
             first = True
             cursor = None
-            with open("queries/forkQuery.txt", "r") as query:
-                query = query.read()
             while cursor is not None or first:
                 first = False
                 try:
-                    prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
+                    prox = pagination_universal(query_graphql, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repository, org=org)
                     limit_validation(rate_limit=find('rateLimit', prox), output=output)
                     print(prox)
@@ -640,24 +521,20 @@ def fork_collector(db, org):
 # ISSUES ###############################
 
 
-def issue(db, org):
+def issue(db, org, query_arango, query_graphql):
     issue_collection = db["Issue"]
     repo_issue_collection = db["RepoIssue"]
-    with open("queries/issueArango.txt", "r") as aql:
-        aql = aql.read()
     bind_vars = {"org": org}
-    query_result = db.AQLQuery(aql, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
+    query_result = db.AQLQuery(query_arango, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
 
     def collector(repositories: Queue, output: Queue):
         while True:
             repository = repositories.get_nowait()
             has_next_page = True
             cursor = None
-            with open("queries/issueQuery.txt", "r") as query:
-                query = query.read()
             while has_next_page:
                 try:
-                    prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor,
+                    prox = pagination_universal(query_graphql, number_of_repo=number_of_repos, next_cursor=cursor,
                                                 next_repo=repository, org=org)
                     limit_validation(rate_limit=find('rateLimit', prox), output=output)
                     # print(prox)
