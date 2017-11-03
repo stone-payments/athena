@@ -4,121 +4,225 @@ from module import *
 
 # REPO ###############################
 
+#
+# def repo(db, org, query):
+#     has_next_page = True
+#     cursor = None
+#     while has_next_page:
+#         try:
+#             prox = pagination_universal(query, number_of_repo=repo_number_of_repos, next_cursor=cursor, org=org,
+#                                         since=since_time, until=until_time)
+#             # print(prox)
+#             limit_validation(rate_limit=find('rateLimit', prox))
+#             has_next_page = find('hasNextPage', prox)
+#             print(has_next_page)
+#             cursor = find('endCursor', prox)
+#             prox_repositorios = prox["data"]["organization"]["repositories"]["edges"]
+#             for repo in prox_repositorios:
+#                 try:
+#                     db.Repo.update_one(
+#     {"_id": repo["node"]["repoId"].replace("/", "@")},
+#     {
+#         "$set":
+#             {
+#                 "_key": repo["node"]["repoId"].replace("/", "@"),
+#                 "repoName": repo["node"]["name"],
+#                 "description": repo["node"]["description"],
+#                 "url": repo["node"]["url"],
+#                 "openSource": False if repo["node"]["isPrivate"] else True,
+#                 "primaryLanguage": find('priLanguage', repo),
+#                 "forks": repo["node"]["forks"]["totalCount"],
+#                 "issues": repo["node"]["issues"]["totalCount"],
+#                 "stargazers": repo["node"]["stargazers"]["totalCount"],
+#                 "watchers": repo["node"]["watchers"]["totalCount"],
+#                 "createdAt": repo["node"]["createdAt"],
+#                 "nameWithOwner": repo["node"]["nameWithOwner"],
+#                 "licenseId": find('licenseId', repo),
+#                 "licenseType": find('licenseType', repo),
+#                 "org": org,
+#                 "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+#                 "languages": parse_multiple_languages(repo, "language_edges", "languageName",
+#                                                       "languageSize"),
+#                 "committed_today": False if find('committedDate', repo) is None else True
+#             }
+#     },
+#     upsert=True,
+# )
+#                 except Exception as exception:
+#                     print(exception)
+#         except Exception as exception:
+#             print(exception)
 
-def repo(db, org, query):
-    repo_collection = db["Repo"]
-    languages_collection = db["Languages"]
-    languages_repo_collection = db["LanguagesRepo"]
-    has_next_page = True
-    cursor = None
-    while has_next_page:
-        try:
-            prox = pagination_universal(query, number_of_repo=repo_number_of_repos, next_cursor=cursor, org=org,
-                                        since=since_time, until=until_time)
-            print(prox)
-            limit_validation(rate_limit=find('rateLimit', prox))
-            has_next_page = find('hasNextPage', prox)
-            print(has_next_page)
-            cursor = find('endCursor', prox)
-            prox_repositorios = prox["data"]["organization"]["repositories"]["edges"]
-            for repo in prox_repositorios:
-                languages_repo = find('language_edges', repo)
-                try:
-                    doc = repo_collection[str(repo["node"]["repoId"].replace("/", "@"))]
-                except Exception:
-                    doc = repo_collection.createDocument()
-                try:
-                    doc['repoName'] = repo["node"]["name"]
-                    doc["description"] = repo["node"]["description"]
-                    doc["url"] = repo["node"]["url"]
-                    doc["openSource"] = False if repo["node"]["isPrivate"] else True
-                    doc["primaryLanguage"] = find('priLanguage', repo)
-                    doc["forks"] = repo["node"]["forks"]["totalCount"]
-                    doc["issues"] = repo["node"]["issues"]["totalCount"]
-                    doc["stargazers"] = repo["node"]["stargazers"]["totalCount"]
-                    doc["watchers"] = repo["node"]["watchers"]["totalCount"]
-                    doc["createdAt"] = repo["node"]["createdAt"]
-                    doc["nameWithOwner"] = repo["node"]["nameWithOwner"]
-                    doc["licenseId"] = find('licenseId', repo)
-                    doc["licenseType"] = find('licenseType', repo)
-                    doc["id"] = repo["node"]["repoId"].replace("/", "@")
-                    doc["org"] = org
-                    doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                    doc["committed_today"] = False if find('committedDate', repo) is None else True
-                    doc._key = repo["node"]["repoId"].replace("/", "@")
-                    doc.save()
-                except Exception as exception:
-                    handling_except(exception)
-                for language in languages_repo:
-                    # print(language)
-                    try:
-                        doc = languages_collection[str(find('languageId', language).replace("/", "@"))]
-                    except Exception:
-                        doc = languages_collection.createDocument()
-                    try:
-                        doc["name"] = find('languageName', language)
-                        doc["id"] = find('languageId', language)
-                        doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                        doc._key = find('languageId', language).replace("/", "@")
-                        doc.save()
-                    except Exception as exception:
-                        handling_except(exception)
-                    try:
-                        doc = languages_repo_collection[(str(find('repoId', repo)) +
-                                                         str(find('languageId', language))).replace("/", "@")]
-                    except Exception:
-                        doc = languages_repo_collection.createEdge()
-                    try:
-                        temp = db['Languages'][str(find('languageId', language)).replace("/", "@")]
-                        temp2 = db['Repo'][str(find('repoId', repo)).replace("/", "@")]
-                        doc["size"] = round(((find('languageSize', language) / find('totalSize', repo)) * 100), 2)
-                        doc._key = (str(find('repoId', repo)) + str(find('languageId', language))).replace("/", "@")
-                        doc.links(temp, temp2)
-                        doc.save()
-                    except Exception as exception:
-                        handling_except(exception)
-        except Exception as exception:
-            handling_except(exception)
+
+
+# def repo(db, org, query):
+#     has_next_page = True
+#     cursor = None
+#     while has_next_page:
+#         try:
+#             prox = pagination_universal(query, number_of_repo=repo_number_of_repos, next_cursor=cursor, org=org,
+#                                         since=since_time, until=until_time)
+#             # print(prox)
+#             limit_validation(rate_limit=find('rateLimit', prox))
+#             has_next_page = find('hasNextPage', prox)
+#             print(has_next_page)
+#             cursor = find('endCursor', prox)
+#             prox_repositorios = prox["data"]["organization"]["repositories"]["edges"]
+#             for repo in prox_repositorios:
+#                 try:
+#                     db.Repo.update_one(
+#                         {"_id": repo["node"]["repoId"].replace("/", "@")},
+#                         {
+#                             "$set":
+#                                 {
+#                                     "_key": repo["node"]["repoId"].replace("/", "@"),
+#                                     "repoName": repo["node"]["name"],
+#                                     "description": repo["node"]["description"],
+#                                     "url": repo["node"]["url"],
+#                                     "openSource": False if repo["node"]["isPrivate"] else True,
+#                                     "primaryLanguage": find('priLanguage', repo),
+#                                     "forks": repo["node"]["forks"]["totalCount"],
+#                                     "issues": repo["node"]["issues"]["totalCount"],
+#                                     "stargazers": repo["node"]["stargazers"]["totalCount"],
+#                                     "watchers": repo["node"]["watchers"]["totalCount"],
+#                                     "createdAt": repo["node"]["createdAt"],
+#                                     "nameWithOwner": repo["node"]["nameWithOwner"],
+#                                     "licenseId": find('licenseId', repo),
+#                                     "licenseType": find('licenseType', repo),
+#                                     "org": org,
+#                                     "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+#                                     "languages": parse_multiple_languages(repo, "language_edges", "languageName",
+#                                                                           "languageSize"),
+#                                     "committed_today": False if find('committedDate', repo) is None else True
+#                                 }
+#                         },
+#                         upsert=True,
+#                     )
+#                 except Exception as exception:
+#                     print(exception)
+#         except Exception as exception:
+#             print(exception)
+
+
+def repo2(db, org, query, collection_name, edge_name):
+    def id_content(node):
+        id = [{"_id": node["node"]["repoId"]}]
+        return id
+
+    def content(node, org):
+        save_content = [{
+            "_key": node["node"]["repoId"].replace("/", "@"),
+            "repoName": node["node"]["name"],
+            "description": node["node"]["description"],
+            "url": node["node"]["url"],
+            "openSource": False if node["node"]["isPrivate"] else True,
+            "primaryLanguage": find('priLanguage', node),
+            "forks": node["node"]["forks"]["totalCount"],
+            "issues": node["node"]["issues"]["totalCount"],
+            "stargazers": node["node"]["stargazers"]["totalCount"],
+            "watchers": node["node"]["watchers"]["totalCount"],
+            "createdAt": node["node"]["createdAt"],
+            "nameWithOwner": node["node"]["nameWithOwner"],
+            "licenseId": find('licenseId', node),
+            "licenseType": find('licenseType', node),
+            "org": org,
+            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+            "languages": parse_multiple_languages(node, "language_edges", "languageName",
+                                                  "languageSize"),
+            "committed_today": False if find('committedDate', node) is None else True
+        }]
+        return save_content
+
+    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                      number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
+                      id_content=id_content, save_content=content)
+    start.collect()
 
 
 # DEV ###############################
 
 
-def dev(db, org, query):
-    dev_collection = db['Dev']
-    cursor = None
-    has_next_page = True
-    while has_next_page:
-        try:
-            response = pagination_universal(query, number_of_repo=30, next_cursor=cursor, org=org)
-            limit_validation(rate_limit=find('rateLimit', response))
-            cursor = find('endCursor', response)
-            has_next_page = find('hasNextPage', response)
-            print(response)
-            devs_edge = response["data"]["organization"]["members"]["edges"]
-            for dev_slice in devs_edge:
-                try:
-                    doc = dev_collection[str(dev_slice["node"]["id"].replace("/", "@"))]
-                except Exception:
-                    doc = dev_collection.createDocument()
-                try:
-                    doc['devName'] = dev_slice["node"]["name"]
-                    doc["followers"] = dev_slice["node"]["followers"]["totalCount"]
-                    doc["following"] = dev_slice["node"]["following"]["totalCount"]
-                    doc["login"] = dev_slice["node"]["login"]
-                    doc["avatarUrl"] = dev_slice["node"]["avatarUrl"]
-                    doc["id"] = dev_slice["node"]["id"].replace("/", "@")
-                    doc["org"] = org
-                    doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                    doc._key = dev_slice["node"]["id"].replace("/", "@")
-                    doc.save()
-                except Exception as exception:
-                    handling_except(exception)
-        except Exception as exception:
-            handling_except(exception)
+def dev2(db, org, query, collection_name, edges_name):
+    def id_content(node):
+        id = [{"_id": node["node"]["id"]}]
+        return id
+
+    def content(node, org):
+        save_content = [{
+            "devName": find("name", node),
+            "followers": node["node"]["followers"]["totalCount"],
+            "following": node["node"]["following"]["totalCount"],
+            "login": node["node"]["login"],
+            "avatarUrl": node["node"]["avatarUrl"],
+            "org": org,
+            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+        }]
+        return save_content
+
+    start = Collector(db=db, collection_name=collection_name, org=org, edges=edges_name, query=query,
+                      number_of_repo=number_of_repos, id_content=id_content, save_content=content)
+    start.collect()
+
+
+# def dev(db, org, query):
+#     dev_collection = db['Dev']
+#     cursor = None
+#     has_next_page = True
+#     while has_next_page:
+#         try:
+#             response = pagination_universal(query, number_of_repo=30, next_cursor=cursor, org=org)
+#             limit_validation(rate_limit=find('rateLimit', response))
+#             cursor = find('endCursor', response)
+#             has_next_page = find('hasNextPage', response)
+#             print(response)
+#             devs_edge = response["data"]["organization"]["members"]["edges"]
+#             for dev_slice in devs_edge:
+#                 try:
+#                     doc = dev_collection[str(dev_slice["node"]["id"].replace("/", "@"))]
+#                 except Exception:
+#                     doc = dev_collection.createDocument()
+#                 try:
+#                     doc['devName'] = dev_slice["node"]["name"]
+#                     doc["followers"] = dev_slice["node"]["followers"]["totalCount"]
+#                     doc["following"] = dev_slice["node"]["following"]["totalCount"]
+#                     doc["login"] = dev_slice["node"]["login"]
+#                     doc["avatarUrl"] = dev_slice["node"]["avatarUrl"]
+#                     doc["id"] = dev_slice["node"]["id"].replace("/", "@")
+#                     doc["org"] = org
+#                     doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+#                     doc._key = dev_slice["node"]["id"].replace("/", "@")
+#                     doc.save()
+#                 except Exception as exception:
+#                     handling_except(exception)
+#         except Exception as exception:
+#             handling_except(exception)
 
 
 # TEAMS ###############################
+
+
+def teams2(db, org, query, collection_name, edges_name):
+    def id_content(node):
+        id = [{"_id": node["node"]["id"].replace("/", "@")}]
+        return id
+
+    def content(node, org):
+        save_content = [{
+            'createdAt': node["node"]["createdAt"],
+            "teamName": node["node"]["name"],
+            "privacy": node["node"]["privacy"],
+            "slug": node["node"]["slug"],
+            "membersCount": find('membersCount', node),
+            "repoCount": find('repoCount', node),
+            "id": node["node"]["id"].replace("/", "@"),
+            "org": org,
+            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+        }]
+        return save_content
+
+    start = Collector(db=db, collection_name=collection_name, org=org, edges=edges_name, query=query,
+                      number_of_repo=number_of_repos, id_content=id_content, save_content=content)
+    start.collect()
 
 
 def teams(db, org, query):
@@ -192,6 +296,28 @@ def teams(db, org, query):
 
 
 # COMMITS ###############################
+
+def commit_collector2(db, org, query, query_db, collection_name, edges_name):
+    def content(self, response, node):
+        save_content = [{
+            "collection_name": collection_name,
+            "_id": find('commitId', node),
+            "repositoryId": find('repositoryId', response),
+            "repoName": find('repoName', response),
+            "branchName": find('branchName', response),
+            "messageHeadline": find('messageHeadline', node),
+            "oid": find('oid', node),
+            "committedDate": find('committedDate', node),
+            "author": find('login', node),
+            "devId": find('devId', node),
+            "commitId": find('commitId', node),
+            "org": self.org
+        }]
+        return save_content
+
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edges_name, query=query,
+                            query_db=query_db, number_of_repo=number_of_repos, save_content=content)
+    start.start_threads()
 
 
 def commit_collector(db, org, query_arango, query_graphql):
