@@ -315,9 +315,23 @@ def commit_collector2(db, org, query, query_db, collection_name, edges_name):
         }]
         return save_content
 
+    def edges(node):
+        save_edges = [{
+            "edge_name": "commit_dev",
+            "to": find('commitId', node),
+            "from": find('devId', node)
+        },
+            {
+                "edge_name": "commit_dev",
+                "to": find('commitId', node),
+                "from": find('repositoryId', node)
+            }
+        ]
+        return save_edges
+
     start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edges_name, query=query,
-                            query_db=query_db, number_of_repo=number_of_repos, save_content=content)
-    start.start_threads()
+                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start()
 
 
 def commit_collector(db, org, query_arango, query_graphql):

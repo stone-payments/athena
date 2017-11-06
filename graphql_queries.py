@@ -10,6 +10,9 @@ with open("queries/teamsQuery.aql", "r") as teams_query:
 with open("queries/commitArango.aql", "r") as commit_arango:
     commit_arango = commit_arango.read()
 
+# commit_arango = "{'committed_today': True, 'org': self.org}"
+
+
 with open("queries/commitQuery.aql", "r") as commit_query:
     commit_query = commit_query.read()
 

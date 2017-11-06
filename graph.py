@@ -19,7 +19,7 @@ def job(orgs):
         # teams_dev(db, org, teams_dev_arango, teams_dev_query)
         # teams_repo(db, org, teams_repo_arango, teams_repo_query)
         # readme(db, org, readme_arango, readme_query)
-        commit_collector2(db, org, commit_query, commit_arango, "Commit", "edges")
+        commit_collector2(db, org, commit_query, commit_arango, ["Commit"], "edges")
         # commit_collector(db, org, commit_arango, commit_query)
         # stats_collector(db, org, stats_query)
         # fork_collector(db, org, fork_arango, fork_query)

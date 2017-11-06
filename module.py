@@ -8,6 +8,7 @@ from graphqlclient import GraphQLClient
 from classes import *
 import time
 from queue import Queue
+from mongraph import *
 
 client = GraphQLClient(url, token, timeout)
 clientRest2 = ClientRest(token, timeout)
@@ -133,8 +134,8 @@ class Collector:
 
 class CollectorThread:
     def __init__(self, db: object, collection_name: object, org: object, edges: object, query: object, query_db: object,
-                 save_content: type, number_of_repo: object = None, slug: object = None, since: object = None,
-                 until: object = None):
+                 save_content: type, save_edges: type = None, number_of_repo: object = None, slug: object = None,
+                 since: object = None, until: object = None):
         self.db = db
         self.org = org
         self.query = query
@@ -146,19 +147,17 @@ class CollectorThread:
         self.slug = slug
         self.collection_name = collection_name
         self.save_content = save_content
+        self.save_edges = save_edges
 
     def _save(self, save: Queue):
         while True:
             c = save.get(timeout=commit_queue_timeout)
-            self.db[c["collection_name"]].update_one(
-                {"_id": c["_id"]},
-                {
-                    "$set": c
-                },
-                upsert=True,
-            )
+            mongo_test = Mongraph(db=self.db)
+            mongo_test.update(obj={"_id": c["_id"]}, patch=c, kind="FOI")
+            for edge in self.save_edges(c):
+                mongo_test.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"))
 
-    def collect(self, repositories: Queue, save: Queue):
+    def _collect(self, repositories: Queue, save: Queue):
         while True:
             repository = repositories.get(timeout=commit_queue_timeout)
             has_next_page = True
@@ -174,22 +173,20 @@ class CollectorThread:
                 for node in edges:
                     print(node)
                     for collection in range(0, len(self.collection_name)):
-                        queue_input = self.save_content(self, response, node)[collection]
+                        queue_input = self.save_content(self, response, node)[0]
                         save.put(queue_input)
 
     def _query_db(self):
-        dictionary = [dict(x) for x in self.db.Repo.find({"committed_today": True, "org": self.org},
-                                                         {"repoName": 1, "_id": 0})]
-        lista = []
-        [lista.append(str(value["repoName"])) for value in dictionary]
-        return lista
+        dictionary = [dict(x) for x in self.db.Repo.find(eval(self.query_db), {'repoName': 1, '_id': 0})]
+        query_list = []
+        [query_list.append(str(value["repoName"])) for value in dictionary]
+        return query_list
 
-    def start_threads(self):
+    def _start_threads(self):
         repositories_queue = Queue(queue_max_size)
         save_queue = Queue(queue_max_size)
         query_result = self._query_db()
-        print(query_result)
-        workers = [Thread(target=self.collect, args=(repositories_queue, save_queue)) for _ in range(num_of_threads)]
+        workers = [Thread(target=self._collect, args=(repositories_queue, save_queue)) for _ in range(num_of_threads)]
         workers2 = [Thread(target=self._save, args=(save_queue,)) for _ in range(num_of_threads)]
         for repo in query_result:
             repositories_queue.put(str(repo))
@@ -197,3 +194,6 @@ class CollectorThread:
         [t.start() for t in workers2]
         [t.join() for t in workers]
         [t.join() for t in workers2]
+
+    def start(self):
+        self._start_threads()

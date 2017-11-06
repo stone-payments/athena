@@ -1,4 +1,1 @@
-FOR Repo in Repo
-    FILTER Repo.org == @org
-    FILTER Repo.committed_today == true
-    return Repo.repoName
+{"committed_today": True, "org": self.org}
