@@ -38,19 +38,15 @@ class Mongraph(object):
         collection.update_many(obj, {"$set": patch}, upsert=True)
         # return result.modified_count
 
-    def connect(self, from_: str, to: str, kind: str, **fields):
+    def connect(self, from_: str, to: str, kind: str, data: dict):
         kind = kind or '{from}${to}'.format(**{
             'from': from_,
             'to': to
         })
-        edge = self.__mongodb_client[kind]
-        edge.update()
-        edge.update_many(
-            {
-                "_key": kind
-            },
+        edge_id = str(from_) + str(to)
 
-        )
+        print(kind)
+        self.update(obj={"_id": edge_id}, patch={"from": from_, "to": to, "type": kind, "data": data}, kind="edges")
 
     def disconnect(self, from_: object, to: object, kind: str):
         kind = kind or '{from}${to}'.format(**{

@@ -114,6 +114,24 @@ class Collector:
             upsert=True,
         )
 
+    def _collect(self, repositories: Queue, save: Queue):
+        while True:
+            repository = repositories.get(timeout=commit_queue_timeout)
+            has_next_page = True
+            cursor = None
+            while has_next_page:
+                response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
+                                                org=self.org, since=since_time, until=until_time, slug=self.slug,
+                                                next_repo=repository)
+                limit_validation(rate_limit=find('rateLimit', response), output=save)
+                has_next_page = find('hasNextPage', response)
+                cursor = find('endCursor', response)
+                edges = find(self.edges, response)
+                for node in edges:
+                    print(node)
+                    queue_input = self.save_content(self, response, node)
+                    save.put(queue_input)
+
     def collect(self):
         has_next_page = True
         cursor = None
@@ -153,9 +171,12 @@ class CollectorThread:
         while True:
             c = save.get(timeout=commit_queue_timeout)
             mongo_test = Mongraph(db=self.db)
-            mongo_test.update(obj={"_id": c["_id"]}, patch=c, kind="FOI")
+            mongo_test.update(obj={"_id": c["_id"]}, patch=c, kind=c["collection_name"])
             for edge in self.save_edges(c):
-                mongo_test.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"))
+                print(edge)
+                mongo_test.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
+                                   data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                                  'edge_name']})
 
     def _collect(self, repositories: Queue, save: Queue):
         while True:
@@ -172,9 +193,8 @@ class CollectorThread:
                 edges = find(self.edges, response)
                 for node in edges:
                     print(node)
-                    for collection in range(0, len(self.collection_name)):
-                        queue_input = self.save_content(self, response, node)[0]
-                        save.put(queue_input)
+                    queue_input = self.save_content(self, response, node)
+                    save.put(queue_input)
 
     def _query_db(self):
         dictionary = [dict(x) for x in self.db.Repo.find(eval(self.query_db), {'repoName': 1, '_id': 0})]

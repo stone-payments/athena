@@ -299,8 +299,8 @@ def teams(db, org, query):
 
 def commit_collector2(db, org, query, query_db, collection_name, edges_name):
     def content(self, response, node):
-        save_content = [{
-            "collection_name": collection_name,
+        save_content = {
+            "collection_name": collection_name[0],
             "_id": find('commitId', node),
             "repositoryId": find('repositoryId', response),
             "repoName": find('repoName', response),
@@ -312,17 +312,19 @@ def commit_collector2(db, org, query, query_db, collection_name, edges_name):
             "devId": find('devId', node),
             "commitId": find('commitId', node),
             "org": self.org
-        }]
+        }
         return save_content
 
     def edges(node):
         save_edges = [{
             "edge_name": "commit_dev",
             "to": find('commitId', node),
-            "from": find('devId', node)
+            "from": find('devId', node),
+            "HUE": 5645,
+            "KAGKA": "ga"
         },
             {
-                "edge_name": "commit_dev",
+                "edge_name": "commit_repo",
                 "to": find('commitId', node),
                 "from": find('repositoryId', node)
             }
