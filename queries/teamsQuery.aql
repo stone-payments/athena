@@ -27,7 +27,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
             }
           }
           createdAt
-          id
+          teamId:id
           name
           privacy
           slug

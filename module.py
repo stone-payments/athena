@@ -90,7 +90,7 @@ def parse_multiple_languages(object_to_be_parsed, edge, key, value):
 
 
 class Collector:
-    def __init__(self, db, collection_name, org, edges, query, id_content, save_content, number_of_repo=None,
+    def __init__(self, db, collection_name, org, edges, query, save_content, save_edges, number_of_repo=None,
                  next_repo=None, slug=None, since=None, until=None):
         self.db = db
         self.org = org
@@ -102,8 +102,19 @@ class Collector:
         self.slug = slug
         self.next_repo = next_repo
         self.collection_name = collection_name
-        self.id_content = id_content
         self.save_content = save_content
+        self.save_edges = save_edges
+
+    def _save2(self, save):
+        c = save
+        print(c)
+        mongo_test = Mongraph(db=self.db)
+        mongo_test.update(obj={"_id": c["_id"]}, patch=c, kind=c["collection_name"])
+        for edge in self.save_edges(c):
+            # print(edge)
+            mongo_test.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
+                               data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                              'edge_name']})
 
     def _save(self, collection_name, id_content, save_content):
         self.db[collection_name].update_one(
@@ -114,23 +125,25 @@ class Collector:
             upsert=True,
         )
 
-    def _collect(self, repositories: Queue, save: Queue):
-        while True:
-            repository = repositories.get(timeout=commit_queue_timeout)
-            has_next_page = True
-            cursor = None
-            while has_next_page:
-                response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
-                                                org=self.org, since=since_time, until=until_time, slug=self.slug,
-                                                next_repo=repository)
-                limit_validation(rate_limit=find('rateLimit', response), output=save)
-                has_next_page = find('hasNextPage', response)
-                cursor = find('endCursor', response)
-                edges = find(self.edges, response)
-                for node in edges:
-                    print(node)
-                    queue_input = self.save_content(self, response, node)
-                    save.put(queue_input)
+    def _collect(self, save: Queue):
+
+        has_next_page = True
+        cursor = None
+        print("FOI")
+        while has_next_page:
+            response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
+                                            org=self.org, since=since_time, until=until_time, slug=self.slug,
+                                            next_repo=self.next_repo)
+            print(response)
+
+            limit_validation(rate_limit=find('rateLimit', response), output=save)
+            has_next_page = find('hasNextPage', response)
+            cursor = find('endCursor', response)
+            edges = find(self.edges, response)
+            for node in edges:
+                # print(node)
+                queue_input = self.save_content(self, response, node)
+                self._save2(queue_input)
 
     def collect(self):
         has_next_page = True
@@ -148,6 +161,10 @@ class Collector:
                     self._save(collection_name=self.collection_name[collection],
                                id_content=self.id_content(node)[collection],
                                save_content=self.save_content(node, self.org)[collection])
+
+    def start(self):
+        save_queue = Queue(queue_max_size)
+        self._collect(save=save_queue)
 
 
 class CollectorThread:
