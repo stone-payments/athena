@@ -134,7 +134,7 @@ def repo2(db, org, query, collection_name, edge_name):
         }
         return save_content
 
-    def edges(node):
+    def edges(node, response):
         save_edges = [
         ]
         return save_edges
@@ -148,26 +148,34 @@ def repo2(db, org, query, collection_name, edge_name):
 # DEV ###############################
 
 
-def dev2(db, org, query, collection_name, edges_name):
-    def id_content(node):
-        id = [{"_id": node["node"]["id"]}]
-        return id
+def dev2(db, org, query, collection_name, edge_name):
+    # def id_content(node):
+    #     id = [{"_id": node["node"]["id"]}]
+    #     return id
 
-    def content(node, org):
-        save_content = [{
+    def content(self, response, node):
+        save_content = {
+            "collection_name": collection_name[0],
+            "_id": find("id", node),
             "devName": find("name", node),
             "followers": node["node"]["followers"]["totalCount"],
             "following": node["node"]["following"]["totalCount"],
             "login": node["node"]["login"],
             "avatarUrl": node["node"]["avatarUrl"],
-            "org": org,
+            "org": self.org,
             "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
-        }]
+        }
         return save_content
 
-    start = Collector(db=db, collection_name=collection_name, org=org, edges=edges_name, query=query,
-                      number_of_repo=number_of_repos, id_content=id_content, save_content=content)
-    start.collect()
+    def edges(node, response):
+        save_edges = [
+        ]
+        return save_edges
+
+    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                      number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
+                      save_content=content, save_edges=edges)
+    start.start()
 
 
 # def dev(db, org, query):
@@ -227,15 +235,36 @@ def teams2(db, org, query, collection_name, edge_name):
         }
         return save_content
 
-    def edges(node):
-        save_edges = [{
-            "edge_name": "team_dev",
-            "to": find('memberId', node),
-            "from": find('teamId', node),
-            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-        }
+    # def edges(node, response):
+    #     save_edges = [{
+    #         "edge_name": "team_dev",
+    #         "to": find('memberId', node),
+    #         "from": find('teamId', response),
+    #         "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+    #     }
+    #     ]
+    #     return save_edges
+
+    def edges(team, members, repos):
+        collect_member_of_team = [
+            {
+                "edge_name": "team_dev",
+                'team_id': team,
+                'member_id': find('memberId', member),
+                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+            }
+            for member in members
         ]
-        return save_edges
+        collect_repositories_of_team = [
+            {
+                "edge_name": "team_dev",
+                'team_id': team,
+                'repository_id': find('repoId', repo),
+                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+            }
+            for repo in repos
+        ]
+        return collect_member_of_team, collect_repositories_of_team
 
     start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                       number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
@@ -333,23 +362,16 @@ def commit_collector2(db, org, query, query_db, collection_name, edges_name):
         }
         return save_content
 
-    def edges(node):
+    def edges(node, response):
         save_edges = [{
             "edge_name": "commit_dev",
             "to": find('commitId', node),
-            "from": find('devId', node),
-            "HUE": 5645,
-            "KAGKA": "ga"
+            "from": find('devId', node)
         },
             {
                 "edge_name": "commit_repo",
                 "to": find('commitId', node),
                 "from": find('repositoryId', node)
-            },
-            {
-                "edge_name": "dev_commit",
-                "to": find('devId', node),
-                "from": find('commitId', node)
             },
             {
                 "edge_name": "dev_repo",

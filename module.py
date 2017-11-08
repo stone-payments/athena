@@ -95,7 +95,7 @@ class Collector:
         self.db = db
         self.org = org
         self.query = query
-        self.edges = edges
+        self.edges_name = edges
         self.since = since
         self.until = until
         self.number_of_repo = number_of_repo
@@ -105,16 +105,38 @@ class Collector:
         self.save_content = save_content
         self.save_edges = save_edges
 
-    def _save2(self, save):
-        c = save
-        print(c)
+    def _save2(self, save, response):
+        print(save)
         mongo_test = Mongraph(db=self.db)
-        mongo_test.update(obj={"_id": c["_id"]}, patch=c, kind=c["collection_name"])
-        for edge in self.save_edges(c):
-            # print(edge)
+        mongo_test.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
+        for edge in self.save_edges(save, response):
             mongo_test.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
                                data={key: value for key, value in edge.items() if key not in ['from', 'to',
                                                                                               'edge_name']})
+
+    def _save_team(self, team, members, repo):
+        print(save)
+        mongo_test = Mongraph(db=self.db)
+        mongo_test.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
+        for edge in self.save_edges(save, response):
+            mongo_test.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
+                               data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                              'edge_name']})
+
+    def _save3(self, save, response):
+        print(save)
+        mongo_test = Mongraph(db=self.db)
+        mongo_test.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
+        for edge in self.save_edges(save, response):
+            for nested_edge in ["members_edge"]:
+                nested_edge_slice = find(nested_edge, response)
+                for x in nested_edge_slice:
+                    for response_nested_edge in self.save_edges(x, response):
+                        print(response_nested_edge)
+                        mongo_test.connect(to=response_nested_edge.get("to"), from_=response_nested_edge.get("from"),
+                                           kind=response_nested_edge.get("edge_name"),
+                                           data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                                          'edge_name']})
 
     def _save(self, collection_name, id_content, save_content):
         self.db[collection_name].update_one(
@@ -139,11 +161,31 @@ class Collector:
             limit_validation(rate_limit=find('rateLimit', response), output=save)
             has_next_page = find('hasNextPage', response)
             cursor = find('endCursor', response)
-            edges = find(self.edges, response)
+            edges = find(self.edges_name, response)
             for node in edges:
-                # print(node)
                 queue_input = self.save_content(self, response, node)
-                self._save2(queue_input)
+                self._save2(queue_input, response)
+
+    def _collect_team(self, save: Queue):
+        has_next_page = True
+        cursor = None
+        print("FOI")
+        while has_next_page:
+            response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
+                                            org=self.org, since=since_time, until=until_time, slug=self.slug,
+                                            next_repo=self.next_repo)
+            print(response)
+
+            limit_validation(rate_limit=find('rateLimit', response), output=save)
+            has_next_page = find('hasNextPage', response)
+            cursor = find('endCursor', response)
+            edges = find(self.edges_name, response)
+            for node in edges:
+                team = self.content(self, edges, node)
+                members, repositories = self.save_edges(team['_id'], find('members_edge', node),
+                                                        find('repo_edge', node))
+                queue_input = self.save_content(self, response, node)
+                self._save2(queue_input, response)
 
     def collect(self):
         has_next_page = True
@@ -155,7 +197,7 @@ class Collector:
             limit_validation(rate_limit=find('rateLimit', response))
             has_next_page = find('hasNextPage', response)
             cursor = find('endCursor', response)
-            edges = find(self.edges, response)
+            edges = find(self.edges_name, response)
             for node in edges:
                 for collection in range(0, len(self.collection_name)):
                     self._save(collection_name=self.collection_name[collection],
