@@ -114,13 +114,16 @@ class Collector:
                                data={key: value for key, value in edge.items() if key not in ['from', 'to',
                                                                                               'edge_name']})
 
-    def _save_team(self, team, members, repo):
-        print(save)
+    def _save_team(self, team, members, repos):
         mongo_test = Mongraph(db=self.db)
-        mongo_test.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
-        for edge in self.save_edges(save, response):
-            mongo_test.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
-                               data={key: value for key, value in edge.items() if key not in ['from', 'to',
+        mongo_test.update(obj={"_id": team["_id"]}, patch=team, kind=team["collection_name"])
+        for member in members:
+            mongo_test.connect(to=member.get("to"), from_=member.get("from"), kind=member.get("edge_name"),
+                               data={key: value for key, value in member.items() if key not in ['from', 'to',
+                                                                                                'edge_name']})
+        for repo in repos:
+            mongo_test.connect(to=repo.get("to"), from_=repo.get("from"), kind=repo.get("edge_name"),
+                               data={key: value for key, value in repo.items() if key not in ['from', 'to',
                                                                                               'edge_name']})
 
     def _save3(self, save, response):
@@ -174,18 +177,17 @@ class Collector:
             response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
                                             org=self.org, since=since_time, until=until_time, slug=self.slug,
                                             next_repo=self.next_repo)
-            print(response)
-
             limit_validation(rate_limit=find('rateLimit', response), output=save)
             has_next_page = find('hasNextPage', response)
             cursor = find('endCursor', response)
             edges = find(self.edges_name, response)
             for node in edges:
-                team = self.content(self, edges, node)
-                members, repositories = self.save_edges(team['_id'], find('members_edge', node),
+                team = self.save_content(self, edges, node)
+
+                members, repositories = self.save_edges(team, find('members_edge', node),
                                                         find('repo_edge', node))
                 queue_input = self.save_content(self, response, node)
-                self._save2(queue_input, response)
+                self._save_team(team, members, repositories)
 
     def collect(self):
         has_next_page = True
@@ -207,6 +209,10 @@ class Collector:
     def start(self):
         save_queue = Queue(queue_max_size)
         self._collect(save=save_queue)
+
+    def start_team(self):
+        save_queue = Queue(queue_max_size)
+        self._collect_team(save=save_queue)
 
 
 class CollectorThread:
@@ -246,6 +252,27 @@ class CollectorThread:
                 response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
                                                 org=self.org, since=since_time, until=until_time, slug=self.slug,
                                                 next_repo=repository)
+                # print(response)
+                limit_validation(rate_limit=find('rateLimit', response), output=save)
+                has_next_page = find('hasNextPage', response)
+                cursor = find('endCursor', response)
+                edges = find(self.edges, response)
+                for node in edges:
+                    # print(node)
+                    queue_input = self.save_content(self, response, node)
+                    save.put(queue_input)
+
+    def _collect_team_dev(self, repositories: Queue, save: Queue):
+        while True:
+            repository = repositories.get(timeout=commit_queue_timeout)
+            has_next_page = True
+            cursor = None
+            print(repository)
+            while has_next_page:
+                response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
+                                                org=self.org, since=since_time, until=until_time, slug=repository
+                                                )
+                print(response)
                 limit_validation(rate_limit=find('rateLimit', response), output=save)
                 has_next_page = find('hasNextPage', response)
                 cursor = find('endCursor', response)
@@ -261,10 +288,25 @@ class CollectorThread:
         [query_list.append(str(value["repoName"])) for value in dictionary]
         return query_list
 
-    def _start_threads(self):
+    def _query_fork(self):
+        dictionary = [dict(x) for x in self.db.Repo.find({"org": self.org, "forks": {"$gt": 0}},
+                                                         {'repoName': 1, '_id': 0})]
+        query_list = []
+        [query_list.append(str(value["repoName"])) for value in dictionary]
+        return query_list
+
+    def _query_team(self):
+        dictionary = [dict(x) for x in self.db.Teams.find({"org": "stone-payments", "membersCount": {"$gt": 100}},
+                                                          {'slug': 1, '_id': 0})]
+        query_list = []
+        [query_list.append(str(value["slug"])) for value in dictionary]
+        return query_list
+
+    def _start_threads(self, query_result):
         repositories_queue = Queue(queue_max_size)
         save_queue = Queue(queue_max_size)
-        query_result = self._query_db()
+        # query_result = self._query_fork()
+        print(query_result)
         workers = [Thread(target=self._collect, args=(repositories_queue, save_queue)) for _ in range(num_of_threads)]
         workers2 = [Thread(target=self._save, args=(save_queue,)) for _ in range(num_of_threads)]
         for repo in query_result:
@@ -275,4 +317,9 @@ class CollectorThread:
         [t.join() for t in workers2]
 
     def start(self):
-        self._start_threads()
+        query_result = self._query_db()
+        self._start_threads(query_result)
+
+    def start_fork(self):
+        query_result = self._query_fork()
+        self._start_threads(query_result)

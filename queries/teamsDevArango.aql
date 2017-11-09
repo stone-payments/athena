@@ -1,1 +1,1 @@
-FOR Teams in Teams FILTER Teams.org == @org FILTER Teams.membersCount > 100 return Teams.slug
+{org:"stone-payments", membersCount:{ {$gt: 100} }}

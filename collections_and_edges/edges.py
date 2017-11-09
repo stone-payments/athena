@@ -3,6 +3,37 @@ from module import *
 
 # TEAMS_DEV ###############################
 
+def teams_dev2(db, org, query, query_db, collection_name, edges_name):
+    def content(self, response, node):
+        save_content = {
+            "collection_name": collection_name[0],
+            'createdAt': node["node"]["createdAt"],
+            "teamName": node["node"]["name"],
+            "privacy": node["node"]["privacy"],
+            "slug": node["node"]["slug"],
+            "membersCount": find('membersCount', node),
+            "repoCount": find('repoCount', node),
+            "_id": find('teamId', node),
+            "org": self.org,
+            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+        }
+        return save_content
+
+    def edges(node, response):
+        save_edges = [
+            {
+                "edge_name": "dev_to_team",
+                'to': find('_id', response),
+                'from': find('memberId', node),
+                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+            },
+        ]
+        return save_edges
+
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edges_name, query=query,
+                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start()
+
 
 def teams_dev(db, org, query_arango, query_graphql):
     teams_dev_collection = db["TeamsDev"]

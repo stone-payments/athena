@@ -16,13 +16,13 @@ def job(orgs):
         # repo2(db, org, repo_query, ["Repo"], "edges")
         # dev2(db, org, dev_query, ["Dev"], "edges")
         # teams2(db, org, teams_query, ["Teams"], "edges")
-        # teams_dev(db, org, teams_dev_arango, teams_dev_query)
+        # teams_dev2(db, org, teams_dev_query, teams_dev_arango, ["Teams"], "edges")
         # teams_repo(db, org, teams_repo_arango, teams_repo_query)
         # readme(db, org, readme_arango, readme_query)
         commit_collector2(db, org, commit_query, commit_arango, ["Commit"], "edges")
         # commit_collector(db, org, commit_arango, commit_query)
         # stats_collector(db, org, stats_query)
-        # fork_collector(db, org, fork_arango, fork_query)
+        # fork_collector2(db, org, fork_query, fork_arango, ["Fork"], "edges")
         # issue(db, org, issue_arango, issue_query)
 
 
