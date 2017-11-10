@@ -15,15 +15,14 @@ def job(orgs):
         print(org)
         # repo2(db, org, repo_query, ["Repo"], "edges")
         # dev2(db, org, dev_query, ["Dev"], "edges")
-        # teams2(db, org, teams_query, ["Teams"], "edges")
+        teams2(db, org, query_team_mongo, ["Teams"], "edges")
         # teams_dev2(db, org, teams_dev_query, teams_dev_arango, ["Teams"], "edges")
         # teams_repo(db, org, teams_repo_arango, teams_repo_query)
         # readme(db, org, readme_arango, readme_query)
-        commit_collector2(db, org, commit_query, commit_arango, ["Commit"], "edges")
-        # commit_collector(db, org, commit_arango, commit_query)
-        # stats_collector(db, org, stats_query)
-        # fork_collector2(db, org, fork_query, fork_arango, ["Fork"], "edges")
-        # issue(db, org, issue_arango, issue_query)
+        # commit_collector2(db, org, commit_query, commit_arango, ["Commit"], "edges")
+        # stats_collector2(db, org, stats_query, ["Commit"], "edges")
+        # fork_collector2(db, org, fork_query, query_fork_mongo, ["Fork"], "edges")
+        # issue2(db, org, issue_query, issue_mongo,  ["Issue"], "edges")
 
 
 while True:

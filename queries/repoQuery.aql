@@ -10,6 +10,11 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
           defaultBranchRef {
             target {
               ...on Commit{
+                blame(path: "README.md"){
+                  ranges{
+                    endingLine
+                  }
+                }
                 history(first:1,since:$sinceTime,until:$untilTime){
         					edges{
                     node{

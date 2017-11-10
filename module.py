@@ -9,6 +9,8 @@ from classes import *
 import time
 from queue import Queue
 from mongraph import *
+import json
+import ast
 
 client = GraphQLClient(url, token, timeout)
 clientRest2 = ClientRest(token, timeout)
@@ -216,9 +218,9 @@ class Collector:
 
 
 class CollectorThread:
-    def __init__(self, db: object, collection_name: object, org: object, edges: object, query: object, query_db: object,
-                 save_content: type, save_edges: type = None, number_of_repo: object = None, slug: object = None,
-                 since: object = None, until: object = None):
+    def __init__(self, db: object, collection_name: object, org: object, edges: object, query: object = None,
+                 query_db: type = None, save_content: type = None, save_edges: type = None,
+                 number_of_repo: object = None, slug: object = None, since: object = None, until: object = None):
         self.db = db
         self.org = org
         self.query = query
@@ -252,15 +254,24 @@ class CollectorThread:
                 response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
                                                 org=self.org, since=since_time, until=until_time, slug=self.slug,
                                                 next_repo=repository)
-                # print(response)
                 limit_validation(rate_limit=find('rateLimit', response), output=save)
                 has_next_page = find('hasNextPage', response)
                 cursor = find('endCursor', response)
                 edges = find(self.edges, response)
                 for node in edges:
-                    # print(node)
                     queue_input = self.save_content(self, response, node)
                     save.put(queue_input)
+
+    def _collect_commit_stats(self, repositories: Queue, save: Queue):
+        while True:
+            repository = repositories.get(timeout=commit_queue_timeout)
+            repository = ast.literal_eval(repository)
+
+            rest_query = self.org + "/" + str(repository["repoName"]) + '/commits/'
+            result = clientRest2.execute(urlCommit, rest_query, str(repository['oid']))
+            queue_input = self.save_content(result, repository["_id"])
+            print(queue_input)
+            save.put(queue_input)
 
     def _collect_team_dev(self, repositories: Queue, save: Queue):
         while True:
@@ -288,26 +299,37 @@ class CollectorThread:
         [query_list.append(str(value["repoName"])) for value in dictionary]
         return query_list
 
-    def _query_fork(self):
-        dictionary = [dict(x) for x in self.db.Repo.find({"org": self.org, "forks": {"$gt": 0}},
-                                                         {'repoName': 1, '_id': 0})]
-        query_list = []
-        [query_list.append(str(value["repoName"])) for value in dictionary]
-        return query_list
+    # def _query_fork(self):
+    #     dictionary = [dict(x) for x in self.db.Repo.find({"org": self.org, "forks": {"$gt": 0}},
+    #                                                      {'repoName': 1, '_id': 0})]
+    #     query_list = []
+    #     [query_list.append(str(value["repoName"])) for value in dictionary]
+    #     return query_list
 
-    def _query_team(self):
-        dictionary = [dict(x) for x in self.db.Teams.find({"org": "stone-payments", "membersCount": {"$gt": 100}},
-                                                          {'slug': 1, '_id': 0})]
-        query_list = []
-        [query_list.append(str(value["slug"])) for value in dictionary]
-        return query_list
+    # def _query_issue(self):
+    #     dictionary = [dict(x) for x in self.db.Repo.find({"org": self.org, "issues": {"$gt": 0}},
+    #                                                      {'repoName': 1, '_id': 0})]
+    #     query_list = []
+    #     [query_list.append(str(value["repoName"])) for value in dictionary]
+    #     return query_list
 
-    def _start_threads(self, query_result):
+    # def _query_team(self):
+    #     dictionary = [dict(x) for x in self.db.Teams.find({"org": "stone-payments", "membersCount": {"$gt": 100}},
+    #                                                       {'slug': 1, '_id': 0})]
+    #     query_list = []
+    #     [query_list.append(str(value["slug"])) for value in dictionary]
+    #     return query_list
+
+    # def _query_stats(self):
+    #     dictionary = [dict(x) for x in self.db.Commit.find({"additions": None, "org": "stone-payments"},
+    #                                                        {'repoName': 1, 'oid': 1, '_id': 1})]
+    #     return dictionary
+
+    def _start_threads(self, query_result, collect_type):
         repositories_queue = Queue(queue_max_size)
         save_queue = Queue(queue_max_size)
-        # query_result = self._query_fork()
         print(query_result)
-        workers = [Thread(target=self._collect, args=(repositories_queue, save_queue)) for _ in range(num_of_threads)]
+        workers = [Thread(target=collect_type, args=(repositories_queue, save_queue)) for _ in range(num_of_threads)]
         workers2 = [Thread(target=self._save, args=(save_queue,)) for _ in range(num_of_threads)]
         for repo in query_result:
             repositories_queue.put(str(repo))
@@ -318,8 +340,16 @@ class CollectorThread:
 
     def start(self):
         query_result = self._query_db()
-        self._start_threads(query_result)
+        self._start_threads(query_result, self._collect)
 
     def start_fork(self):
-        query_result = self._query_fork()
-        self._start_threads(query_result)
+        query_result = self.query_db(self)
+        self._start_threads(query_result, self._collect)
+
+    def start_issue(self):
+        query_result = self.query_db(self)
+        self._start_threads(query_result, self._collect)
+
+    def start_stats(self):
+        query_result = self.query_db(self)
+        self._start_threads(query_result, self._collect)
