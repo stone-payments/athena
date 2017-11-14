@@ -177,8 +177,12 @@ class Collector:
         print("FOI")
         while has_next_page:
             response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
-                                            org=self.org, since=since_time, until=until_time, slug=self.slug,
+                                            org=self.org, slug=self.slug,
                                             next_repo=self.next_repo)
+            print(response)
+            # response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
+            #                                 org=self.org, since=since_time, until=until_time, slug=self.slug,
+            #                                 next_repo=repository)
             limit_validation(rate_limit=find('rateLimit', response), output=save)
             has_next_page = find('hasNextPage', response)
             cursor = find('endCursor', response)
@@ -218,7 +222,8 @@ class Collector:
 
 
 class CollectorThread:
-    def __init__(self, db: object, collection_name: object, org: object, edges: object, query: object = None,
+    def __init__(self, db: object, collection_name: object = None, org: object = None, edges: object = "edges",
+                 query: type = None,
                  query_db: type = None, save_content: type = None, save_edges: type = None,
                  number_of_repo: object = None, slug: object = None, since: object = None, until: object = None):
         self.db = db
@@ -236,11 +241,20 @@ class CollectorThread:
 
     def _save(self, save: Queue):
         while True:
-            c = save.get(timeout=commit_queue_timeout)
+            save_data = save.get(timeout=commit_queue_timeout)
             mongo_test = Mongraph(db=self.db)
-            mongo_test.update(obj={"_id": c["_id"]}, patch=c, kind=c["collection_name"])
-            for edge in self.save_edges(c):
+            mongo_test.update(obj={"_id": save_data["_id"]}, patch=save_data, kind=save_data["collection_name"])
+            for edge in self.save_edges(save_data):
                 print(edge)
+                mongo_test.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
+                                   data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                                  'edge_name']})
+
+    def _save_edges(self, save: Queue):
+        while True:
+            save_edges = save.get(timeout=commit_queue_timeout)
+            mongo_test = Mongraph(db=self.db)
+            for edge in save_edges:
                 mongo_test.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
                                    data={key: value for key, value in edge.items() if key not in ['from', 'to',
                                                                                                   'edge_name']})
@@ -254,10 +268,12 @@ class CollectorThread:
                 response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=cursor,
                                                 org=self.org, since=since_time, until=until_time, slug=self.slug,
                                                 next_repo=repository)
+                print(response)
                 limit_validation(rate_limit=find('rateLimit', response), output=save)
                 has_next_page = find('hasNextPage', response)
                 cursor = find('endCursor', response)
                 edges = find(self.edges, response)
+
                 for node in edges:
                     queue_input = self.save_content(self, response, node)
                     save.put(queue_input)
@@ -266,8 +282,8 @@ class CollectorThread:
         while True:
             repository = repositories.get(timeout=commit_queue_timeout)
             repository = ast.literal_eval(repository)
-
-            rest_query = self.org + "/" + str(repository["repoName"]) + '/commits/'
+            rest_query = self.query(self, repository)
+            # rest_query = self.org + "/" + str(repository["repoName"]) + '/commits/'
             result = clientRest2.execute(urlCommit, rest_query, str(repository['oid']))
             queue_input = self.save_content(result, repository["_id"])
             print(queue_input)
@@ -289,15 +305,16 @@ class CollectorThread:
                 cursor = find('endCursor', response)
                 edges = find(self.edges, response)
                 for node in edges:
-                    print(node)
-                    queue_input = self.save_content(self, response, node)
+                    # print(node)
+                    queue_input = self.save_edges(response, node)
+                    # print(queue_input)
                     save.put(queue_input)
 
-    def _query_db(self):
-        dictionary = [dict(x) for x in self.db.Repo.find(eval(self.query_db), {'repoName': 1, '_id': 0})]
-        query_list = []
-        [query_list.append(str(value["repoName"])) for value in dictionary]
-        return query_list
+    # def _query_db(self):
+    #     dictionary = [dict(x) for x in self.db.Repo.find(eval(self.query_db), {'repoName': 1, '_id': 0})]
+    #     query_list = []
+    #     [query_list.append(str(value["repoName"])) for value in dictionary]
+    #     return query_list
 
     # def _query_fork(self):
     #     dictionary = [dict(x) for x in self.db.Repo.find({"org": self.org, "forks": {"$gt": 0}},
@@ -325,12 +342,12 @@ class CollectorThread:
     #                                                        {'repoName': 1, 'oid': 1, '_id': 1})]
     #     return dictionary
 
-    def _start_threads(self, query_result, collect_type):
+    def _start_threads(self, query_result, collect_type, save_type):
         repositories_queue = Queue(queue_max_size)
         save_queue = Queue(queue_max_size)
         print(query_result)
         workers = [Thread(target=collect_type, args=(repositories_queue, save_queue)) for _ in range(num_of_threads)]
-        workers2 = [Thread(target=self._save, args=(save_queue,)) for _ in range(num_of_threads)]
+        workers2 = [Thread(target=save_type, args=(save_queue,)) for _ in range(num_of_threads)]
         for repo in query_result:
             repositories_queue.put(str(repo))
         [t.start() for t in workers]
@@ -338,18 +355,23 @@ class CollectorThread:
         [t.join() for t in workers]
         [t.join() for t in workers2]
 
-    def start(self):
-        query_result = self._query_db()
-        self._start_threads(query_result, self._collect)
-
-    def start_fork(self):
+    def start(self, stats=None, team_dev=None):
         query_result = self.query_db(self)
-        self._start_threads(query_result, self._collect)
+        if stats is True:
+            self._start_threads(query_result, self._collect_commit_stats, self._save)
+        elif team_dev is True:
+            self._start_threads(query_result, self._collect_team_dev, self._save_edges)
+        else:
+            self._start_threads(query_result, self._collect, self._save)
 
-    def start_issue(self):
-        query_result = self.query_db(self)
-        self._start_threads(query_result, self._collect)
+            # def start_fork(self):
+            #     query_result = self.query_db(self)
+            #     self._start_threads(query_result, self._collect)
+            #
+            # def start_issue(self):
+            #     query_result = self.query_db(self)
+            #     self._start_threads(query_result, self._collect)
 
-    def start_stats(self):
-        query_result = self.query_db(self)
-        self._start_threads(query_result, self._collect)
+            # def start_stats(self):
+            #     query_result = self.query_db(self)
+            #     self._start_threads(query_result, self._collect_commit_stats)

@@ -4,7 +4,7 @@ from module import *
 
 # REPO ###############################
 
-def repo2(db, org, query, collection_name, edge_name):
+def repo2(db, org, query, collection_name, edge_name="edges"):
 
     def content(self, response, node):
         readme_ranges = find('ranges', node)
@@ -51,7 +51,7 @@ def repo2(db, org, query, collection_name, edge_name):
 # DEV ###############################
 
 
-def dev2(db, org, query, collection_name, edge_name):
+def dev2(db, org, query, collection_name, edge_name="edges"):
 
     def content(self, response, node):
         save_content = {
@@ -81,7 +81,7 @@ def dev2(db, org, query, collection_name, edge_name):
 # TEAMS ###############################
 
 
-def teams2(db, org, query, collection_name, edge_name):
+def teams2(db, org, query, collection_name, edge_name="edges"):
     # def id_content(node):
     #     id = [{"_id": node["node"]["id"].replace("/", "@")}]
     #     return id
@@ -123,7 +123,7 @@ def teams2(db, org, query, collection_name, edge_name):
         ]
         collect_repositories_of_team = [
             {
-                "edge_name": "_to_team",
+                "edge_name": "repo_to_team",
                 'to': find('_id', team),
                 'from': find('repoId', repo),
                 "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
@@ -138,79 +138,79 @@ def teams2(db, org, query, collection_name, edge_name):
     start.start_team()
 
 
-def teams(db, org, query):
-    teams_collection = db["Teams"]
-    teams_dev_collection = db["TeamsDev"]
-    teams_repo_collection = db["TeamsRepo"]
-    cursor = None
-    has_next_page = True
-    while has_next_page:
-        try:
-            prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, org=org)
-            limit_validation(rate_limit=find('rateLimit', prox))
-            print(prox)
-            cursor = find('endCursor', prox)
-            has_next_page = find('hasNextPage', prox)
-            print(has_next_page)
-            proxrepositorios = prox["data"]["organization"]["teams"]["edges"]
-            for team in proxrepositorios:
-                team_dev_contents = find('members_edge', team)
-                team_repo_contents = find('repo_edge', team)
-                try:
-                    doc = teams_collection[str(team["node"]["id"].replace("/", "@"))]
-                except Exception:
-                    doc = teams_collection.createDocument()
-                try:
-                    doc['createdAt'] = team["node"]["createdAt"]
-                    doc["teamName"] = team["node"]["name"]
-                    doc["privacy"] = team["node"]["privacy"]
-                    doc["slug"] = team["node"]["slug"]
-                    doc["membersCount"] = find('membersCount', team)
-                    doc["repoCount"] = find('repoCount', team)
-                    doc["id"] = team["node"]["id"].replace("/", "@")
-                    doc["org"] = org
-                    doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                    doc._key = team["node"]["id"].replace("/", "@")
-                    doc.save()
-                except Exception as exception:
-                    handling_except(exception)
-                for team_dev_content in team_dev_contents:
-                    try:
-                        doc = teams_dev_collection[(str(team["node"]["id"]) +
-                                                    str(find('memberId', team_dev_content))).replace("/", "@")]
-                    except Exception:
-                        doc = teams_dev_collection.createEdge()
-                    try:
-                        temp = db['Dev'][str(find('memberId', team_dev_content)).replace("/", "@")]
-                        temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
-                        doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                        doc._key = (str(team["node"]["id"]) + str(find('memberId', team_dev_content))).replace("/", "@")
-                        doc.links(temp, temp2)
-                        doc.save()
-                    except Exception as exception:
-                        handling_except(exception)
-                for team_repo_content in team_repo_contents:
-                    try:
-                        doc = teams_repo_collection[(str(team["node"]["id"]) +
-                                                     str(find('repoId', team_repo_content))).replace("/", "@")]
-                    except Exception:
-                        doc = teams_repo_collection.createEdge()
-                    try:
-                        temp = db['Repo'][str(find('repoId', team_repo_content)).replace("/", "@")]
-                        temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
-                        doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
-                        doc._key = (str(team["node"]["id"]) + str(find('repoId', team_repo_content))).replace("/", "@")
-                        doc.links(temp, temp2)
-                        doc.save()
-                    except Exception as exception:
-                        handling_except(exception)
-        except Exception as exception:
-            handling_except(exception)
+# def teams(db, org, query):
+#     teams_collection = db["Teams"]
+#     teams_dev_collection = db["TeamsDev"]
+#     teams_repo_collection = db["TeamsRepo"]
+#     cursor = None
+#     has_next_page = True
+#     while has_next_page:
+#         try:
+#             prox = pagination_universal(query, number_of_repo=number_of_repos, next_cursor=cursor, org=org)
+#             limit_validation(rate_limit=find('rateLimit', prox))
+#             print(prox)
+#             cursor = find('endCursor', prox)
+#             has_next_page = find('hasNextPage', prox)
+#             print(has_next_page)
+#             proxrepositorios = prox["data"]["organization"]["teams"]["edges"]
+#             for team in proxrepositorios:
+#                 team_dev_contents = find('members_edge', team)
+#                 team_repo_contents = find('repo_edge', team)
+#                 try:
+#                     doc = teams_collection[str(team["node"]["id"].replace("/", "@"))]
+#                 except Exception:
+#                     doc = teams_collection.createDocument()
+#                 try:
+#                     doc['createdAt'] = team["node"]["createdAt"]
+#                     doc["teamName"] = team["node"]["name"]
+#                     doc["privacy"] = team["node"]["privacy"]
+#                     doc["slug"] = team["node"]["slug"]
+#                     doc["membersCount"] = find('membersCount', team)
+#                     doc["repoCount"] = find('repoCount', team)
+#                     doc["id"] = team["node"]["id"].replace("/", "@")
+#                     doc["org"] = org
+#                     doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+#                     doc._key = team["node"]["id"].replace("/", "@")
+#                     doc.save()
+#                 except Exception as exception:
+#                     handling_except(exception)
+#                 for team_dev_content in team_dev_contents:
+#                     try:
+#                         doc = teams_dev_collection[(str(team["node"]["id"]) +
+#                                                     str(find('memberId', team_dev_content))).replace("/", "@")]
+#                     except Exception:
+#                         doc = teams_dev_collection.createEdge()
+#                     try:
+#                         temp = db['Dev'][str(find('memberId', team_dev_content)).replace("/", "@")]
+#                         temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
+#                         doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+#                         doc._key = (str(team["node"]["id"]) + str(find('memberId', team_dev_content))).replace("/", "@")
+#                         doc.links(temp, temp2)
+#                         doc.save()
+#                     except Exception as exception:
+#                         handling_except(exception)
+#                 for team_repo_content in team_repo_contents:
+#                     try:
+#                         doc = teams_repo_collection[(str(team["node"]["id"]) +
+#                                                      str(find('repoId', team_repo_content))).replace("/", "@")]
+#                     except Exception:
+#                         doc = teams_repo_collection.createEdge()
+#                     try:
+#                         temp = db['Repo'][str(find('repoId', team_repo_content)).replace("/", "@")]
+#                         temp2 = db['Teams'][str(team["node"]["id"]).replace("/", "@")]
+#                         doc["db_last_updated"] = str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+#                         doc._key = (str(team["node"]["id"]) + str(find('repoId', team_repo_content))).replace("/", "@")
+#                         doc.links(temp, temp2)
+#                         doc.save()
+#                     except Exception as exception:
+#                         handling_except(exception)
+#         except Exception as exception:
+#             handling_except(exception)
 
 
 # COMMITS ###############################
 
-def commit_collector2(db, org, query, query_db, collection_name, edges_name):
+def commit_collector2(db, org, query, query_db, collection_name, edge_name="edges"):
     def content(self, response, node):
         save_content = {
             "collection_name": collection_name[0],
@@ -224,7 +224,8 @@ def commit_collector2(db, org, query, query_db, collection_name, edges_name):
             "author": find('login', node),
             "devId": find('devId', node),
             "commitId": find('commitId', node),
-            "org": self.org
+            "org": self.org,
+            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
         }
         return save_content
 
@@ -232,29 +233,32 @@ def commit_collector2(db, org, query, query_db, collection_name, edges_name):
         save_edges = [{
             "edge_name": "commit_dev",
             "to": find('commitId', node),
-            "from": find('devId', node)
+            "from": find('devId', node),
+            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
         },
             {
                 "edge_name": "commit_repo",
                 "to": find('commitId', node),
-                "from": find('repositoryId', node)
+                "from": find('repositoryId', node),
+                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
             },
             {
                 "edge_name": "dev_repo",
                 "to": find('devId', node),
-                "from": find('repositoryId', node)
+                "from": find('repositoryId', node),
+                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
             }
         ]
         return save_edges
 
-    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edges_name, query=query,
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                             query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
     start.start()
 
 
 # STATS ###############################
 
-def stats_collector2(db, org, stats_query, collection_name, edges_name):
+def stats_collector2(db, org, query, stats_query, collection_name, edge_name="edges"):
     def content(node, commit_id):
         save_content = {
             "collection_name": collection_name[0],
@@ -271,67 +275,68 @@ def stats_collector2(db, org, stats_query, collection_name, edges_name):
         ]
         return save_edges
 
-    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edges_name, query_db=stats_query,
-                            number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start_stats()
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                            query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
+                            save_edges=edges)
+    start.start(stats=True)
 
 
-def stats_collector(db, org, query):
-    commit_collection = db["Commit"]
-    bind_vars = {"org": org, "since_time": since_time, "until_time": until_time}
-    query_result = db.AQLQuery(query, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
-
-    def collector(repositories: Queue, output: Queue):
-        while True:
-            repository = repositories.get_nowait()
-            try:
-                temp = repository["oid"]
-                rest_query = org + "/" + repository["repo"] + '/commits/'
-                result = clientRest2.execute(urlCommit, rest_query, temp)
-                print(result)
-            except Exception:
-                continue
-            commit = {
-                "commitId": repository["id"],
-                'totalAddDel': result['stats']['total'],
-                'additions': result['stats']['additions'],
-                'deletions': result['stats']['deletions'],
-                'numFiles': len(result['files'])
-            }
-            output.put(commit)
-
-    def save(repositories: Queue, output: Queue):
-        while True:
-            c = commits_queue.get(timeout=stats_queue_timeout)
-            try:
-                doc = commit_collection[str(c["commitId"].replace("/", "@"))]
-                doc['totalAddDel'] = c['totalAddDel']
-                doc['additions'] = c['additions']
-                doc['deletions'] = c['deletions']
-                doc['numFiles'] = c['numFiles']
-                doc._key = c["commitId"].replace("/", "@")
-                doc.save()
-            except Exception as exception:
-                handling_except(exception)
-
-    repositories_queue = Queue(queue_max_size)
-    commits_queue = Queue(queue_max_size)
-
-    workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(stats_num_of_threads)]
-    workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(stats_num_of_threads)]
-
-    for repo in query_result:
-        print(repo)
-        repositories_queue.put(repo)
-    [t.start() for t in workers]
-    [t.start() for t in workers2]
-    [t.join() for t in workers]
-    [t.join() for t in workers2]
+# def stats_collector(db, org, query):
+#     commit_collection = db["Commit"]
+#     bind_vars = {"org": org, "since_time": since_time, "until_time": until_time}
+#     query_result = db.AQLQuery(query, batchSize=batch_size, rawResults=True, bindVars=bind_vars)
+#
+#     def collector(repositories: Queue, output: Queue):
+#         while True:
+#             repository = repositories.get_nowait()
+#             try:
+#                 temp = repository["oid"]
+#                 rest_query = org + "/" + repository["repo"] + '/commits/'
+#                 result = clientRest2.execute(urlCommit, rest_query, temp)
+#                 print(result)
+#             except Exception:
+#                 continue
+#             commit = {
+#                 "commitId": repository["id"],
+#                 'totalAddDel': result['stats']['total'],
+#                 'additions': result['stats']['additions'],
+#                 'deletions': result['stats']['deletions'],
+#                 'numFiles': len(result['files'])
+#             }
+#             output.put(commit)
+#
+#     def save(repositories: Queue, output: Queue):
+#         while True:
+#             c = commits_queue.get(timeout=stats_queue_timeout)
+#             try:
+#                 doc = commit_collection[str(c["commitId"].replace("/", "@"))]
+#                 doc['totalAddDel'] = c['totalAddDel']
+#                 doc['additions'] = c['additions']
+#                 doc['deletions'] = c['deletions']
+#                 doc['numFiles'] = c['numFiles']
+#                 doc._key = c["commitId"].replace("/", "@")
+#                 doc.save()
+#             except Exception as exception:
+#                 handling_except(exception)
+#
+#     repositories_queue = Queue(queue_max_size)
+#     commits_queue = Queue(queue_max_size)
+#
+#     workers = [Thread(target=collector, args=(repositories_queue, commits_queue)) for _ in range(stats_num_of_threads)]
+#     workers2 = [Thread(target=save, args=(repositories_queue, commits_queue)) for _ in range(stats_num_of_threads)]
+#
+#     for repo in query_result:
+#         print(repo)
+#         repositories_queue.put(repo)
+#     [t.start() for t in workers]
+#     [t.start() for t in workers2]
+#     [t.join() for t in workers]
+#     [t.join() for t in workers2]
 
 
 # FORK ###############################
 
-def fork_collector2(db, org, query, query_db, collection_name, edges_name):
+def fork_collector2(db, org, query, query_db, collection_name, edge_name="edges"):
     def content(self, response, node):
         save_content = {
             "collection_name": collection_name[0],
@@ -343,7 +348,8 @@ def fork_collector2(db, org, query, query_db, collection_name, edges_name):
             "isLocked": find('isLocked', node),
             "devId": find('devId', node),
             "login": find('login', node),
-            "org": self.org
+            "org": self.org,
+            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
         }
         return save_content
 
@@ -363,14 +369,14 @@ def fork_collector2(db, org, query, query_db, collection_name, edges_name):
         ]
         return save_edges
 
-    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edges_name, query=query,
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                             query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start_fork()
+    start.start()
 
 
 # ISSUES ###############################
 
-def issue2(db, org, query, query_db, collection_name, edges_name):
+def issue2(db, org, query, query_db, collection_name, edge_name="edges"):
     def content(self, response, node):
         save_content = {
             "collection_name": collection_name[0],
@@ -386,7 +392,8 @@ def issue2(db, org, query, query_db, collection_name, edges_name):
             "closed": find('closed', node),
             "label": find('label', node),
             "title": find('title', node),
-            "org": self.org
+            "org": self.org,
+            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
         }
         return save_content
 
@@ -401,6 +408,6 @@ def issue2(db, org, query, query_db, collection_name, edges_name):
         ]
         return save_edges
 
-    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edges_name, query=query,
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                             query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start_fork()
+    start.start()

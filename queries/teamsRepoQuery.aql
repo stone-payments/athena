@@ -2,11 +2,11 @@ query ($number_of_repos: Int!, $next: String, $slug: String!, $org: String!) {
   organization(login: $org) {
     team(slug: $slug) {
       name
-      id
+      teamId:id
       repositories(first: $number_of_repos, after: $next) {
         edges {
           node {
-            id
+            repoId:id
             name
           }
         }

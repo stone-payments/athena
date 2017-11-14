@@ -13,16 +13,15 @@ db = create_database_if_not_exists(db_name, db_url, username, password)
 def job(orgs):
     for org in orgs:
         print(org)
-        # repo2(db, org, repo_query, ["Repo"], "edges")
-        # dev2(db, org, dev_query, ["Dev"], "edges")
-        teams2(db, org, query_team_mongo, ["Teams"], "edges")
-        # teams_dev2(db, org, teams_dev_query, teams_dev_arango, ["Teams"], "edges")
-        # teams_repo(db, org, teams_repo_arango, teams_repo_query)
-        # readme(db, org, readme_arango, readme_query)
-        # commit_collector2(db, org, commit_query, commit_arango, ["Commit"], "edges")
-        # stats_collector2(db, org, stats_query, ["Commit"], "edges")
-        # fork_collector2(db, org, fork_query, query_fork_mongo, ["Fork"], "edges")
-        # issue2(db, org, issue_query, issue_mongo,  ["Issue"], "edges")
+        # repo2(db, org, repo_query, ["Repo"])
+        # dev2(db, org, dev_query, ["Dev"])
+        # teams2(db, org, teams_query, ["Teams"])
+        # teams_dev2(db, org, teams_dev_query, query_teams_dev_mongo)
+        # teams_repo2(db, org, teams_repo_query, query_teams_repo_mongo)
+        # commit_collector2(db, org, commit_query, query_commit_mongo, ["Commit"])
+        # stats_collector2(db, org, stats_query, query_stats_mongo, ["Commit"])
+        # fork_collector2(db, org, fork_query, query_fork_mongo, ["Fork"])
+        issue2(db, org, issue_query, issue_mongo, ["Issue"])
 
 
 while True:
