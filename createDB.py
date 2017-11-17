@@ -1,16 +1,11 @@
-# from pyArango.connection import *
 from pymongo import MongoClient
-
+from config import *
 # Create DataBase ################################################
 
 
 def create_database_if_not_exists(db_name, db_url, username, password):
-    # conn = Connection(arangoURL=db_url, username=username, password=password)
-    # if not conn.hasDatabase(db_name):
-    #     conn.createDatabase(name=db_name)
-    # return conn[db_name]
     client = MongoClient('localhost', 27017)
-    return client.test_database
+    return client[db_name]
 
 #
 # def create_collection_if_not_exists(db, collections, hash_indexes, hash_indexes_unique, skip_list_indexes,
