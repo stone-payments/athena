@@ -7,12 +7,6 @@ with open("queries/devQuery.aql", "r") as dev_query:
 with open("queries/teamsQuery.aql", "r") as teams_query:
     teams_query = teams_query.read()
 
-# with open("queries/commitArango.aql", "r") as commit_arango:
-#     commit_arango = commit_arango.read()
-
-# commit_arango = "{'committed_today': True, 'org': self.org}"
-
-
 with open("queries/commitQuery.aql", "r") as commit_query:
     commit_query = commit_query.read()
 
@@ -22,8 +16,6 @@ with open("queries/readmeArango.aql", "r") as readme_arango:
 with open("queries/readmeQuery.aql", "r") as readme_query:
     readme_query = readme_query.read()
 
-# with open("queries/statsQuery.aql", "r") as stats_query:
-#     stats_query = stats_query.read()
 
 with open("queries/forkArango.aql", "r") as fork_arango:
     fork_arango = fork_arango.read()
@@ -31,14 +23,10 @@ with open("queries/forkArango.aql", "r") as fork_arango:
 with open("queries/forkQuery.aql", "r") as fork_query:
     fork_query = fork_query.read()
 
-# with open("queries/issueArango.aql", "r") as issue_mongo:
-#     issue_mongo = issue_mongo.read()
 
 with open("queries/issueQuery.aql", "r") as issue_query:
     issue_query = issue_query.read()
 
-# with open("queries/teamsDevArango.aql", "r") as teams_dev_arango:
-#     teams_dev_arango = teams_dev_arango.read()
 
 with open("queries/teamsDevQuery.aql", "r") as teams_dev_query:
     teams_dev_query = teams_dev_query.read()

@@ -2,13 +2,15 @@ from collections_and_edges import *
 from createDB import create_database_if_not_exists
 from config import *
 from graphql_queries import *
-
+from pymongo import IndexModel, ASCENDING, DESCENDING
 db = create_database_if_not_exists(db_name, db_url, username, password)
 
 
 # create_collection_if_not_exists(db, collections, hash_indexes, hash_indexes_unique, skip_list_indexes,
 #                                 full_text_indexes)
 
+# index2 = IndexModel([("orgw", DESCENDING)])
+# db.Repo.create_indexes([index2])
 
 def job(orgs):
     for org in orgs:

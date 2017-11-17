@@ -1,4 +1,4 @@
-from module import *
+from collector import *
 
 
 # REPO ###############################
