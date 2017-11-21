@@ -1,9 +1,10 @@
 from collector import *
+from validators import *
 
 
 # REPO ###############################
 
-def repo2(db, org, query, collection_name, edge_name="edges"):
+def repo(db, org, query, collection_name, edge_name="edges"):
 
     def content(self, response, node):
         readme_ranges = find('ranges', node)
@@ -12,27 +13,27 @@ def repo2(db, org, query, collection_name, edge_name="edges"):
         else:
             readme = None
         save_content = {
-            "collection_name": collection_name[0],
-            "_id": node["node"]["repoId"].replace("/", "@"),
-            "repoName": node["node"]["name"],
-            "description": node["node"]["description"],
-            "url": node["node"]["url"],
-            "openSource": False if node["node"]["isPrivate"] else True,
-            "primaryLanguage": find('priLanguage', node),
-            "forks": node["node"]["forks"]["totalCount"],
-            "issues": node["node"]["issues"]["totalCount"],
-            "stargazers": node["node"]["stargazers"]["totalCount"],
-            "watchers": node["node"]["watchers"]["totalCount"],
-            "createdAt": node["node"]["createdAt"],
-            "nameWithOwner": node["node"]["nameWithOwner"],
-            "licenseId": find('licenseId', node),
-            "licenseType": find('licenseType', node),
-            "readme": readme,
-            "org": self.org,
-            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+            "collection_name": string_validate(collection_name[0], not_none=True),
+            "org": string_validate(self.org, not_none=True),
+            "_id": not_null(node["node"]["repoId"].replace("/", "@")),
+            "repoName": string_validate(node["node"]["name"], not_none=True),
+            "description": string_validate(node["node"]["description"]),
+            "url": string_validate(node["node"]["url"]),
+            "openSource": bool_validate(False if node["node"]["isPrivate"] else True),
+            "primaryLanguage": string_validate(find('priLanguage', node)),
+            "forks": int_validate(node["node"]["forks"]["totalCount"]),
+            "issues": int_validate(node["node"]["issues"]["totalCount"]),
+            "stargazers": int_validate(node["node"]["stargazers"]["totalCount"]),
+            "watchers": int_validate(node["node"]["watchers"]["totalCount"]),
+            "createdAt": string_validate(node["node"]["createdAt"]),
+            "nameWithOwner": string_validate(node["node"]["nameWithOwner"]),
+            "licenseId": string_validate(find('licenseId', node)),
+            "licenseType": string_validate(find('licenseType', node)),
+            "readme": string_validate(readme),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))),
             "languages": parse_multiple_languages(node, "language_edges", "languageName",
                                                   "languageSize"),
-            "committed_today": False if find('committedDate', node) is None else True
+            "committed_today": bool_validate(False if find('committedDate', node) is None else True)
         }
         return save_content
 
@@ -50,19 +51,19 @@ def repo2(db, org, query, collection_name, edge_name="edges"):
 # DEV ###############################
 
 
-def dev2(db, org, query, collection_name, edge_name="edges"):
+def dev(db, org, query, collection_name, edge_name="edges"):
 
     def content(self, response, node):
         save_content = {
-            "collection_name": collection_name[0],
-            "_id": find("id", node),
-            "devName": find("name", node),
-            "followers": node["node"]["followers"]["totalCount"],
-            "following": node["node"]["following"]["totalCount"],
-            "login": node["node"]["login"],
-            "avatarUrl": node["node"]["avatarUrl"],
-            "org": self.org,
-            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+            "collection_name": string_validate(collection_name[0], not_none=True),
+            "org": string_validate(self.org, not_none=True),
+            "_id": not_null(find("id", node)),
+            "devName": string_validate(find("name", node)),
+            "followers": int_validate(node["node"]["followers"]["totalCount"]),
+            "following": int_validate(node["node"]["following"]["totalCount"]),
+            "login": string_validate(node["node"]["login"], not_none=True),
+            "avatarUrl": string_validate(node["node"]["avatarUrl"]),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))),
         }
         return save_content
 
@@ -72,7 +73,7 @@ def dev2(db, org, query, collection_name, edge_name="edges"):
         return save_edges
 
     start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
+                      number_of_repo=number_of_repos, since=since_time, until=until_time,
                       save_content=content, save_edges=edges)
     start.start()
 
@@ -80,20 +81,20 @@ def dev2(db, org, query, collection_name, edge_name="edges"):
 # TEAMS ###############################
 
 
-def teams2(db, org, query, collection_name, edge_name="edges"):
+def teams(db, org, query, collection_name, edge_name="edges"):
 
     def content(self, response, node):
         save_content = {
-            "collection_name": collection_name[0],
-            'createdAt': node["node"]["createdAt"],
-            "teamName": node["node"]["name"],
-            "privacy": node["node"]["privacy"],
-            "slug": node["node"]["slug"],
-            "membersCount": find('membersCount', node),
-            "repoCount": find('repoCount', node),
-            "_id": find('teamId', node),
-            "org": self.org,
-            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+            "collection_name": string_validate(collection_name[0], not_none=True),
+            "org": string_validate(self.org, not_none=True),
+            "_id": not_null(find('teamId', node)),
+            'createdAt': string_validate(node["node"]["createdAt"]),
+            "teamName": string_validate(node["node"]["name"], not_none=True),
+            "privacy": string_validate(node["node"]["privacy"]),
+            "slug": string_validate(node["node"]["slug"], not_none=True),
+            "membersCount": int_validate(find('membersCount', node)),
+            "repoCount": int_validate(find('repoCount', node)),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
         }
         return save_content
 
@@ -101,68 +102,114 @@ def teams2(db, org, query, collection_name, edge_name="edges"):
         collect_member_of_team = [
             {
                 "edge_name": "dev_to_team",
-                'to': find('_id', team),
-                'from': find('memberId', member),
-                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                'to': not_null(find('_id', team)),
+                'from': not_null(find('memberId', member)),
+                "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             }
             for member in members
         ]
         collect_repositories_of_team = [
             {
                 "edge_name": "repo_to_team",
-                'to': find('_id', team),
-                'from': find('repoId', repo),
-                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                'to': not_null(find('_id', team)),
+                'from': not_null(find('repoId', repo)),
+                "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             }
             for repo in repos
         ]
         return collect_member_of_team, collect_repositories_of_team
 
     start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
+                      number_of_repo=number_of_repos, since=since_time, until=until_time,
                       save_content=content, save_edges=edges)
     start.start_team()
 
 
-# COMMITS ###############################
+# TEAMS_DEV ###############################
 
-def commit_collector2(db, org, query, query_db, collection_name, edge_name="edges"):
+def teams_dev(db, org, query, query_db, edges_name="edges"):
     def content(self, response, node):
         save_content = {
-            "collection_name": collection_name[0],
-            "_id": find('commitId', node),
-            "repositoryId": find('repositoryId', response),
-            "repoName": find('repoName', response),
-            "branchName": find('branchName', response),
-            "messageHeadline": find('messageHeadline', node),
-            "oid": find('oid', node),
-            "committedDate": find('committedDate', node),
-            "author": find('login', node),
-            "devId": find('devId', node),
-            "commitId": find('commitId', node),
-            "org": self.org,
-            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+        }
+        return save_content
+
+    def edges(response, node):
+        save_edges = [{
+            "edge_name": "dev_to_team",
+            'to': not_null(find('teamId', response)),
+            'from': not_null(find('memberId', node)),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
+        }
+        ]
+        return save_edges
+
+    start = CollectorThread(db=db, org=org, edges=edges_name, query=query,
+                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start(team_dev=True)
+
+
+# TEAMS_REPO ###############################
+
+def teams_repo(db, org, query, query_db, edges_name="edges"):
+    def content(self, response, node):
+        save_content = {
+        }
+        return save_content
+
+    def edges(response, node):
+        save_edges = [{
+            "edge_name": "dev_to_repo",
+            'to': not_null(find('teamId', response)),
+            'from': not_null(find('repoId', node)),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
+        }
+        ]
+        return save_edges
+
+    start = CollectorThread(db=db, org=org, edges=edges_name, query=query,
+                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start(team_dev=True)
+
+
+# COMMITS ###############################
+
+def commit_collector(db, org, query, query_db, collection_name, edge_name="edges"):
+    def content(self, response, node):
+        save_content = {
+            "collection_name": string_validate(collection_name[0], not_none=True),
+            "org": string_validate(self.org, not_none=True),
+            "_id": not_null(find('commitId', node)),
+            "repositoryId": string_validate(find('repositoryId', response), not_none=True),
+            "repoName": string_validate(find('repoName', response), not_none=True),
+            "branchName": string_validate(find('branchName', response)),
+            "messageHeadline": string_validate(find('messageHeadline', node)),
+            "oid": not_null(find('oid', node)),
+            "committedDate": string_validate(find('committedDate', node), not_none=True),
+            "author": string_validate(find('login', node)),
+            "devId": string_validate(find('devId', node)),
+            "commitId": string_validate(find('commitId', node)),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))),
         }
         return save_content
 
     def edges(node):
         save_edges = [{
             "edge_name": "commit_dev",
-            "to": find('commitId', node),
-            "from": find('devId', node),
-            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+            "to": not_null(find('commitId', node)),
+            "from": not_null(find('devId', node)),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
         },
             {
                 "edge_name": "commit_repo",
-                "to": find('commitId', node),
-                "from": find('repositoryId', node),
-                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                "to": not_null(find('commitId', node)),
+                "from": not_null(find('repositoryId', node)),
+                "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             },
             {
                 "edge_name": "dev_repo",
-                "to": find('devId', node),
-                "from": find('repositoryId', node),
-                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+                "to": not_null(find('devId', node)),
+                "from": not_null(find('repositoryId', node)),
+                "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))),
             }
         ]
         return save_edges
@@ -174,15 +221,15 @@ def commit_collector2(db, org, query, query_db, collection_name, edge_name="edge
 
 # STATS ###############################
 
-def stats_collector2(db, org, query, stats_query, collection_name, edge_name="edges"):
+def stats_collector(db, org, query, stats_query, collection_name, edge_name="edges"):
     def content(node, commit_id):
         save_content = {
-            "collection_name": collection_name[0],
-            "_id": commit_id,
-            'totalAddDel': node['stats']['total'],
-            'additions': node['stats']['additions'],
-            'deletions': node['stats']['deletions'],
-            'numFiles': len(node['files'])
+            "collection_name": string_validate(collection_name[0], not_none=True),
+            "_id": not_null(commit_id),
+            'totalAddDel': int_validate(node['stats']['total']),
+            'additions': int_validate(node['stats']['additions']),
+            'deletions': int_validate(node['stats']['deletions']),
+            'numFiles': int_validate(len(node['files']))
         }
         return save_content
 
@@ -199,35 +246,35 @@ def stats_collector2(db, org, query, stats_query, collection_name, edge_name="ed
 
 # FORK ###############################
 
-def fork_collector2(db, org, query, query_db, collection_name, edge_name="edges"):
+def fork_collector(db, org, query, query_db, collection_name, edge_name="edges"):
     def content(self, response, node):
         save_content = {
-            "collection_name": collection_name[0],
-            "repositoryId": find('repositoryId', response),
-            "repoName": find('repoName', response),
-            "createdAt": find('createdAt', node),
-            "_id": find('forkId', node),
-            "isPrivate": find('isPrivate', node),
-            "isLocked": find('isLocked', node),
-            "devId": find('devId', node),
-            "login": find('login', node),
-            "org": self.org,
-            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+            "collection_name": string_validate(collection_name[0], not_none=True),
+            "org": string_validate(self.org, not_none=True),
+            "_id": not_null(find('forkId', node)),
+            "repositoryId": not_null(find('repositoryId', response)),
+            "repoName": string_validate(find('repoName', response)),
+            "createdAt": string_validate(find('createdAt', node)),
+            "isPrivate": bool_validate(find('isPrivate', node)),
+            "isLocked": bool_validate(find('isLocked', node)),
+            "devId": string_validate(find('devId', node)),
+            "login": string_validate(find('login', node)),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))),
         }
         return save_content
 
     def edges(node):
         save_edges = [{
             "edge_name": "fork_to_dev",
-            "to": find('_id', node),
-            "from": find('devId', node),
-            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+            "to": not_null(find('_id', node)),
+            "from": not_null(find('devId', node)),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
         },
             {
                 "edge_name": "fork_to_repo",
-                "to": find('_id', node),
-                "from": find('repositoryId', node),
-                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                "to": not_null(find('_id', node)),
+                "from": not_null(find('repositoryId', node)),
+                "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             }
         ]
         return save_edges
@@ -239,24 +286,24 @@ def fork_collector2(db, org, query, query_db, collection_name, edge_name="edges"
 
 # ISSUES ###############################
 
-def issue2(db, org, query, query_db, collection_name, edge_name="edges"):
+def issue(db, org, query, query_db, collection_name, edge_name="edges"):
     def content(self, response, node):
         save_content = {
-            "collection_name": collection_name[0],
-            "repositoryId": find('repositoryId', response),
-            "repoName": find('repoName', response),
-            "state": find('state', node),
-            "closed_login": find('closed_login', node),
-            "closedAt": find('closedAt', node),
-            "_id": find('issueId', node),
-            "created_login": find('created_login', node),
-            "createdAt": find('createdAt', node),
-            "authorAssociation": find('authorAssociation', node),
-            "closed": find('closed', node),
-            "label": find('label', node),
-            "title": find('title', node),
-            "org": self.org,
-            "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')),
+            "collection_name": string_validate(collection_name[0]),
+            "org": string_validate(self.org, not_none=True),
+            "_id": not_null(find('issueId', node)),
+            "repositoryId": not_null(find('repositoryId', response)),
+            "repoName": string_validate(find('repoName', response)),
+            "state": string_validate(find('state', node)),
+            "closed_login": string_validate(find('closed_login', node)),
+            "closedAt": string_validate(find('closedAt', node)),
+            "created_login": string_validate(find('created_login', node)),
+            "createdAt": string_validate(find('createdAt', node)),
+            "authorAssociation": string_validate(find('authorAssociation', node)),
+            "closed": bool_validate(find('closed', node)),
+            "label": string_validate(find('label', node)),
+            "title": string_validate(find('title', node)),
+            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))),
         }
         return save_content
 
@@ -264,9 +311,9 @@ def issue2(db, org, query, query_db, collection_name, edge_name="edges"):
         save_edges = [
             {
                 "edge_name": "issue_to_repo",
-                "to": find('_id', node),
-                "from": find('repositoryId', node),
-                "db_last_updated": str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))
+                "to": not_null(find('_id', node)),
+                "from": not_null(find('repositoryId', node)),
+                "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             }
         ]
         return save_edges

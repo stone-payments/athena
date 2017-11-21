@@ -1,10 +1,7 @@
-import sys
 from datetime import datetime
-# from pyArango.theExceptions import (UpdateError, CreationError)
 from config import *
 from graphqlclient import ClientRest
 from graphqlclient import GraphQLClient
-# from classes import *
 import time
 
 client = GraphQLClient(url, token, timeout)
@@ -51,13 +48,6 @@ def find(key, json) -> object:
 
 # HANDLING EXCEPTIONS ###############
 
-def handling_except(exception):
-    if type(exception) == CreationError or type(exception) == UpdateError or type(exception) == KeyError:
-        pass
-    else:
-        print(exception)
-        sys.exit(1)
-
 
 def limit_validation(rate_limit=None, output=None, readme_limit=None):
     if readme_limit is not None:
@@ -76,11 +66,14 @@ def limit_validation(rate_limit=None, output=None, readme_limit=None):
 
 
 def parse_multiple_languages(object_to_be_parsed, edge, key, value):
-    dictionary = {}
+    list_languages = []
     try:
         for node in find(edge, object_to_be_parsed):
-            dictionary[str((find(key, node)))] = round(((find(value, node) /
-                                                         find('totalSize', object_to_be_parsed)) * 100), 2)
-        return dictionary
-    except Exception:
+            temp = {'language': str((find(key, node))), 'size': round(((find(value, node) /
+                                                                        find('totalSize', object_to_be_parsed)) * 100),
+                                                                      2)}
+            list_languages.append(temp)
+        return list_languages
+    except Exception as a:
+        print(a)
         return None

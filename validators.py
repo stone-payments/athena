@@ -1,23 +1,28 @@
-import pyArango.validation as val
-from pyArango.theExceptions import ValidationError
+def not_null(value):
+    if value is None:
+        raise ValueError("Field value cannot be None")
+    return value
 
 
-class StringValidator(val.Validator):
-    def validate(self, value):
-        if not isinstance(value, str) or None:
-            raise ValidationError("Field value must be a string")
-        return True
+def string_validate(value, not_none=False):
+    if not_none:
+        not_null(value)
+    if not isinstance(value, str) and value is not None:
+        raise ValueError("Field value must be a string")
+    return value
 
 
-class IntValidator(val.Validator):
-    def validate(self, value):
-        if not isinstance(value, int) or None:
-            raise ValidationError("Field value must be an int")
-        return True
+def int_validate(value, not_none=False):
+    if not_none:
+        not_null(value)
+    if not isinstance(value, int) and value is not None:
+        raise ValueError("Field value must be an int")
+    return value
 
 
-class BoolValidator(val.Validator):
-    def validate(self, value):
-        if not isinstance(value, bool) or None:
-            raise ValidationError("Field value must be an int")
-        return True
+def bool_validate(value, not_none=False):
+    if not_none:
+        not_null(value)
+    if not isinstance(value, bool) and value is not None:
+        raise ValueError("Field value must be an bool")
+    return value

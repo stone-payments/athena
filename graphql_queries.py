@@ -16,17 +16,14 @@ with open("queries/readmeArango.aql", "r") as readme_arango:
 with open("queries/readmeQuery.aql", "r") as readme_query:
     readme_query = readme_query.read()
 
-
 with open("queries/forkArango.aql", "r") as fork_arango:
     fork_arango = fork_arango.read()
 
 with open("queries/forkQuery.aql", "r") as fork_query:
     fork_query = fork_query.read()
 
-
 with open("queries/issueQuery.aql", "r") as issue_query:
     issue_query = issue_query.read()
-
 
 with open("queries/teamsDevQuery.aql", "r") as teams_dev_query:
     teams_dev_query = teams_dev_query.read()

@@ -2,6 +2,7 @@ from queue import Queue
 from mongraph import *
 import ast
 from module import *
+from threading import Thread
 
 
 class Collector:
@@ -107,7 +108,7 @@ class CollectorThread:
 
     def _save(self, save: Queue):
         while True:
-            save_data = save.get(timeout=commit_queue_timeout)
+            save_data = save.get(timeout=queue_timeout)
             db = Mongraph(db=self.db)
             db.update(obj={"_id": save_data["_id"]}, patch=save_data, kind=save_data["collection_name"])
             for edge in self.save_edges(save_data):
@@ -118,7 +119,7 @@ class CollectorThread:
 
     def _save_edges(self, save: Queue):
         while True:
-            save_edges = save.get(timeout=commit_queue_timeout)
+            save_edges = save.get(timeout=queue_timeout)
             db = Mongraph(db=self.db)
             for edge in save_edges:
                 db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
@@ -127,7 +128,7 @@ class CollectorThread:
 
     def _collect(self, repositories: Queue, save: Queue):
         while True:
-            repository = repositories.get(timeout=commit_queue_timeout)
+            repository = repositories.get(timeout=queue_timeout)
             has_next_page = True
             cursor = None
             while has_next_page:
@@ -145,18 +146,17 @@ class CollectorThread:
 
     def _collect_commit_stats(self, repositories: Queue, save: Queue):
         while True:
-            repository = repositories.get(timeout=commit_queue_timeout)
+            repository = repositories.get(timeout=queue_timeout)
             repository = ast.literal_eval(repository)
             rest_query = self.query(self, repository)
-            # rest_query = self.org + "/" + str(repository["repoName"]) + '/commits/'
-            result = clientRest2.execute(urlCommit, rest_query, str(repository['oid']))
+            result = clientRest2.execute(url_rest_api, rest_query, str(repository['oid']))
             queue_input = self.save_content(result, repository["_id"])
             print(queue_input)
             save.put(queue_input)
 
     def _collect_team_dev(self, repositories: Queue, save: Queue):
         while True:
-            repository = repositories.get(timeout=commit_queue_timeout)
+            repository = repositories.get(timeout=queue_timeout)
             has_next_page = True
             cursor = None
             print(repository)
