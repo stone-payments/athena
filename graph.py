@@ -27,10 +27,3 @@ while True:
     job(orgs)
     print("--- %s seconds ---" % (time.time() - start_time))
 
-    # db.getCollection('edges').aggregate([{$lookup: {from: 'Teams', localField: 'to', foreignField: '_id', as: 'Team'}}
-    # , {$lookup: {from: 'Dev', localField: 'from', foreignField: '_id', as: 'Dev'}},
-    # {
-    #   $match:
-    # {"Team.0.slug":'plataforma'}
-    # }
-    # ])
