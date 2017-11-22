@@ -3,6 +3,7 @@ from mongraph import *
 import ast
 from module import *
 from threading import Thread
+from validators import *
 
 
 class Collector:
@@ -26,6 +27,8 @@ class Collector:
         db = Mongraph(db=self.db)
         db.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
         for edge in self.save_edges(save, response):
+            if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
+                continue
             db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
                        data={key: value for key, value in edge.items() if key not in ['from', 'to',
                                                                                       'edge_name']})
@@ -34,10 +37,14 @@ class Collector:
         db = Mongraph(db=self.db)
         db.update(obj={"_id": team["_id"]}, patch=team, kind=team["collection_name"])
         for member in members:
+            if validate_edge(member.get("to"), member.get("from"), member.get("edge_name")):
+                continue
             db.connect(to=member.get("to"), from_=member.get("from"), kind=member.get("edge_name"),
                        data={key: value for key, value in member.items() if key not in ['from', 'to',
                                                                                         'edge_name']})
         for repo in repos:
+            if validate_edge(repo.get("to"), repo.get("from"), repo.get("edge_name")):
+                continue
             db.connect(to=repo.get("to"), from_=repo.get("from"), kind=repo.get("edge_name"),
                        data={key: value for key, value in repo.items() if key not in ['from', 'to',
                                                                                       'edge_name']})
@@ -112,7 +119,8 @@ class CollectorThread:
             db = Mongraph(db=self.db)
             db.update(obj={"_id": save_data["_id"]}, patch=save_data, kind=save_data["collection_name"])
             for edge in self.save_edges(save_data):
-                print(edge)
+                if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
+                    continue
                 db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
                            data={key: value for key, value in edge.items() if key not in ['from', 'to',
                                                                                           'edge_name']})
@@ -122,6 +130,8 @@ class CollectorThread:
             save_edges = save.get(timeout=queue_timeout)
             db = Mongraph(db=self.db)
             for edge in save_edges:
+                if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
+                    continue
                 db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
                            data={key: value for key, value in edge.items() if key not in ['from', 'to',
                                                                                           'edge_name']})

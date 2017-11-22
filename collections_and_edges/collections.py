@@ -30,7 +30,7 @@ def repo(db, org, query, collection_name, edge_name="edges"):
             "licenseId": string_validate(find('licenseId', node)),
             "licenseType": string_validate(find('licenseType', node)),
             "readme": string_validate(readme),
-            "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))),
+            "db_last_updated": datetime.datetime.utcnow(),
             "languages": parse_multiple_languages(node, "language_edges", "languageName",
                                                   "languageSize"),
             "committed_today": bool_validate(False if find('committedDate', node) is None else True)
@@ -102,8 +102,8 @@ def teams(db, org, query, collection_name, edge_name="edges"):
         collect_member_of_team = [
             {
                 "edge_name": "dev_to_team",
-                'to': not_null(find('_id', team)),
-                'from': not_null(find('memberId', member)),
+                'to': find('_id', team),
+                'from': find('memberId', member),
                 "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             }
             for member in members
@@ -111,8 +111,8 @@ def teams(db, org, query, collection_name, edge_name="edges"):
         collect_repositories_of_team = [
             {
                 "edge_name": "repo_to_team",
-                'to': not_null(find('_id', team)),
-                'from': not_null(find('repoId', repo_slice)),
+                'to': find('_id', team),
+                'from': find('repoId', repo_slice),
                 "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             }
             for repo_slice in repos
@@ -136,8 +136,8 @@ def teams_dev(db, org, query, query_db, edges_name="edges"):
     def edges(response, node):
         save_edges = [{
             "edge_name": "dev_to_team",
-            'to': not_null(find('teamId', response)),
-            'from': not_null(find('memberId', node)),
+            'to': find('teamId', response),
+            'from': find('memberId', node),
             "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
         }
         ]
@@ -159,8 +159,8 @@ def teams_repo(db, org, query, query_db, edges_name="edges"):
     def edges(response, node):
         save_edges = [{
             "edge_name": "dev_to_repo",
-            'to': not_null(find('teamId', response)),
-            'from': not_null(find('repoId', node)),
+            'to': find('teamId', response),
+            'from': find('repoId', node),
             "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
         }
         ]
@@ -184,7 +184,9 @@ def commit_collector(db, org, query, query_db, collection_name, edge_name="edges
             "branchName": string_validate(find('branchName', response)),
             "messageHeadline": string_validate(find('messageHeadline', node)),
             "oid": not_null(find('oid', node)),
-            "committedDate": string_validate(find('committedDate', node), not_none=True),
+            # "committedDate": string_validate(find('committedDate', node), not_none=True),
+            "committedDate": datetime.datetime.strptime(string_validate(find('committedDate', node),
+                                                                        not_none=True), "%Y-%m-%dT%H:%M:%SZ"),
             "author": string_validate(find('login', node)),
             "devId": string_validate(find('devId', node)),
             "commitId": string_validate(find('commitId', node)),
@@ -195,20 +197,20 @@ def commit_collector(db, org, query, query_db, collection_name, edge_name="edges
     def edges(node):
         save_edges = [{
             "edge_name": "commit_dev",
-            "to": not_null(find('commitId', node)),
-            "from": not_null(find('devId', node)),
+            "to": find('commitId', node),
+            "from": find('devId', node),
             "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
         },
             {
                 "edge_name": "commit_repo",
-                "to": not_null(find('commitId', node)),
-                "from": not_null(find('repositoryId', node)),
+                "to": find('commitId', node),
+                "from": find('repositoryId', node),
                 "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             },
             {
                 "edge_name": "dev_repo",
-                "to": not_null(find('devId', node)),
-                "from": not_null(find('repositoryId', node)),
+                "to": find('devId', node),
+                "from": find('repositoryId', node),
                 "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'))),
             }
         ]
@@ -266,14 +268,14 @@ def fork_collector(db, org, query, query_db, collection_name, edge_name="edges")
     def edges(node):
         save_edges = [{
             "edge_name": "fork_to_dev",
-            "to": not_null(find('_id', node)),
-            "from": not_null(find('devId', node)),
+            "to": find('_id', node),
+            "from": find('devId', node),
             "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
         },
             {
                 "edge_name": "fork_to_repo",
-                "to": not_null(find('_id', node)),
-                "from": not_null(find('repositoryId', node)),
+                "to": find('_id', node),
+                "from": find('repositoryId', node),
                 "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             }
         ]
@@ -311,8 +313,8 @@ def issue(db, org, query, query_db, collection_name, edge_name="edges"):
         save_edges = [
             {
                 "edge_name": "issue_to_repo",
-                "to": not_null(find('_id', node)),
-                "from": not_null(find('repositoryId', node)),
+                "to": find('_id', node),
+                "from": find('repositoryId', node),
                 "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             }
         ]

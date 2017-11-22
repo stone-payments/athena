@@ -1,7 +1,15 @@
 def not_null(value):
     if value is None:
-        raise ValueError("Field value cannot be None")
+        # raise ValueError("Field value cannot be None")
+        return None
     return value
+
+
+def validate_edge(*args):
+    for value in args:
+        if value is None:
+            return 1
+    return 0
 
 
 def string_validate(value, not_none=False):
