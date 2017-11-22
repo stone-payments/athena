@@ -2,6 +2,7 @@ from collections_and_edges import *
 from createDB import create_database_if_not_exists, create_collection_if_not_exists
 from config import *
 from graphql_queries import *
+import time
 
 db = create_database_if_not_exists(db_name=db_name, db_url=db_url)
 create_collection_if_not_exists(db, hash_indexes, hash_indexes_unique,
@@ -26,4 +27,4 @@ while True:
     start_time = time.time()
     job(orgs)
     print("--- %s seconds ---" % (time.time() - start_time))
-
+    time.sleep(rest_minutes * 60)

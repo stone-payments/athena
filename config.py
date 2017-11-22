@@ -16,8 +16,9 @@ until_time = (datetime.datetime.utcnow() + datetime.timedelta(+1)).strftime('%Y-
 orgs = ["stone-payments", "mundipagg", "cappta", "equals-conc", "pagarme"]
 update = 1  # update every x hours
 queue_max_size = 1500000
-num_of_threads = 3
+num_of_threads = 2
 queue_timeout = 15
+rest_minutes = 20  # minutes to rest and start collect again
 rate_limit_to_sleep = 6  # minimum remaining api value to wait next reset
 hash_indexes = [["Dev", "devName"], ["Dev", "login"], ["Teams", "teamName"],
                 ["Commit", "org"], ["Issue", "repoName"], ["Repo", "readme"], ["Commit", "author"],
