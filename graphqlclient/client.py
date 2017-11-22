@@ -24,7 +24,7 @@ class ClientRest:
         self.token = token
         self.timeout = timeout
 
-    def execute(self, url: object, query: object, temp: object) -> object:
+    def execute(self, url: str, query: str, temp: str) -> object:
         query = url + query + temp
         print(query)
         if self.token != "":
@@ -34,7 +34,3 @@ class ClientRest:
         else:
             raise NameError("Token is not Defined")
 
-#
-# clientRest2 = ClientRest("896a853e110a21a6e25cbbcf1ebd2e2ce1139a8e")
-# print(clientRest2.execute(url='https://api.github.com/rate_limit', query='', temp=''))
-# /repos/:owner/:repo/events

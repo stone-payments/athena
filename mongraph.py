@@ -1,5 +1,3 @@
-# from pymongo import MongoClient
-
 
 class Mongraph(object):
     def __init__(self, db, edge_collection: str = 'edges'):

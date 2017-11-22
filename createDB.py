@@ -4,7 +4,9 @@ from pymongo import ASCENDING, TEXT
 # Create DataBase ################################################
 
 
-def create_database_if_not_exists(db_name, db_url='', username='', password=''):
+def create_database_if_not_exists(db_name='database', db_url=None):
+    if db_url is None:
+        raise NameError("DB URL is not Defined")
     client = MongoClient(db_url)
     return client[db_name]
 

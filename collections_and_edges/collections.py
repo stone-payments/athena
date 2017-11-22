@@ -13,7 +13,7 @@ def repo(db, org, query, collection_name, edge_name="edges"):
         else:
             readme = None
         save_content = {
-            "collection_name": string_validate(collection_name[0], not_none=True),
+            "collection_name": string_validate(collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
             "_id": not_null(node["node"]["repoId"].replace("/", "@")),
             "repoName": string_validate(node["node"]["name"], not_none=True),
@@ -55,7 +55,7 @@ def dev(db, org, query, collection_name, edge_name="edges"):
 
     def content(self, response, node):
         save_content = {
-            "collection_name": string_validate(collection_name[0], not_none=True),
+            "collection_name": string_validate(collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
             "_id": not_null(find("id", node)),
             "devName": string_validate(find("name", node)),
@@ -85,7 +85,7 @@ def teams(db, org, query, collection_name, edge_name="edges"):
 
     def content(self, response, node):
         save_content = {
-            "collection_name": string_validate(collection_name[0], not_none=True),
+            "collection_name": string_validate(collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
             "_id": not_null(find('teamId', node)),
             'createdAt': string_validate(node["node"]["createdAt"]),
@@ -112,10 +112,10 @@ def teams(db, org, query, collection_name, edge_name="edges"):
             {
                 "edge_name": "repo_to_team",
                 'to': not_null(find('_id', team)),
-                'from': not_null(find('repoId', repo)),
+                'from': not_null(find('repoId', repo_slice)),
                 "db_last_updated": string_validate(str(datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')))
             }
-            for repo in repos
+            for repo_slice in repos
         ]
         return collect_member_of_team, collect_repositories_of_team
 
@@ -176,7 +176,7 @@ def teams_repo(db, org, query, query_db, edges_name="edges"):
 def commit_collector(db, org, query, query_db, collection_name, edge_name="edges"):
     def content(self, response, node):
         save_content = {
-            "collection_name": string_validate(collection_name[0], not_none=True),
+            "collection_name": string_validate(collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
             "_id": not_null(find('commitId', node)),
             "repositoryId": string_validate(find('repositoryId', response), not_none=True),
@@ -224,7 +224,7 @@ def commit_collector(db, org, query, query_db, collection_name, edge_name="edges
 def stats_collector(db, org, query, stats_query, collection_name, edge_name="edges"):
     def content(node, commit_id):
         save_content = {
-            "collection_name": string_validate(collection_name[0], not_none=True),
+            "collection_name": string_validate(collection_name, not_none=True),
             "_id": not_null(commit_id),
             'totalAddDel': int_validate(node['stats']['total']),
             'additions': int_validate(node['stats']['additions']),
@@ -249,7 +249,7 @@ def stats_collector(db, org, query, stats_query, collection_name, edge_name="edg
 def fork_collector(db, org, query, query_db, collection_name, edge_name="edges"):
     def content(self, response, node):
         save_content = {
-            "collection_name": string_validate(collection_name[0], not_none=True),
+            "collection_name": string_validate(collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
             "_id": not_null(find('forkId', node)),
             "repositoryId": not_null(find('repositoryId', response)),
@@ -289,7 +289,7 @@ def fork_collector(db, org, query, query_db, collection_name, edge_name="edges")
 def issue(db, org, query, query_db, collection_name, edge_name="edges"):
     def content(self, response, node):
         save_content = {
-            "collection_name": string_validate(collection_name[0]),
+            "collection_name": string_validate(collection_name),
             "org": string_validate(self.org, not_none=True),
             "_id": not_null(find('issueId', node)),
             "repositoryId": not_null(find('repositoryId', response)),

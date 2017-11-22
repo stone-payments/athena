@@ -195,3 +195,17 @@ class CollectorThread:
             self._start_threads(query_result, self._collect_team_dev, self._save_edges)
         else:
             self._start_threads(query_result, self._collect, self._save)
+
+
+def parse_multiple_languages(object_to_be_parsed, edge, key, value):
+    list_languages = []
+    try:
+        for node in find(edge, object_to_be_parsed):
+            temp = {'language': str((find(key, node))), 'size': round(((find(value, node) /
+                                                                        find('totalSize', object_to_be_parsed)) * 100),
+                                                                      2)}
+            list_languages.append(temp)
+        return list_languages
+    except Exception as a:
+        print(a)
+        return None

@@ -29,7 +29,7 @@ def pagination_universal(query, number_of_repo=None, next_cursor=None, next_repo
 # FIND ###############################
 
 
-def find(key, json) -> object:
+def find(key, json) -> iter:
     if isinstance(json, list):
         for item in json:
             f = find(key, item)
@@ -64,16 +64,15 @@ def limit_validation(rate_limit=None, output=None, readme_limit=None):
         elif output is None:
             return time.sleep(limit_time)
 
-
-def parse_multiple_languages(object_to_be_parsed, edge, key, value):
-    list_languages = []
-    try:
-        for node in find(edge, object_to_be_parsed):
-            temp = {'language': str((find(key, node))), 'size': round(((find(value, node) /
-                                                                        find('totalSize', object_to_be_parsed)) * 100),
-                                                                      2)}
-            list_languages.append(temp)
-        return list_languages
-    except Exception as a:
-        print(a)
-        return None
+# def parse_multiple_languages(object_to_be_parsed, edge, key, value):
+#     list_languages = []
+#     try:
+#         for node in find(edge, object_to_be_parsed):
+#             temp = {'language': str((find(key, node))), 'size': round(((find(value, node) /
+#                                                                         find('totalSize', object_to_be_parsed)) * 100),
+#                                                                       2)}
+#             list_languages.append(temp)
+#         return list_languages
+#     except Exception as a:
+#         print(a)
+#         return None
