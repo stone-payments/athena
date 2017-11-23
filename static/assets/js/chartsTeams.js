@@ -1,5 +1,5 @@
 $(function() {
-  let myChart = null;
+  let commitsChart = null;
   let languages = null;
   let issuesChart = null;
   let openSourceChart = null;
@@ -44,7 +44,7 @@ $(function() {
       lastDay = JSON.parse($("#teamsRangeDate").val()).end;
     }
     $.ajax({
-      url: address+'/OpenSourceTeam?org=' + orgSelector + '&team=' + name,
+      url: address+'/get_open_source_team?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -93,7 +93,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/readmeOrgTeam?org=' + orgSelector + '&team=' + name,
+      url: address+'/get_readme_team?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -124,7 +124,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/LicenseTypeTeam?org=' + orgSelector + '&team=' + name,
+      url: address+'/get_license_type_team?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -177,7 +177,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/LanguagesOrgTeam?org=' + orgSelector + '&team=' + name,
+      url: address+'/get_languages_team?org=' + orgSelector + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -230,7 +230,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/RepoMembersTeam?org=' + 'stone-payments' + '&team=' + name,
+      url: address+'/get_repo_members_team?org=' + 'stone-payments' + '&team=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -253,7 +253,83 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/IssuesTeam?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
+      url: address+'/get_commits_team?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        let labelsCommit = returnedData.map(function(num) {
+          return num.day;
+        });
+        let dataCommits = returnedData.map(function(num) {
+          return num.number;
+        });
+        let ctx = document.getElementById("commitsChart").getContext('2d');
+
+        if (commitsChart != null) {
+          commitsChart.destroy();
+        }
+        commitsChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labelsCommit,
+            datasets: [{
+              label: 'num of Commits',
+              data: dataCommits,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1,
+              lineTension: 0
+            }]
+          },
+          options: {
+            maintainAspectRatio: true,
+            tooltips: {
+              mode: 'index',
+              intersect: false
+            },
+            scales: {
+              xAxes: [{
+                ticks: {
+                  autoSkip: labelsCommit.length > 31 ? true : false,
+                  responsive: true,
+                }
+              }],
+              yAxes: [{
+                ticks: {
+                  suggestedMax: 10,
+                  responsive: true,
+                  beginAtZero: true,
+                  callback: function(value, index, values) {
+                    if (Math.floor(value) === value) {
+                      return value;
+                    }
+                  }
+                }
+              }]
+            }
+          },
+        });
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
+    $.ajax({
+      url: address+'/get_issues_team?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -342,82 +418,6 @@ $(function() {
               }]
             },
           }
-        });
-      },
-      error: function(error) {
-        console.log(error);
-      }
-    });
-    $.ajax({
-      url: address+'/CommitsTeam?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay + '&org=' + orgSelector,
-      type: 'GET',
-      success: function(response) {
-        returnedData = JSON.parse(response);
-        let labelsCommit = returnedData.map(function(num) {
-          return num.day;
-        });
-        let dataCommits = returnedData.map(function(num) {
-          return num.number;
-        });
-        let ctx = document.getElementById("myChart").getContext('2d');
-
-        if (myChart != null) {
-          myChart.destroy();
-        }
-        myChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labelsCommit,
-            datasets: [{
-              label: 'num of Commits',
-              data: dataCommits,
-              backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-              ],
-              borderColor: [
-                'rgba(255,99,132,1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-              ],
-              borderWidth: 1,
-              lineTension: 0
-            }]
-          },
-          options: {
-            maintainAspectRatio: true,
-            tooltips: {
-              mode: 'index',
-              intersect: false
-            },
-            scales: {
-              xAxes: [{
-                ticks: {
-                  autoSkip: labelsCommit.length > 31 ? true : false,
-                  responsive: true,
-                }
-              }],
-              yAxes: [{
-                ticks: {
-                  suggestedMax: 10,
-                  responsive: true,
-                  beginAtZero: true,
-                  callback: function(value, index, values) {
-                    if (Math.floor(value) === value) {
-                      return value;
-                    }
-                  }
-                }
-              }]
-            }
-          },
         });
       },
       error: function(error) {

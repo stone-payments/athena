@@ -1,5 +1,5 @@
 $(function() {
-  let myChart = null;
+  let commitsCharts = null;
   let languages = null;
   let issuesChart = null;
   let openSourceChart = null;
@@ -28,7 +28,7 @@ $(function() {
       lastDay = JSON.parse($("#org").val()).end;
     }
     $.ajax({
-      url: address+'/LanguagesOrg?name=' + name,
+      url: address+'/get_languages_org?name=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -85,7 +85,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/CommitsOrg?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
+      url: address+'/get_commits_org?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -95,11 +95,11 @@ $(function() {
         let dataCommits = returnedData.map(function(num) {
           return num.number;
         });
-        let ctx = document.getElementById("myChart").getContext('2d');
-        if (myChart != null) {
-          myChart.destroy();
+        let ctx = document.getElementById("commitsCharts").getContext('2d');
+        if (commitsCharts != null) {
+          commitsCharts.destroy();
         }
-        myChart = new Chart(ctx, {
+        commitsCharts = new Chart(ctx, {
           type: 'line',
           data: {
             labels: labelsCommit,
@@ -157,40 +157,13 @@ $(function() {
       },
       error: function(error) {
         console.log(error);
-        if (myChart != null) {
-          myChart.destroy();
+        if (commitsCharts != null) {
+          commitsCharts.destroy();
         }
       }
     });
     $.ajax({
-      url: address+'/RepoMembers?name=' + name,
-      type: 'GET',
-      success: function(response) {
-        returnedData = JSON.parse(response);
-        $("#members").empty();
-        returnedData.map(function(num) {
-          memberName = num.member;
-          html = `<tr>
-                        <td style="width:10px;">
-
-                                <i class="pe-7s-angle-right-circle"></i>
-
-                        </td>
-                        <td>${memberName}</td>
-                        <td class="td-actions text-right">
-
-                        </td>
-                    </tr>`
-          $("#members").append(html);
-        });
-      },
-      error: function(error) {
-        console.log(error);
-        $("#members").empty();
-      }
-    });
-    $.ajax({
-      url: address+'/OpenSource?name=' + name,
+      url: address+'/get_open_source_org?name=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -223,7 +196,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/readmeOrg?name=' + name,
+      url: address+'/get_readme_org?name=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -257,7 +230,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/LicenseType?name=' + name,
+      url: address+'/get_license_type_org?name=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -313,7 +286,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/IssuesOrg?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
+      url: address+'/get_issues_org?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);

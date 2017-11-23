@@ -26,271 +26,73 @@ with open("static/assets/js/configs.js", "w") as config_js:
 # Repos #####
 
 
-@app.route('/Languages')
-def Languages():
+@app.route('/get_languages_repo')
+def get_languages_repo():
     response = repo_languages()
     return response
 
 
-@app.route('/Commits_Repo')
-def Commits_Repo():
+@app.route('/get_commits_repo')
+def get_commits_repo():
     response = repo_commits()
     return response
 
 
-@app.route('/RepoMembers')
-def RepoMembers():
+@app.route('/get_members_repo')
+def get_members_repo():
     response = repo_members()
     return response
 
 
-@app.route('/BestPractices')
-def BestPractices():
+@app.route('/get_best_practices_repo')
+def get_best_practices_repo():
     response = repo_best_practices()
     return response
 
 
-@app.route('/Issues')
-def Issues():
-    aql_created = """
-    let a =(    
-    FOR Issue IN Issue
-        FILTER LOWER(Issue.repoName) == @name
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
-        COLLECT 
-        day = DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day ASC
-        RETURN {
-          day: day,
-          number: number
-        })
-    let begin = @startDate
-    let end = @endDate
-    let b = (
-    for date in 0..DATE_DIFF(begin, end, "days")
-        let actual_date = DATE_FORMAT(DATE_ADD(begin, date,  "d"),"%Y-%mm-%dd")
-        return {day:actual_date,number:0})
-
-    let c =(    
-    FOR Issue IN Issue
-        FILTER LOWER(Issue.repoName) == @name
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
-        COLLECT 
-        day = DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day DESC
-        RETURN {
-          day: day, number:0
-        })
-    let removable = REMOVE_VALUES(b, c )
-    let result = UNION(removable, a)
-    FOR results IN result
-    SORT results.day ASC
-    RETURN  results"""
-    name = request.args.get("name")
-    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
-    query_result = db.AQLQuery(aql_created, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result_created = [dict(i) for i in query_result]
-
-    def accumulator(days):
-        value_accumulated = 0
-        for day in days:
-            if day["number"] > 0:
-                value_accumulated += day["number"]
-                day["number"] = value_accumulated
-            else:
-                day["number"] = value_accumulated
-        return days
-    result_created = accumulator(result_created)
-
-    aql_closed = """
-    let a =(    
-    FOR Issue IN Issue
-        FILTER LOWER(Issue.repoName) == @name
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
-        COLLECT 
-        day = DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day ASC
-        RETURN {
-          day: day,
-          number: number
-        })
-    
-    let begin = @startDate
-    let end = @endDate
-    let b = (
-    for date in 0..DATE_DIFF(begin, end, "days")
-        let actual_date = DATE_FORMAT(DATE_ADD(begin, date,  "d"),"%Y-%mm-%dd")
-        return {day:actual_date,number:0})
-        
-    let c =(    
-    FOR Issue IN Issue
-        FILTER LOWER(Issue.repoName) == @name
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
-        COLLECT 
-        day = DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day DESC
-        RETURN {
-          day: day, number:0
-        })
-    let removable = REMOVE_VALUES(b, c )
-    let result = UNION(removable, a)
-    FOR results IN result
-    SORT results.day ASC
-    RETURN  results"""
-
-    query_result = db.AQLQuery(aql_closed, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result_closed = [dict(i) for i in query_result]
-    result_closed = accumulator(result_closed)
-    response = [result_created, result_closed]
-    return json.dumps(response)
+@app.route('/get_issues_repo')
+def get_issues_repo():
+    response = repo_issues()
+    return response
 
 
 # Orgs ############
 
 
-@app.route('/LanguagesOrg')
-def LanguagesOrg():
+@app.route('/get_languages_org')
+def get_languages_org():
     response = org_languages()
     return response
 
 
-@app.route('/OpenSource')
-def OpenSource():
+@app.route('/get_open_source_org')
+def get_open_source_org():
     response = org_open_source()
     return response
 
 
-@app.route('/CommitsOrg')
-def CommitsOrg():
+@app.route('/get_commits_org')
+def get_commits_org():
     response = org_commits()
     return response
 
 
-@app.route('/readmeOrg')
-def readmeOrg():
+@app.route('/get_readme_org')
+def get_readme_org():
     response = org_readme()
     return response
 
 
-@app.route('/LicenseType')
-def LicenseType():
+@app.route('/get_license_type_org')
+def get_license_type_org():
     response = org_license()
     return response
 
 
-@app.route('/IssuesOrg')
-def IssuesOrg():
-    aql_created = """
-    let a =(    
-    FOR Issue IN Issue
-        FILTER LOWER(Issue.org) == @name
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
-        COLLECT 
-        day = DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day ASC
-        RETURN {
-          day: day,
-          number: number
-        })
-    let begin = @startDate
-    let end = @endDate
-    let b = (
-    for date in 0..DATE_DIFF(begin, end, "days")
-        let actual_date = DATE_FORMAT(DATE_ADD(begin, date,  "d"),"%Y-%mm-%dd")
-        return {day:actual_date,number:0})
-
-    let c =(    
-    FOR Issue IN Issue
-        FILTER LOWER(Issue.org) == @name
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
-        COLLECT 
-        day = DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day DESC
-        RETURN {
-          day: day, number:0
-        })
-    let removable = REMOVE_VALUES(b, c )
-    let result = UNION(removable, a)
-    FOR results IN result
-    SORT results.day ASC
-    RETURN  results"""
-    name = request.args.get("name")
-    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
-    query_result = db.AQLQuery(aql_created, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result_created = [dict(i) for i in query_result]
-
-    def accumulator(days):
-        value_accumulated = 0
-        for day in days:
-            if day["number"] > 0:
-                value_accumulated += day["number"]
-                day["number"] = value_accumulated
-            else:
-                day["number"] = value_accumulated
-        return days
-    result_created = accumulator(result_created)
-
-    aql_closed = """
-    let a =(    
-    FOR Issue IN Issue
-        FILTER LOWER(Issue.org) == @name
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
-        COLLECT 
-        day = DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day ASC
-        RETURN {
-          day: day,
-          number: number
-        })
-    
-    let begin = @startDate
-    let end = @endDate
-    let b = (
-    for date in 0..DATE_DIFF(begin, end, "days")
-        let actual_date = DATE_FORMAT(DATE_ADD(begin, date,  "d"),"%Y-%mm-%dd")
-        return {day:actual_date,number:0})
-        
-    let c =(    
-    FOR Issue IN Issue
-        FILTER LOWER(Issue.org) == @name
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
-        COLLECT 
-        day = DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day DESC
-        RETURN {
-          day: day, number:0
-        })
-    let removable = REMOVE_VALUES(b, c )
-    let result = UNION(removable, a)
-    FOR results IN result
-    SORT results.day ASC
-    RETURN  results"""
-
-    query_result = db.AQLQuery(aql_closed, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result_closed = [dict(i) for i in query_result]
-    result_closed = accumulator(result_closed)
-    response = [result_closed, result_created]
-    return json.dumps(response)
+@app.route('/get_issues_org')
+def get_issues_org():
+    response = org_issues()
+    return response
 
 
 @app.route('/get_repo_name')
@@ -302,245 +104,46 @@ def get_repo_name():
 # Teams ###
 
 
-@app.route('/LanguagesOrgTeam')
-def LanguagesOrgTeam():
+@app.route('/get_languages_team')
+def get_languages_team():
     response = team_languages()
     return response
 
 
-@app.route('/OpenSourceTeam')
-def OpenSourceTeam():
+@app.route('/get_open_source_team')
+def get_open_source_team():
     response = team_open_source()
     return response
 
 
-@app.route('/CommitsTeam')
-def CommitsTeam():
+@app.route('/get_commits_team')
+def get_commits_team():
     response = team_commits()
     return response
 
 
-@app.route('/readmeOrgTeam')
-def readmeOrgTeam():
+@app.route('/get_readme_team')
+def get_readme_team():
     response = team_readme()
     return response
 
 
-@app.route('/LicenseTypeTeam')
-def LicenseTypeTeam():
+@app.route('/get_license_type_team')
+def get_license_type_team():
     response = team_license()
     return response
 
 
-@app.route('/RepoMembersTeam')
-def RepoMembersTeam():
+@app.route('/get_repo_members_team')
+def get_repo_members_team():
     response = team_repo_members()
     return response
 
 
-@app.route('/IssuesTeam')
-def IssuesTeam():
-    aql_created = """
-    let a =(    
-    FOR Issue IN Issue
-    FOR Repo IN Repo
-    FOR Teams IN Teams
-    FOR RepoIssue IN RepoIssue
-    FOR TeamsRepo IN TeamsRepo
-    FILTER LOWER(Issue.org) == @org
-        FILTER LOWER(Teams.teamName) == @name
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
-        FILTER TeamsRepo._from == Repo._id
-        FILTER TeamsRepo._to == Teams._id
-        FILTER RepoIssue._from == Repo._id
-        FILTER RepoIssue._to == Issue._id
-        COLLECT 
-        day = DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day ASC
-        RETURN {
-          day: day,
-          number: number
-        })
-    
-    let begin = @startDate
-    let end = @endDate
-    let b = (
-    for date in 0..DATE_DIFF(begin, end, "days")
-        let actual_date = DATE_FORMAT(DATE_ADD(begin, date,  "d"),"%Y-%mm-%dd")
-        return {day:actual_date,number:0})
-
-    let removable = REMOVE_VALUES(b, a )
-    let result = UNION(removable, a)
-    FOR results IN result
-    SORT results.day ASC
-    RETURN  results"""
-    name = request.args.get("name")
-    org = request.args.get("org")
-    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date), "org": str.lower(org)}
-    query_result = db.AQLQuery(aql_created, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result_created = [dict(i) for i in query_result]
-
-    def accumulator(days):
-        value_accumulated = 0
-        for day in days:
-            if day["number"] > 0:
-                value_accumulated += day["number"]
-                day["number"] = value_accumulated
-            else:
-                day["number"] = value_accumulated
-        return days
-    result_created = accumulator(result_created)
-
-    aql_closed = """
-        let a =(    
-    FOR Issue IN Issue
-    FOR Repo IN Repo
-    FOR Teams IN Teams
-    FOR RepoIssue IN RepoIssue
-    FOR TeamsRepo IN TeamsRepo
-    FILTER LOWER(Issue.org) == @org
-        FILTER LOWER(Teams.teamName) == @name
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
-        FILTER TeamsRepo._from == Repo._id
-        FILTER TeamsRepo._to == Teams._id
-        FILTER RepoIssue._from == Repo._id
-        FILTER RepoIssue._to == Issue._id
-        COLLECT 
-        day = DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd")
-        WITH COUNT INTO number
-        SORT day ASC
-        RETURN {
-          day: day,
-          number: number
-        })
-    
-    let begin = @startDate
-    let end = @endDate
-    let b = (
-    for date in 0..DATE_DIFF(begin, end, "days")
-        let actual_date = DATE_FORMAT(DATE_ADD(begin, date,  "d"),"%Y-%mm-%dd")
-        return {day:actual_date,number:0})
-
-    let removable = REMOVE_VALUES(b, a )
-    let result = UNION(removable, a)
-    FOR results IN result
-    SORT results.day ASC
-    RETURN  results"""
-
-    query_result = db.AQLQuery(aql_closed, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result_closed = [dict(i) for i in query_result]
-    result_closed = accumulator(result_closed)
-    response = [result_closed, result_created]
-    return json.dumps(response)
-
-
-
-
-    # global value
-    # aql = """
-    # FOR Issue IN Issue
-    # FOR Repo IN Repo
-    # FOR Teams IN Teams
-    # FOR RepoIssue IN RepoIssue
-    # FOR TeamsRepo IN TeamsRepo
-    # FILTER LOWER(Issue.org) == @org
-    # FILTER LOWER(Teams.teamName) == @name
-    # FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") >= @startDate
-    # FILTER DATE_FORMAT(Issue.closedAt,"%Y-%mm-%dd") <= @endDate
-    # FILTER TeamsRepo._from == Repo._id
-    # FILTER TeamsRepo._to == Teams._id
-    # FILTER RepoIssue._from == Repo._id
-    # FILTER RepoIssue._to == Issue._id
-    # COLLECT
-    # day = DATE_FORMAT(Issue.closedAt,"%www %dd-%mmm")
-    # WITH COUNT INTO number
-    # SORT day ASC
-    # RETURN {
-    #   day: day,
-    #   number: number
-    # }"""
-    # name = request.args.get("name")
-    # org = request.args.get("org")
-    # start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    # end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    # delta = end_date - start_date
-    # bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date), "org": str.lower(org)}
-    # query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    # result = [dict(i) for i in query_result]
-    # days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
-    #         for i in range(delta.days + 1)]
-    # lst = []
-    #
-    # def recur(x):
-    #     global value
-    #     day = {}
-    #     for y in result:
-    #         if y.get('day') == x:
-    #             day['day'] = str(y.get('day'))
-    #             value = int(y.get('number')) + value
-    #             day['number'] = value
-    #             return day
-    #     day['day'] = x
-    #     day['number'] = 0 + value
-    #     return day
-    #
-    # value = 0
-    # for x in days:
-    #     lst.append(recur(x))
-    #
-    #     aql = """
-    # FOR Issue IN Issue
-    # FOR Repo IN Repo
-    # FOR Teams IN Teams
-    # FOR RepoIssue IN RepoIssue
-    # FOR TeamsRepo IN TeamsRepo
-    # FILTER LOWER(Issue.org) == @org
-    # FILTER LOWER(Teams.teamName) == @name
-    # FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") >= @startDate
-    # FILTER DATE_FORMAT(Issue.createdAt,"%Y-%mm-%dd") <= @endDate
-    # FILTER TeamsRepo._from == Repo._id
-    # FILTER TeamsRepo._to == Teams._id
-    # FILTER RepoIssue._from == Repo._id
-    # FILTER RepoIssue._to == Issue._id
-    # COLLECT
-    # day = DATE_FORMAT(Issue.createdAt,"%www %dd-%mmm")
-    # WITH COUNT INTO number
-    # SORT day ASC
-    # RETURN {
-    #   day: day,
-    #   number: number
-    # }"""
-    # bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date), "org": str.lower(org)}
-    # query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    # result = [dict(i) for i in query_result]
-    # days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
-    #         for i in range(delta.days + 1)]
-    # lst2 = []
-    #
-    # def recur(x):
-    #     global value
-    #     day = {}
-    #     for y in result:
-    #         if y.get('day') == x:
-    #             day['day'] = str(y.get('day'))
-    #             value = int(y.get('number')) + value
-    #             day['number'] = value
-    #             return day
-    #     day['day'] = x
-    #     day['number'] = 0 + value
-    #     return day
-    #
-    # value = 0
-    # for x in days:
-    #     lst2.append(recur(x))
-    # response = [lst, lst2]
-    # print(response)
-    # return json.dumps(response)
+@app.route('/get_issues_team')
+def get_issues_team():
+    response = issues_team()
+    return response
 
 
 # Users #########################

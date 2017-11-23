@@ -1,5 +1,5 @@
 $(function() {
-  let myChart = null;
+  let commitsCharts = null;
   let pieChart = null;
   let issuesChart = null;
   let startDay = moment().startOf('month').format('YYYY-MM-DD');
@@ -40,7 +40,7 @@ $(function() {
       lastDay = JSON.parse($("#repoRangeDate").val()).end;
     }
     $.ajax({
-      url: address+'/Languages?name=' + name+'&org='+ orgSelector,
+      url: address+'/get_languages_repo?name=' + name+'&org='+ orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -93,7 +93,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/Commits_Repo?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay+'&org='+ orgSelector,
+      url: address+'/get_commits_repo?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay+'&org='+ orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -103,12 +103,12 @@ $(function() {
         let dataCommits = returnedData.map(function(num) {
           return num.number;
         });
-        let ctx = document.getElementById("myChart").getContext('2d');
+        let ctx = document.getElementById("commitsCharts").getContext('2d');
 
-        if (myChart != null) {
-          myChart.destroy();
+        if (commitsCharts != null) {
+          commitsCharts.destroy();
         }
-        myChart = new Chart(ctx, {
+        commitsCharts = new Chart(ctx, {
           type: 'line',
           data: {
             labels: labelsCommit,
@@ -168,7 +168,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/RepoMembers?name=' + name+'&org='+ orgSelector,
+      url: address+'/get_members_repo?name=' + name+'&org='+ orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -191,7 +191,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/BestPractices?name=' + name+'&org='+ orgSelector,
+      url: address+'/get_best_practices_repo?name=' + name+'&org='+ orgSelector,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -231,7 +231,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/Issues?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
+      url: address+'/get_issues_repo?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
