@@ -8,8 +8,8 @@ def repo_name():
     name = "^" + str(request.args.get("name"))
     org = str(request.args.get("org"))
     compiled_name = re.compile(r'%s' % name, re.I)
-    query_result = db['Repo'].find({'org': org, 'repoName': {'$regex': compiled_name}})
-    print(query_result)
+    print(compiled_name)
+    query_result = db['Repo'].find({'org': org, 'repoName': {'$regex': compiled_name}}, {'_id': 0, 'repoName': 1})
     result = [dict(i) for i in query_result]
     return json.dumps(result)
 
@@ -22,74 +22,74 @@ def repo_languages():
     return json.dumps(result)
 
 
-def repo_commits():
-    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    query = [
-        {'$project': {
-            "day": {'$dayOfMonth': "$committedDate"},
-            "month": {'$month': "$committedDate"},
-            "year": {'$year': "$committedDate"}}},
-        {'$match': {"year": {'$gte': start_date.year, '$lte': end_date.year},
-                    "day": {'$gte': start_date.day, '$lte': end_date.day}, "month": {'$gte': start_date.month,
-                                                                                     '$lte': end_date.month}}},
-        {'$group': {"_id": "$day",
-                    "day": {'$first': "$day"},
-                    "month": {'$first': "$month"},
-                    "year": {'$first': "$year"},
-                    'count': {
-                        "$sum": 1
-                    }}},
-        {'$project': {"_id": 0,
-                      "count": 1,
-                      "day": 1,
-                      "month": 1,
-                      "year": 1
-                      }}]
-
-    aql = """
-    FOR Commit IN Commit
-    FILTER LOWER(Commit.repoName) == @name
-    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
-    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
-    FILTER Commit.org == @org
-    COLLECT
-    day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
-    WITH COUNT INTO number
-    SORT day ASC
-    RETURN {
-      day: day,
-      number: number
-    }"""
-
-    # start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d').strftime('%Y-%m-%d')
-    # end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d').strftime('%Y-%m-%d')
-    org = str(request.args.get("org"))
-    # delta = end_date - start_date
-    print(end_date)
-    # bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date), "org": org}
-    query_result = db['Commit'].aggregate(query)
-    # query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result = [dict(i) for i in query_result]
-    print(result)
-    # days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
-    #         for i in range(delta.days + 1)]
-    # lst = []
-    #
-    # def recur(day_slice):
-    #     day_dict = {}
-    #     for y in result:
-    #         if y.get('day') == day_slice:
-    #             day_dict['day'] = str(y.get('day'))
-    #             day_dict['number'] = int(y.get('number'))
-    #             return day_dict
-    #     day_dict['day'] = day_slice
-    #     day_dict['number'] = 0
-    #     return day_dict
-    # for day in days:
-    #     lst.append(recur(day))
-    # return json.dumps(lst)
-    return json.dumps(result)
+# def repo_commits():
+#     start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+#     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+#     query = [
+#         {'$project': {
+#             "day": {'$dayOfMonth': "$committedDate"},
+#             "month": {'$month': "$committedDate"},
+#             "year": {'$year': "$committedDate"}}},
+#         {'$match': {"year": {'$gte': start_date.year, '$lte': end_date.year},
+#                     "day": {'$gte': start_date.day, '$lte': end_date.day}, "month": {'$gte': start_date.month,
+#                                                                                      '$lte': end_date.month}}},
+#         {'$group': {"_id": "$day",
+#                     "day": {'$first': "$day"},
+#                     "month": {'$first': "$month"},
+#                     "year": {'$first': "$year"},
+#                     'count': {
+#                         "$sum": 1
+#                     }}},
+#         {'$project': {"_id": 0,
+#                       "count": 1,
+#                       "day": 1,
+#                       "month": 1,
+#                       "year": 1
+#                       }}]
+#
+#     aql = """
+#     FOR Commit IN Commit
+#     FILTER LOWER(Commit.repoName) == @name
+#     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
+#     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
+#     FILTER Commit.org == @org
+#     COLLECT
+#     day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
+#     WITH COUNT INTO number
+#     SORT day ASC
+#     RETURN {
+#       day: day,
+#       number: number
+#     }"""
+#
+#     # start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d').strftime('%Y-%m-%d')
+#     # end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d').strftime('%Y-%m-%d')
+#     org = str(request.args.get("org"))
+#     # delta = end_date - start_date
+#     print(end_date)
+#     # bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date), "org": org}
+#     query_result = db['Commit'].aggregate(query)
+#     # query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+#     result = [dict(i) for i in query_result]
+#     print(result)
+#     # days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
+#     #         for i in range(delta.days + 1)]
+#     # lst = []
+#     #
+#     # def recur(day_slice):
+#     #     day_dict = {}
+#     #     for y in result:
+#     #         if y.get('day') == day_slice:
+#     #             day_dict['day'] = str(y.get('day'))
+#     #             day_dict['number'] = int(y.get('number'))
+#     #             return day_dict
+#     #     day_dict['day'] = day_slice
+#     #     day_dict['number'] = 0
+#     #     return day_dict
+#     # for day in days:
+#     #     lst.append(recur(day))
+#     # return json.dumps(lst)
+#     return json.dumps(result)
 
 
 def repo_members():

@@ -22,8 +22,9 @@ $(function() {
       xhr = $.getJSON(address+'/get_repo_name?name=' + term+'&org='+ orgSelector, function(result) {
         console.log(orgSelector);
         let returnedData = result.map(function(num) {
-          return num.data;
+          return num.repoName;
         });
+        console.log(returnedData);
         response(returnedData);
       });
     }

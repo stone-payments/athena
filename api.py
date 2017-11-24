@@ -56,6 +56,10 @@ def get_issues_repo():
     return response
 
 
+@app.route('/get_repo_name')
+def get_repo_name():
+    response = repo_name()
+    return response
 # Orgs ############
 
 
@@ -92,12 +96,6 @@ def get_license_type_org():
 @app.route('/get_issues_org')
 def get_issues_org():
     response = org_issues()
-    return response
-
-
-@app.route('/get_repo_name')
-def get_repo_name():
-    response = repo_name()
     return response
 
 
