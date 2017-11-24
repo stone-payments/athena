@@ -64,3 +64,22 @@ def limit_validation(rate_limit=None, output=None, readme_limit=None):
         elif output is None:
             return time.sleep(limit_time)
 
+
+def parse_multiple_languages(object_to_be_parsed, edge, key, value):
+    list_languages = []
+    try:
+        for node in find(edge, object_to_be_parsed):
+            temp = {'language': str((find(key, node))), 'size': round(((find(value, node) /
+                                                                        find('totalSize', object_to_be_parsed)) * 100),
+                                                                      2)}
+            list_languages.append(temp)
+        return list_languages
+    except Exception as a:
+        print(a)
+        return None
+
+
+def convert_datetime(value):
+    if value is not None:
+        datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+    return value

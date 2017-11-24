@@ -25,8 +25,7 @@ def repo(db, org, query, collection_name, edge_name="edges"):
             "issues": int_validate(node["node"]["issues"]["totalCount"]),
             "stargazers": int_validate(node["node"]["stargazers"]["totalCount"]),
             "watchers": int_validate(node["node"]["watchers"]["totalCount"]),
-            "createdAt": datetime.datetime.strptime(string_validate(find('createdAt', node),
-                                                                    not_none=True), "%Y-%m-%dT%H:%M:%SZ"),
+            "createdAt": convert_datetime(find('createdAt', node)),
             "nameWithOwner": string_validate(node["node"]["nameWithOwner"]),
             "licenseId": string_validate(find('licenseId', node)),
             "licenseType": string_validate(find('licenseType', node)),
@@ -89,8 +88,7 @@ def teams(db, org, query, collection_name, edge_name="edges"):
             "collection_name": string_validate(collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
             "_id": not_null(find('teamId', node)),
-            'createdAt': datetime.datetime.strptime(string_validate(find('createdAt', node),
-                                                                    not_none=True), "%Y-%m-%dT%H:%M:%SZ"),
+            'createdAt': convert_datetime(find('createdAt', node)),
             "teamName": string_validate(node["node"]["name"], not_none=True),
             "privacy": string_validate(node["node"]["privacy"]),
             "slug": string_validate(node["node"]["slug"], not_none=True),
@@ -124,7 +122,7 @@ def teams(db, org, query, collection_name, edge_name="edges"):
     start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                       number_of_repo=number_of_repos, since=since_time, until=until_time,
                       save_content=content, save_edges=edges)
-    start.start_team()
+    start.start(team=True)
 
 
 # TEAMS_DEV ###############################
@@ -145,9 +143,9 @@ def teams_dev(db, org, query, query_db, edges_name="edges"):
         ]
         return save_edges
 
-    start = CollectorThread(db=db, org=org, edges=edges_name, query=query,
-                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start(team_dev=True)
+    start = Collector(db=db, org=org, edges=edges_name, query=query,
+                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start(thread=True, team_dev=True)
 
 
 # TEAMS_REPO ###############################
@@ -168,9 +166,9 @@ def teams_repo(db, org, query, query_db, edges_name="edges"):
         ]
         return save_edges
 
-    start = CollectorThread(db=db, org=org, edges=edges_name, query=query,
-                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start(team_dev=True)
+    start = Collector(db=db, org=org, edges=edges_name, query=query,
+                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start(thread=True, team_dev=True)
 
 
 # COMMITS ###############################
@@ -187,8 +185,7 @@ def commit_collector(db, org, query, query_db, collection_name, edge_name="edges
             "messageHeadline": string_validate(find('messageHeadline', node)),
             "oid": not_null(find('oid', node)),
             # "committedDate": string_validate(find('committedDate', node), not_none=True),
-            "committedDate": datetime.datetime.strptime(string_validate(find('committedDate', node),
-                                                                        not_none=True), "%Y-%m-%dT%H:%M:%SZ"),
+            "committedDate": convert_datetime(find('committedDate', node)),
             "author": string_validate(find('login', node)),
             "devId": string_validate(find('devId', node)),
             "commitId": string_validate(find('commitId', node)),
@@ -218,9 +215,9 @@ def commit_collector(db, org, query, query_db, collection_name, edge_name="edges
         ]
         return save_edges
 
-    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start()
+    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start(thread=True)
 
 
 # STATS ###############################
@@ -242,10 +239,10 @@ def stats_collector(db, org, query, stats_query, collection_name, edge_name="edg
         ]
         return save_edges
 
-    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                            query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
-                            save_edges=edges)
-    start.start(stats=True)
+    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                      query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
+                      save_edges=edges)
+    start.start(thread=True, stats=True)
 
 
 # FORK ###############################
@@ -258,8 +255,7 @@ def fork_collector(db, org, query, query_db, collection_name, edge_name="edges")
             "_id": not_null(find('forkId', node)),
             "repositoryId": not_null(find('repositoryId', response)),
             "repoName": string_validate(find('repoName', response)),
-            "createdAt": datetime.datetime.strptime(string_validate(find('createdAt', node),
-                                                                    not_none=True), "%Y-%m-%dT%H:%M:%SZ"),
+            "createdAt": convert_datetime(find('createdAt', node)),
             "isPrivate": bool_validate(find('isPrivate', node)),
             "isLocked": bool_validate(find('isLocked', node)),
             "devId": string_validate(find('devId', node)),
@@ -284,9 +280,9 @@ def fork_collector(db, org, query, query_db, collection_name, edge_name="edges")
         ]
         return save_edges
 
-    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start()
+    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start(thread=True)
 
 
 # ISSUES ###############################
@@ -301,11 +297,9 @@ def issue(db, org, query, query_db, collection_name, edge_name="edges"):
             "repoName": string_validate(find('repoName', response)),
             "state": string_validate(find('state', node)),
             "closed_login": string_validate(find('closed_login', node)),
-            "closedAt": datetime.datetime.strptime(string_validate(find('closedAt', node),
-                                                                   not_none=True), "%Y-%m-%dT%H:%M:%SZ"),
+            "closedAt": convert_datetime(find('closedAt', node)),
             "created_login": string_validate(find('created_login', node)),
-            "createdAt": datetime.datetime.strptime(string_validate(find('createdAt', node),
-                                                                    not_none=True), "%Y-%m-%dT%H:%M:%SZ"),
+            "createdAt": convert_datetime(find('createdAt', node)),
             "authorAssociation": string_validate(find('authorAssociation', node)),
             "closed": bool_validate(find('closed', node)),
             "label": string_validate(find('label', node)),
@@ -325,6 +319,6 @@ def issue(db, org, query, query_db, collection_name, edge_name="edges"):
         ]
         return save_edges
 
-    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start()
+    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start(thread=True)
