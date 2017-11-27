@@ -1,5 +1,4 @@
 import os
-from pyArango.connection import *
 from pymongo import MongoClient
 
 # db_url = "http://10.152.20.89:8529"

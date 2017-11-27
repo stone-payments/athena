@@ -2,15 +2,16 @@ from flask import request
 from api import *
 from .config import *
 import re
+from operator import itemgetter
 
 
 def repo_name():
     name = "^" + str(request.args.get("name"))
     org = str(request.args.get("org"))
     compiled_name = re.compile(r'%s' % name, re.I)
-    print(compiled_name)
-    query_result = db['Repo'].find({'org': org, 'repoName': {'$regex': compiled_name}}, {'_id': 0, 'repoName': 1})
+    query_result = db['Repo'].find({'org': org, 'repoName': {'$regex': compiled_name}}, {'_id': 0, 'repoName': 1}).limit(6)
     result = [dict(i) for i in query_result]
+    print(result)
     return json.dumps(result)
 
 
@@ -19,6 +20,9 @@ def repo_languages():
     org = str(request.args.get("org"))
     query_result = db['Repo'].find({'org': org, 'repoName': name}, {"languages": 1, "_id": 0})
     result = [dict(i) for i in query_result]
+    result = (result[0]['languages'])
+    result = sorted(result, key=itemgetter('size'), reverse=True)
+    print(result)
     return json.dumps(result)
 
 
@@ -93,20 +97,13 @@ def repo_languages():
 
 
 def repo_members():
-    aql = """
-    FOR Commit IN Commit
-    FILTER Commit.org == @org
-    FILTER LOWER(Commit.repoName) == @name
-    FILTER Commit.committedDate > "2017-01-01T00:00:00Z"
-    FILTER Commit.author != "anonimo"
-    RETURN DISTINCT {member:Commit.author}"""
     name = request.args.get("name")
     org = str(request.args.get("org"))
-    bind_vars = {"name": str.lower(name), "org": org}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result = [dict(i) for i in query_result]
-    print(result)
-    return json.dumps(result)
+    # bind_vars = {"name": str.lower(name), "org": org}
+    # query_result = db.Commit.distinct('author', {'org': org, 'repoName': name}, {'_id': 0, 'author': 1})
+    query_result = db.Commit.find({'org': org, 'repoName': name, 'author': {'$ne': None}},
+                                  {'_id': 0, 'author': 1}).distinct("author")
+    return json.dumps(query_result)
 
 
 def repo_best_practices():

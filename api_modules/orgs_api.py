@@ -1,5 +1,6 @@
 import datetime as dt
 import datetime
+from datetime import date
 import json
 
 from flask import request
@@ -25,7 +26,7 @@ def org_languages():
     result = [dict(i) for i in query_result]
     soma = sum(item['size'] for item in result)
     for x in result:
-        x['size'] = round((x['size']/soma*100), 2)
+        x['size'] = round((x['size'] / soma * 100), 2)
     print(result[:12])
     return json.dumps(result[:12])
 
@@ -62,53 +63,53 @@ def org_open_source():
     soma = int(result[0]["openSource"][0]) + int(result[0]["notOpenSource"][0])
     print(result)
     for x in result:
-        x['openSource'] = round(int(x['openSource'][0])/soma*100, 1)
-        x['notOpenSource'] = round(int(x['notOpenSource'][0])/soma*100, 1)
+        x['openSource'] = round(int(x['openSource'][0]) / soma * 100, 1)
+        x['notOpenSource'] = round(int(x['notOpenSource'][0]) / soma * 100, 1)
     print(result)
     return json.dumps(result)
 
 
 def org_commits():
-    aql = """
-    FOR Commit IN Commit
-    FILTER LOWER(Commit.org) == @name
-    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
-    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
-    COLLECT
-    day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
-    WITH COUNT INTO number
-    SORT day ASC
-    RETURN {
-      day: day,
-      number: number
-    }"""
     name = request.args.get("name")
     start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    query = [{'$match': {'org': name, 'committedDate': {'$gte': start_date, '$lte': end_date}}},
+             {'$group': {
+                 '_id': {
+                     'year': {'$year': "$committedDate"},
+                     'month': {'$month': "$committedDate"},
+                     'day': {'$dayOfMonth': "$committedDate"},
+                 },
+                 'count': {'$sum': 1}
+             }},
+             {'$project': {'_id': 0, "year": "$_id.year", "month": "$_id.month", "day": "$_id.day", 'count': 1}}
+             ]
     delta = end_date - start_date
-    bind_vars = {"name": str.lower(name), "startDate": str(start_date.strftime('%Y-%m-%d')), "endDate":
-                 str(end_date.strftime('%Y-%m-%d'))}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    query_result = db.Commit.aggregate(query)
     result = [dict(i) for i in query_result]
     print(result)
-    days = [dt.datetime.strptime(str(start_date + dt.timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
-            for i in range(delta.days + 1)]
-    # print(days)
+    for x in result:
+        x['date'] = dt.datetime(x['year'], x['month'], x['day'], 0, 0)
+    print(result)
+    days = [start_date + dt.timedelta(days=i) for i in range(delta.days + 1)]
+    # days = [dt.date.strptime(str(start_date + dt.timedelta(days=i)), '%Y-%m-%d %H:%M:%S')
+    #         for i in range(delta.days + 1)]
+    print(days)
     lst = []
 
     def recur(x):
         day = {}
         for y in result:
-            if y.get('day') == x:
-                day['day'] = str(y.get('day'))
-                day['number'] = int(y.get('number'))
+            if y.get('date') == x:
+                day['day'] = str(y.get('date').strftime('%a %d-%b'))
+                day['number'] = int(y.get('count'))
                 return day
-        day['day'] = x
-        day['number'] = 0
+        day['day'] = x.strftime('%a %d-%b')
+        day['count'] = 0
         return day
     for x in days:
         lst.append(recur(x))
-    # print(lst)
+    print(lst)
     return json.dumps(lst)
 
 
@@ -155,9 +156,9 @@ def org_readme():
     soma = int(result[0]["ok"][0]) + int(result[0]["poor"][0]) + int(result[0]["bad"][0])
     print(result)
     for x in result:
-        x['ok'] = round(int(x['ok'][0])/soma*100, 1)
-        x['poor'] = round(int(x['poor'][0])/soma*100, 1)
-        x['bad'] = round(int(x['bad'][0])/soma*100, 1)
+        x['ok'] = round(int(x['ok'][0]) / soma * 100, 1)
+        x['poor'] = round(int(x['poor'][0]) / soma * 100, 1)
+        x['bad'] = round(int(x['bad'][0]) / soma * 100, 1)
     print(result)
     return json.dumps(result)
 
@@ -183,7 +184,7 @@ def org_license():
     for x in result:
         if x['day'] is None:
             x['day'] = "None"
-        x['number'] = round(x['number']/soma*100, 2)
+        x['number'] = round(x['number'] / soma * 100, 2)
     print(soma)
     # print(queryResult[0])
     print(result)
@@ -245,6 +246,7 @@ def org_issues():
             else:
                 day["number"] = value_accumulated
         return days
+
     result_created = accumulator(result_created)
 
     aql_closed = """
