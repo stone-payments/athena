@@ -27,63 +27,63 @@ $(function() {
       startDay = JSON.parse($("#org").val()).start;
       lastDay = JSON.parse($("#org").val()).end;
     }
-    $.ajax({
-      url: address+'/get_languages_org?name=' + name,
-      type: 'GET',
-      success: function(response) {
-        returnedData = JSON.parse(response);
-        let labels = returnedData.map(function(num) {
-          return num.name;
-        });
-        let dataSize = returnedData.map(function(num) {
-          return num.size;
-        });
-        if (languages != null) {
-          languages.destroy();
-        }
-        languages = new Chart(document.getElementById("languages"), {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: "Languages (%)",
-              backgroundColor: colors,
-              borderWidth: 1,
-              data: dataSize
-            }]
-          },
-          options: {
-            tooltips: {
-              mode: 'index',
-              intersect: false
-            },
-            scales: {
-              yAxes: [{
-                ticks: {
-
-                  beginAtZero: true,
-                  autoSkip: false,
-                  maxTicksLimit: 100,
-                  responsive: true
-                }
-              }],
-              xAxes: [{
-                ticks: {
-                  autoSkip: false,
-                  responsive: true
-                }
-              }]
-            }
-          }
-        });
-      },
-      error: function(error) {
-        console.log(error);
-        if (languages != null) {
-          languages.destroy();
-        }
-      }
-    });
+//    $.ajax({
+//      url: address+'/get_languages_org?name=' + name,
+//      type: 'GET',
+//      success: function(response) {
+//        returnedData = JSON.parse(response);
+//        let labels = returnedData.map(function(num) {
+//          return num.name;
+//        });
+//        let dataSize = returnedData.map(function(num) {
+//          return num.size;
+//        });
+//        if (languages != null) {
+//          languages.destroy();
+//        }
+//        languages = new Chart(document.getElementById("languages"), {
+//          type: 'bar',
+//          data: {
+//            labels: labels,
+//            datasets: [{
+//              label: "Languages (%)",
+//              backgroundColor: colors,
+//              borderWidth: 1,
+//              data: dataSize
+//            }]
+//          },
+//          options: {
+//            tooltips: {
+//              mode: 'index',
+//              intersect: false
+//            },
+//            scales: {
+//              yAxes: [{
+//                ticks: {
+//
+//                  beginAtZero: true,
+//                  autoSkip: false,
+//                  maxTicksLimit: 100,
+//                  responsive: true
+//                }
+//              }],
+//              xAxes: [{
+//                ticks: {
+//                  autoSkip: false,
+//                  responsive: true
+//                }
+//              }]
+//            }
+//          }
+//        });
+//      },
+//      error: function(error) {
+//        console.log(error);
+//        if (languages != null) {
+//          languages.destroy();
+//        }
+//      }
+//    });
     $.ajax({
       url: address+'/get_commits_org?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
       type: 'GET',
@@ -93,7 +93,7 @@ $(function() {
           return num.day;
         });
         let dataCommits = returnedData.map(function(num) {
-          return num.number;
+          return num.count;
         });
         let ctx = document.getElementById("commitsCharts").getContext('2d');
         if (commitsCharts != null) {
@@ -167,6 +167,12 @@ $(function() {
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
+        let labelsCommit = returnedData.map(function(num) {
+          return num.openSource;
+        });
+        let dataCommits = returnedData.map(function(num) {
+          return num.count;
+        });
         let openSource = Number(returnedData[0]['openSource']);
         let notOpenSource = Number(returnedData[0]['notOpenSource']);
         if (openSourceChart != null) {
@@ -175,12 +181,12 @@ $(function() {
         openSourceChart = new Chart(document.getElementById("openSourceChart"), {
           type: 'doughnut',
           data: {
-            labels: ['openSource', 'Private'],
+            labels: labelsCommit,
             datasets: [{
               label: "",
-              backgroundColor: ['#0B3B1F', '#C52233'],
+              backgroundColor: ['#C52233', '#0B3B1F'],
               borderWidth: 1,
-              data: [openSource, notOpenSource]
+              data: dataCommits
             }]
           },
           options: {
@@ -200,21 +206,24 @@ $(function() {
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
-        let ok = Number(returnedData[0]['ok']);
-        let poor = Number(returnedData[0]['poor']);
-        let none = Number(returnedData[0]['bad']);
+        let labelsReadme = returnedData.map(function(num) {
+          return num.status;
+        });
+        let dataReadme = returnedData.map(function(num) {
+          return num.count;
+        });
         if (readmeChart != null) {
           readmeChart.destroy();
         }
         readmeChart = new Chart(document.getElementById("readmeChart"), {
           type: 'doughnut',
           data: {
-            labels: ['OK', 'Poor', 'None'],
+            labels: labelsReadme,
             datasets: [{
               label: "",
-              backgroundColor: ['#0B3B1F', '#ABC421', '#C52233'],
+              backgroundColor: [ '#ABC421', '#0B3B1F', '#C52233'],
               borderWidth: 1,
-              data: [ok, poor, none]
+              data: dataReadme
             }]
           },
           options: {
@@ -235,10 +244,10 @@ $(function() {
       success: function(response) {
         returnedData = JSON.parse(response);
         let labelsLicense = returnedData.map(function(num) {
-          return num.day;
+          return num.license;
         });
         let dataLicense = returnedData.map(function(num) {
-          return num.number;
+          return num.count;
         });
         if (LicenseType != null) {
           LicenseType.destroy();
@@ -294,10 +303,10 @@ $(function() {
           return num.day;
         });
         let dataIssues1 = returnedData[0].map(function(num) {
-          return num.number;
+          return num.count;
         });
         let dataIssues2 = returnedData[1].map(function(num) {
-          return num.number;
+          return num.count;
         });
         let ctx = document.getElementById("issuesChart").getContext('2d');
         if (issuesChart != null) {
