@@ -5,7 +5,6 @@ from validators import *
 # REPO ###############################
 
 def repo(db, org, query, collection_name, edge_name="edges"):
-
     def content(self, response, node):
         readme_ranges = find('ranges', node)
         if readme_ranges:
@@ -52,7 +51,6 @@ def repo(db, org, query, collection_name, edge_name="edges"):
 
 
 def dev(db, org, query, collection_name, edge_name="edges"):
-
     def content(self, response, node):
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
@@ -82,7 +80,6 @@ def dev(db, org, query, collection_name, edge_name="edges"):
 
 
 def teams(db, org, query, collection_name, edge_name="edges"):
-
     def content(self, response, node):
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
@@ -122,7 +119,7 @@ def teams(db, org, query, collection_name, edge_name="edges"):
     start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                       number_of_repo=number_of_repos, since=since_time, until=until_time,
                       save_content=content, save_edges=edges)
-    start.start(team=True)
+    start.start_team()
 
 
 # TEAMS_DEV ###############################
@@ -143,9 +140,9 @@ def teams_dev(db, org, query, query_db, edges_name="edges"):
         ]
         return save_edges
 
-    start = Collector(db=db, org=org, edges=edges_name, query=query,
-                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start(thread=True, team_dev=True)
+    start = CollectorThread(db=db, org=org, edges=edges_name, query=query,
+                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start(team_dev=True)
 
 
 # TEAMS_REPO ###############################
@@ -166,9 +163,9 @@ def teams_repo(db, org, query, query_db, edges_name="edges"):
         ]
         return save_edges
 
-    start = Collector(db=db, org=org, edges=edges_name, query=query,
-                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start(thread=True, team_dev=True)
+    start = CollectorThread(db=db, org=org, edges=edges_name, query=query,
+                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start(team_dev=True)
 
 
 # COMMITS ###############################
@@ -215,9 +212,10 @@ def commit_collector(db, org, query, query_db, collection_name, edge_name="edges
         ]
         return save_edges
 
-    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start(thread=True)
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                            since=since_time, until=until_time, query_db=query_db, number_of_repo=number_of_repos,
+                            save_content=content, save_edges=edges)
+    start.start()
 
 
 # STATS ###############################
@@ -239,10 +237,10 @@ def stats_collector(db, org, query, stats_query, collection_name, edge_name="edg
         ]
         return save_edges
 
-    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
-                      save_edges=edges)
-    start.start(thread=True, stats=True)
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                            query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
+                            save_edges=edges)
+    start.start(stats=True)
 
 
 # FORK ###############################
@@ -280,9 +278,9 @@ def fork_collector(db, org, query, query_db, collection_name, edge_name="edges")
         ]
         return save_edges
 
-    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start(thread=True)
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start()
 
 
 # ISSUES ###############################
@@ -319,6 +317,6 @@ def issue(db, org, query, query_db, collection_name, edge_name="edges"):
         ]
         return save_edges
 
-    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start(thread=True)
+    start = CollectorThread(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                            query_db=query_db, number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start.start()
