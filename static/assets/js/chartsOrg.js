@@ -27,63 +27,63 @@ $(function() {
       startDay = JSON.parse($("#org").val()).start;
       lastDay = JSON.parse($("#org").val()).end;
     }
-//    $.ajax({
-//      url: address+'/get_languages_org?name=' + name,
-//      type: 'GET',
-//      success: function(response) {
-//        returnedData = JSON.parse(response);
-//        let labels = returnedData.map(function(num) {
-//          return num.name;
-//        });
-//        let dataSize = returnedData.map(function(num) {
-//          return num.size;
-//        });
-//        if (languages != null) {
-//          languages.destroy();
-//        }
-//        languages = new Chart(document.getElementById("languages"), {
-//          type: 'bar',
-//          data: {
-//            labels: labels,
-//            datasets: [{
-//              label: "Languages (%)",
-//              backgroundColor: colors,
-//              borderWidth: 1,
-//              data: dataSize
-//            }]
-//          },
-//          options: {
-//            tooltips: {
-//              mode: 'index',
-//              intersect: false
-//            },
-//            scales: {
-//              yAxes: [{
-//                ticks: {
-//
-//                  beginAtZero: true,
-//                  autoSkip: false,
-//                  maxTicksLimit: 100,
-//                  responsive: true
-//                }
-//              }],
-//              xAxes: [{
-//                ticks: {
-//                  autoSkip: false,
-//                  responsive: true
-//                }
-//              }]
-//            }
-//          }
-//        });
-//      },
-//      error: function(error) {
-//        console.log(error);
-//        if (languages != null) {
-//          languages.destroy();
-//        }
-//      }
-//    });
+    $.ajax({
+      url: address+'/get_languages_org?name=' + name,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        let labels = returnedData.map(function(num) {
+          return num.languages;
+        });
+        let dataSize = returnedData.map(function(num) {
+          return num.count;
+        });
+        if (languages != null) {
+          languages.destroy();
+        }
+        languages = new Chart(document.getElementById("languages"), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Languages (%)",
+              backgroundColor: colors,
+              borderWidth: 1,
+              data: dataSize
+            }]
+          },
+          options: {
+            tooltips: {
+              mode: 'index',
+              intersect: false
+            },
+            scales: {
+              yAxes: [{
+                ticks: {
+
+                  beginAtZero: true,
+                  autoSkip: false,
+                  maxTicksLimit: 100,
+                  responsive: true
+                }
+              }],
+              xAxes: [{
+                ticks: {
+                  autoSkip: false,
+                  responsive: true
+                }
+              }]
+            }
+          }
+        });
+      },
+      error: function(error) {
+        console.log(error);
+        if (languages != null) {
+          languages.destroy();
+        }
+      }
+    });
     $.ajax({
       url: address+'/get_commits_org?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
       type: 'GET',

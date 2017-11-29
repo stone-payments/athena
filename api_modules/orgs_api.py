@@ -9,24 +9,27 @@ from api_modules import db
 
 
 def org_languages():
-    aql = """
-    FOR Languages IN Languages
-    FOR LanguagesRepo IN LanguagesRepo
-    FOR Repo IN Repo
-    FILTER Languages._id == LanguagesRepo._from
-    FILTER Repo._id == LanguagesRepo._to
-    FILTER LOWER(Repo.org) == @name
-    COLLECT ageGroup = Languages.name 
-    AGGREGATE soma = SUM(LanguagesRepo.size)
-    SORT soma DESC
-    RETURN {name:ageGroup,size:soma}"""
     name = request.args.get("name")
-    bind_vars = {"name": str.lower(name)}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=1000000, bindVars=bind_vars)
+    query = [{'$match': {'org': name}},
+             {'$unwind': "$languages"},
+             {'$group': {
+                 '_id': {
+                     'language': "$languages.language",
+                 },
+                 'count': {'$sum': '$languages.size'}
+             }},
+             {'$sort': {'count': -1}},
+             {'$project': {'_id': 0, "languages": "$_id.language", 'count': 1}}]
+
+    query_result = db.Repo.aggregate(query)
     result = [dict(i) for i in query_result]
-    soma = sum(item['size'] for item in result)
+    print(result)
+    soma = sum([language['count'] for language in result])
+    print(soma)
     for x in result:
-        x['size'] = round((x['size'] / soma * 100), 2)
+        x['count'] = round((x['count'] / soma * 100), 2)
+    soma = sum([language['count'] for language in result])
+    print(soma)
     print(result[:12])
     return json.dumps(result[:12])
 
@@ -57,7 +60,8 @@ def org_open_source():
 def org_commits():
     name = request.args.get("name")
     start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
+    print(end_date)
     query = [{'$match': {'org': name, 'committedDate': {'$gte': start_date, '$lte': end_date}}},
              {'$group': {
                  '_id': {
@@ -100,15 +104,15 @@ def org_commits():
 def org_readme():
     name = request.args.get("name")
     query = [{'$match': {'org': name}},
-           {'$group': {
-               '_id': {
-                   'status': "$readme",
-               },
-               'count': {'$sum': 1}
-           }},
+             {'$group': {
+                 '_id': {
+                     'status': "$readme",
+                 },
+                 'count': {'$sum': 1}
+             }},
              {'$sort': {'_id.status': -1}},
-           {'$project': {'_id': 0, "status": "$_id.status", 'count': 1}}
-           ]
+             {'$project': {'_id': 0, "status": "$_id.status", 'count': 1}}
+             ]
     query_result = db.Repo.aggregate(query)
     readme_status_list = [dict(i) for i in query_result]
     soma = sum([readme_status['count'] for readme_status in readme_status_list])
@@ -166,7 +170,7 @@ def org_issues():
 
     name = request.args.get("name")
     start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
     query = [{'$match': {'org': name, 'createdAt': {'$gte': start_date, '$lte': end_date}}},
              {'$group': {
                  '_id': {
@@ -192,7 +196,6 @@ def org_issues():
     for z in days:
         created_issues_list.append(fill_all_dates(z, commits_count_list))
     print(created_issues_list)
-
 
     query = [{'$match': {'org': name, 'closedAt': {'$gte': start_date, '$lte': end_date}}},
              {'$group': {
