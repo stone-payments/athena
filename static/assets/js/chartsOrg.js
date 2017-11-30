@@ -28,6 +28,46 @@ $(function() {
       lastDay = JSON.parse($("#org").val()).end;
     }
     $.ajax({
+      url: address+'/get_org_info?name=' + name,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        let url = String(returnedData[0]['avatarUrl']);
+        let repoCount = String(returnedData[0]['repoCount']);
+        let membersCount = String(returnedData[0]['membersCount']);
+        let teamsCount = String(returnedData[0]['teamsCount']);
+        let projectCount = String(returnedData[0]['projectCount']);
+        let orgName = String(returnedData[0]['org']);
+        let orgLastUpdated = String(returnedData[0]['db_last_updated']);
+        $('#avatar').attr("src", url);
+        $('#membersCount').text(membersCount + " Members");
+        $('#orgName').text(orgName);
+        $('#repoCount').text(repoCount + " Repositories");
+        $('#teamsCount').text(teamsCount + " Teams");
+        $('#projectCount').text(projectCount + " Projects");
+        $('#orgLastUpdated').html('<i class="fa fa-clock-o"></i> '+ orgLastUpdated + ' minutes ago');
+//        if (following == '-'){
+//          $(".content").hide();
+//          $(document).ready(function() {
+//        		$.notify({
+//        			icon: 'pe-7s-close-circle',
+//        			message: "User does not exist"
+//        		}, {
+//        			type: 'danger',
+//        			timer: 4000
+//        		});
+//        	});
+//        }
+//        else {
+//          $(".content").show();
+//        }
+      },
+
+      error: function(error) {
+        console.log(error);
+      }
+    });
+    $.ajax({
       url: address+'/get_languages_org?name=' + name,
       type: 'GET',
       success: function(response) {

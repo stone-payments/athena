@@ -60,7 +60,14 @@ def get_issues_repo():
 def get_repo_name():
     response = repo_name()
     return response
+
 # Orgs ############
+
+
+@app.route('/get_org_info')
+def get_org_info():
+    response = org_info()
+    return response
 
 
 @app.route('/get_languages_org')

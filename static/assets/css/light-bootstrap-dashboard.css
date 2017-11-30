@@ -1630,6 +1630,7 @@ body > .navbar-collapse {
     color: #333333;
     font-weight: 300; }
   .card .avatar {
+    background-color: #eeeeee;
     width: 30px;
     height: 30px;
     overflow: hidden;
