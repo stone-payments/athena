@@ -1,5 +1,6 @@
 import datetime
 import os
+from queue import Queue
 
 token = os.getenv("GRAPHQL_TOKEN")
 db_name = "athena"
@@ -28,4 +29,4 @@ hash_indexes_unique = []
 skip_list_indexes = [["Issue", "closeAt"], ["Issue", "createdAt"], ["Commit", "committedDate"], ["Fork", "createdAt"]]
 full_text_indexes = [["Repo", "repoName"], ["Teams", "teamName"], ["Issue", "org"],
                      ["Commit", "org"], ["Fork", "org"], ["Dev", "login"]]
-
+save_queue = Queue(queue_max_size)

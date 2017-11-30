@@ -34,6 +34,8 @@ with open("queries/teamsRepoArango.aql", "r") as teams_repo_arango:
 with open("queries/teamsRepoQuery.aql", "r") as teams_repo_query:
     teams_repo_query = teams_repo_query.read()
 
+with open("queries/org_query.graphql", "r") as org_query:
+    org_query = org_query.read()
 
 def query_stats_mongo(self):
     dictionary = [dict(x) for x in self.db.Commit.find({"additions": None, "org": self.org},

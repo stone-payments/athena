@@ -4,6 +4,33 @@ from validators import *
 
 # REPO ###############################
 
+def org_collection(db, org, query, collection_name, edge_name="edges"):
+    def content(self, node):
+        save_content = {
+            "collection_name": string_validate(collection_name, not_none=True),
+            "org": string_validate(self.org, not_none=True),
+            "_id": not_null(find('id', node)),
+            "avatarUrl": string_validate(find('avatarUrl', node)),
+            "description": string_validate(find('description', node)),
+            "membersCount": int_validate(find('membersCount', node)),
+            "teamsCount": int_validate(find('teamsCount', node)),
+            "repoCount": int_validate(find('repoCount', node)),
+            "projectCount": int_validate(find('projectCount', node)),
+            "db_last_updated": datetime.datetime.utcnow(),
+        }
+        return save_content
+
+    def edges(node, response):
+        save_edges = [
+        ]
+        return save_edges
+
+    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                      number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
+                      save_content=content, save_edges=edges)
+    start.start()
+
+
 def repo(db, org, query, collection_name, edge_name="edges"):
     def content(self, response, node):
         readme_ranges = find('ranges', node)

@@ -54,11 +54,11 @@ class Pagination:
         return response
 
 
-class Save:
+class Saver:
     def __init__(self, db):
         self.db = db
 
-    def _save_thread(self, save: Queue):
+    def save_thread(self, save: Queue):
         while True:
             save_data = save.get(timeout=queue_timeout)
             db = Mongraph(db=self.db)
@@ -70,7 +70,7 @@ class Save:
                            data={key: value for key, value in edge.items() if key not in ['from', 'to',
                                                                                           'edge_name']})
 
-    def _save_edges_thread(self, save: Queue):
+    def save_edges_thread(self, save: Queue):
         while True:
             save_edges = save.get(timeout=queue_timeout)
             db = Mongraph(db=self.db)
@@ -81,10 +81,15 @@ class Save:
                            data={key: value for key, value in edge.items() if key not in ['from', 'to',
                                                                                           'edge_name']})
 
+    workers = [Thread(target=save_thread, args=(save_queue,)) for _ in range(num_of_threads)]
+    workers2 = [Thread(target=save_edges_thread, args=(save_queue,)) for _ in range(num_of_threads)]
+    [t.start() for t in workers]
+    [t.start() for t in workers2]
+
 
 class Collector:
     def __init__(self, db: object, collection_name: object, org: object, edges: object, query: object,
-                 save_content: object, save_edges: object, number_of_repo: object = None,
+                 save_content: type, save_edges: type, number_of_repo: object = None,
                  next_repo: object = None, slug: object = None, since: object = None, until: object = None):
         self.db = db
         self.org = org
@@ -131,8 +136,12 @@ class Collector:
                                 number_of_repo=self.number_of_repo, slug=self.slug, next_repo=self.next_repo)
         for page in pagination:
             edges = find(self.edges_name, page)
-            for node in edges:
-                queue_input = self.save_content(self, page, node)
+            if edges is not None:
+                for node in edges:
+                    queue_input = self.save_content(self, page, node)
+                    self._save(queue_input, pagination)
+            else:
+                queue_input = self.save_content(self, page)
                 self._save(queue_input, pagination)
 
     def _collect_team(self):
