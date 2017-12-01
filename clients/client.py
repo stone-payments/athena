@@ -15,6 +15,8 @@ class GraphQLClient:
         if self.token != "":
             headers = {'Authorization': 'bearer %s' % self.token}
             req = requests.post(self.endpoint, json.dumps(data), headers=headers, timeout=self.timeout)
+            if req.json().get("message"):
+                time.sleep(5)
             return req.json()
         else:
             raise NameError("Token is not Defined")

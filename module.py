@@ -73,5 +73,5 @@ def parse_multiple_languages(object_to_be_parsed, edge, key, value):
 
 def convert_datetime(value):
     if value is not None:
-        datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+        return datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
     return value
