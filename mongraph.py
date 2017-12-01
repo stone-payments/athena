@@ -1,4 +1,3 @@
-
 class Mongraph(object):
     def __init__(self, db, edge_collection: str = 'edges'):
         self.__edge_collection = edge_collection
@@ -16,4 +15,3 @@ class Mongraph(object):
         })
         edge_id = str(from_) + str(to)
         self.update(obj={"_id": edge_id}, patch={"from": from_, "to": to, "type": kind, "data": data}, kind="edges")
-

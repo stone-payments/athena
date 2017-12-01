@@ -1,6 +1,5 @@
 def not_null(value):
     if value is None:
-        # raise ValueError("Field value cannot be None")
         return None
     return value
 

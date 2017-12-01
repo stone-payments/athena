@@ -1,37 +1,31 @@
-with open("queries/repoQuery.aql", "r") as repo_query:
+with open("queries/repoQuery.graphql", "r") as repo_query:
     repo_query = repo_query.read()
 
-with open("queries/devQuery.aql", "r") as dev_query:
+with open("queries/devQuery.graphql", "r") as dev_query:
     dev_query = dev_query.read()
 
-with open("queries/teamsQuery.aql", "r") as teams_query:
+with open("queries/teamsQuery.graphql", "r") as teams_query:
     teams_query = teams_query.read()
 
-with open("queries/commitQuery.json", "r") as commit_query:
+with open("queries/commitQuery.graphql", "r") as commit_query:
     commit_query = commit_query.read()
 
 with open("queries/readmeArango.aql", "r") as readme_arango:
     readme_arango = readme_arango.read()
 
-with open("queries/readmeQuery.aql", "r") as readme_query:
+with open("queries/readmeQuery.graphql", "r") as readme_query:
     readme_query = readme_query.read()
 
-with open("queries/forkArango.aql", "r") as fork_arango:
-    fork_arango = fork_arango.read()
-
-with open("queries/forkQuery.aql", "r") as fork_query:
+with open("queries/forkQuery.graphql", "r") as fork_query:
     fork_query = fork_query.read()
 
-with open("queries/issueQuery.aql", "r") as issue_query:
+with open("queries/issueQuery.graphql", "r") as issue_query:
     issue_query = issue_query.read()
 
-with open("queries/teamsDevQuery.aql", "r") as teams_dev_query:
+with open("queries/teamsDevQuery.graphql", "r") as teams_dev_query:
     teams_dev_query = teams_dev_query.read()
 
-with open("queries/teamsRepoArango.aql", "r") as teams_repo_arango:
-    teams_repo_arango = teams_repo_arango.read()
-
-with open("queries/teamsRepoQuery.aql", "r") as teams_repo_query:
+with open("queries/teamsRepoQuery.graphql", "r") as teams_repo_query:
     teams_repo_query = teams_repo_query.read()
 
 with open("queries/org_query.graphql", "r") as org_query:
