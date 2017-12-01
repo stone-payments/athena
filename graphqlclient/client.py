@@ -1,5 +1,6 @@
 import json
 import requests
+import time
 
 
 class GraphQLClient:
@@ -30,7 +31,8 @@ class ClientRest:
         if self.token != "":
             headers = {'Authorization': 'token %s' % self.token}
             req = requests.get(query, headers=headers, timeout=self.timeout)
+            if req.json().get("message"):
+                time.sleep(5)
             return req.json()
         else:
             raise NameError("Token is not Defined")
-

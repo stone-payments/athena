@@ -7,7 +7,7 @@ with open("queries/devQuery.aql", "r") as dev_query:
 with open("queries/teamsQuery.aql", "r") as teams_query:
     teams_query = teams_query.read()
 
-with open("queries/commitQuery.aql", "r") as commit_query:
+with open("queries/commitQuery.json", "r") as commit_query:
     commit_query = commit_query.read()
 
 with open("queries/readmeArango.aql", "r") as readme_arango:
@@ -36,6 +36,7 @@ with open("queries/teamsRepoQuery.aql", "r") as teams_repo_query:
 
 with open("queries/org_query.graphql", "r") as org_query:
     org_query = org_query.read()
+
 
 def query_stats_mongo(self):
     dictionary = [dict(x) for x in self.db.Commit.find({"additions": None, "org": self.org},

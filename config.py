@@ -20,7 +20,7 @@ queue_max_size = 1500000
 num_of_threads = 2
 queue_timeout = 15
 rest_minutes = 20  # minutes to rest and start collect again
-rate_limit_to_sleep = 6  # minimum remaining api value to wait next reset
+rate_limit_to_sleep = 10  # minimum remaining api value to wait next reset
 hash_indexes = [["Dev", "devName"], ["Dev", "login"], ["Teams", "teamName"],
                 ["Commit", "org"], ["Issue", "repoName"], ["Repo", "readme"], ["Commit", "author"],
                 ["Repo", "repoName"], ["Repo", "openSource"], ["Repo", "licenseId"], ["Repo", "licenseType"],
@@ -30,3 +30,4 @@ skip_list_indexes = [["Issue", "closeAt"], ["Issue", "createdAt"], ["Commit", "c
 full_text_indexes = [["Repo", "repoName"], ["Teams", "teamName"], ["Issue", "org"],
                      ["Commit", "org"], ["Fork", "org"], ["Dev", "login"]]
 save_queue = Queue(queue_max_size)
+save_edges_name_queue = Queue(queue_max_size)

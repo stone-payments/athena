@@ -50,19 +50,19 @@ def find(key, json) -> iter:
 
 
 def limit_validation(rate_limit=None, output=None, readme_limit=None):
-    if readme_limit is not None:
-        with open("queries/rate_limit_query.aql", "r") as query:
-            query = query.read()
-        prox = pagination_universal(query)
-        return limit_validation(rate_limit=find('rateLimit', prox))
+    # if readme_limit is not None:
+    #     with open("queries/rate_limit_query.aql", "r") as query:
+    #         query = query.read()
+    #     prox = pagination_universal(query)
+    #     return limit_validation(rate_limit=find('rateLimit', prox))
     if rate_limit is not None and rate_limit["remaining"] < rate_limit_to_sleep:
         limit_time = (datetime.datetime.strptime(rate_limit["resetAt"], '%Y-%m-%dT%H:%M:%SZ') -
                       datetime.datetime.utcnow()).total_seconds()
         print("wait " + str(limit_time / 60) + " mins")
-        if output is not None:
-            return time.sleep(limit_time), output.put(rate_limit)
-        elif output is None:
-            return time.sleep(limit_time)
+        # if output is not None:
+        #     return time.sleep(limit_time), output.put(rate_limit)
+        # elif output is None:
+        return time.sleep(limit_time)
 
 
 def parse_multiple_languages(object_to_be_parsed, edge, key, value):
