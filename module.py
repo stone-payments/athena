@@ -1,4 +1,3 @@
-from queue import Queue
 from datetime import datetime
 from config import *
 from clients import ClientRest
