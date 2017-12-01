@@ -1,4 +1,0 @@
-FOR Repo in Repo
-    FILTER Repo.org == @org
-    FILTER Repo.forks > 0
-    RETURN Repo.repoName

@@ -10,9 +10,6 @@ with open("queries/teamsQuery.graphql", "r") as teams_query:
 with open("queries/commitQuery.graphql", "r") as commit_query:
     commit_query = commit_query.read()
 
-with open("queries/readmeArango.aql", "r") as readme_arango:
-    readme_arango = readme_arango.read()
-
 with open("queries/readmeQuery.graphql", "r") as readme_query:
     readme_query = readme_query.read()
 

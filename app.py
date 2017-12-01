@@ -1,4 +1,4 @@
-from collections_and_edges import *
+from collections_edges import *
 from createDB import create_database_if_not_exists, create_collection_if_not_exists
 from config import *
 from graphql_queries import *

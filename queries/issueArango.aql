@@ -1,4 +1,0 @@
-FOR Repo in Repo
-    FILTER Repo.org == @org
-    FILTER Repo.issues > 0
-    return Repo.repoName

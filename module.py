@@ -1,7 +1,8 @@
+from queue import Queue
 from datetime import datetime
 from config import *
-from graphqlclient import ClientRest
-from graphqlclient import GraphQLClient
+from clients import ClientRest
+from clients import GraphQLClient
 import time
 
 client = GraphQLClient(url, token, timeout)

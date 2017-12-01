@@ -1,7 +1,0 @@
-FOR Commit IN Commit
-    FILTER Commit.additions == null
-    FILTER Commit.org == @org
-    FILTER Commit.committedDate >= @since_time
-    FILTER Commit.committedDate < @until_time
-    LIMIT 4990
-    RETURN {oid:Commit.oid,repo:Commit.repoName,id:Commit.GitHubId}
