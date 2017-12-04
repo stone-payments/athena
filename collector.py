@@ -3,6 +3,7 @@ import ast
 from module import *
 from threading import Thread
 from validators import *
+import sys
 
 
 class Pagination:
@@ -44,9 +45,7 @@ class Pagination:
         print(response)
         limit_validation(rate_limit=find('rateLimit', response))
         self.has_next_page = find('hasNextPage', response)
-        print(self.has_next_page)
         self.cursor = find('endCursor', response)
-        print(self.cursor)
         return response
 
 
@@ -58,57 +57,67 @@ class Saver:
 
     def save(self, save: dict, response: object, save_edges: type):
         print(save)
-        db = Mongraph(db=self.db)
-        db.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
-        for edge in save_edges(save, response):
-            if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
-                continue
-            db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
-                       data={key: value for key, value in edge.items() if key not in ['from', 'to',
-                                                                                      'edge_name']})
+        try:
+            db = Mongraph(db=self.db)
+            db.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
+            for edge in save_edges(save, response):
+                if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
+                    continue
+                db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
+                           data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                          'edge_name']})
+        except Exception:
+            sys.exit(1)
 
     def save_team(self, team, members, repos):
         db = Mongraph(db=self.db)
-        db.update(obj={"_id": team["_id"]}, patch=team, kind=team["collection_name"])
-        for member in members:
-            if validate_edge(member.get("to"), member.get("from"), member.get("edge_name")):
-                continue
-            db.connect(to=member.get("to"), from_=member.get("from"), kind=member.get("edge_name"),
-                       data={key: value for key, value in member.items() if key not in ['from', 'to',
-                                                                                        'edge_name']})
-        for repo in repos:
-            if validate_edge(repo.get("to"), repo.get("from"), repo.get("edge_name")):
-                continue
-            db.connect(to=repo.get("to"), from_=repo.get("from"), kind=repo.get("edge_name"),
-                       data={key: value for key, value in repo.items() if key not in ['from', 'to',
-                                                                                      'edge_name']})
+        try:
+            db.update(obj={"_id": team["_id"]}, patch=team, kind=team["collection_name"])
+            for member in members:
+                if validate_edge(member.get("to"), member.get("from"), member.get("edge_name")):
+                    continue
+                db.connect(to=member.get("to"), from_=member.get("from"), kind=member.get("edge_name"),
+                           data={key: value for key, value in member.items() if key not in ['from', 'to',
+                                                                                            'edge_name']})
+            for repo in repos:
+                if validate_edge(repo.get("to"), repo.get("from"), repo.get("edge_name")):
+                    continue
+                db.connect(to=repo.get("to"), from_=repo.get("from"), kind=repo.get("edge_name"),
+                           data={key: value for key, value in repo.items() if key not in ['from', 'to',
+                                                                                          'edge_name']})
+        except Exception:
+            sys.exit(1)
 
     def save_thread(self):
         while True:
             returned_data = self.save_edges_name_queue.get(block=True)
-            save_data = returned_data[0]
-            save_edges = returned_data[1]
-            db = Mongraph(db=self.db)
-            db.update(obj={"_id": save_data["_id"]}, patch=save_data, kind=save_data["collection_name"])
-            for edge in save_edges(save_data):
-                if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
-                    continue
-                db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
-                           data={key: value for key, value in edge.items() if key not in ['from', 'to',
-                                                                                          'edge_name']})
+            try:
+                save_data = returned_data[0]
+                save_edges = returned_data[1]
+                db = Mongraph(db=self.db)
+                db.update(obj={"_id": save_data["_id"]}, patch=save_data, kind=save_data["collection_name"])
+                for edge in save_edges(save_data):
+                    if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
+                        continue
+                    db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
+                               data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                              'edge_name']})
+            except Exception:
+                sys.exit(1)
 
     def save_edges_thread(self):
         while True:
             save_edges = self.save_queue.get(block=True)
-            print("555")
-            print(save_edges)
-            db = Mongraph(db=self.db)
-            for edge in save_edges:
-                if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
-                    continue
-                db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
-                           data={key: value for key, value in edge.items() if key not in ['from', 'to',
-                                                                                          'edge_name']})
+            try:
+                db = Mongraph(db=self.db)
+                for edge in save_edges:
+                    if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
+                        continue
+                    db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
+                               data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                              'edge_name']})
+            except Exception:
+                sys.exit(1)
 
     def start(self):
         workers = [Thread(target=self.save_thread, args=()) for _ in range(num_of_threads)]
@@ -134,33 +143,6 @@ class Collector:
         self.save_content = save_content
         self.save_edges = save_edges
 
-    # def _save(self, save, response):
-    #     print(save)
-    #     db = Mongraph(db=self.db)
-    #     db.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
-    #     for edge in self.save_edges(save, response):
-    #         if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
-    #             continue
-    #         db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
-    #                    data={key: value for key, value in edge.items() if key not in ['from', 'to',
-    #                                                                                   'edge_name']})
-    #
-    # def _save_team(self, team, members, repos):
-    #     db = Mongraph(db=self.db)
-    #     db.update(obj={"_id": team["_id"]}, patch=team, kind=team["collection_name"])
-    #     for member in members:
-    #         if validate_edge(member.get("to"), member.get("from"), member.get("edge_name")):
-    #             continue
-    #         db.connect(to=member.get("to"), from_=member.get("from"), kind=member.get("edge_name"),
-    #                    data={key: value for key, value in member.items() if key not in ['from', 'to',
-    #                                                                                     'edge_name']})
-    #     for repo in repos:
-    #         if validate_edge(repo.get("to"), repo.get("from"), repo.get("edge_name")):
-    #             continue
-    #         db.connect(to=repo.get("to"), from_=repo.get("from"), kind=repo.get("edge_name"),
-    #                    data={key: value for key, value in repo.items() if key not in ['from', 'to',
-    #                                                                                   'edge_name']})
-
     def _collect(self):
         pagination = Pagination(org=self.org, query=self.query, since=self.since, until=self.until,
                                 number_of_repo=self.number_of_repo, slug=self.slug, next_repo=self.next_repo)
@@ -169,12 +151,10 @@ class Collector:
             if edges is not None:
                 for node in edges:
                     queue_input = self.save_content(self, page, node)
-                    # self._save(queue_input, pagination)
                     save = Saver(db=self.db)
                     save.save(queue_input, pagination, save_edges=self.save_edges)
             else:
                 queue_input = self.save_content(self, page)
-                # self._save(queue_input, pagination)
                 save = Saver(db=self.db)
                 save.save(queue_input, pagination, save_edges=self.save_edges)
 
@@ -183,20 +163,18 @@ class Collector:
                                        since=self.since, until=self.until, slug=self.slug, next_repo=self.next_repo)
         for page in return_pagination:
             edges = find(self.edges_name, page)
-            for node in edges:
-                team = self.save_content(self, edges, node)
-                members, repositories = self.save_edges(team, find('members_edge', node),
-                                                        find('repo_edge', node))
-                # self._save_team(team, members, repositories)
-                save = Saver(db=self.db)
-                save.save_team(team, members, repositories)
+            if edges is not None:
+                for node in edges:
+                    team = self.save_content(self, edges, node)
+                    members, repositories = self.save_edges(team, find('members_edge', node),
+                                                            find('repo_edge', node))
+                    save = Saver(db=self.db)
+                    save.save_team(team, members, repositories)
 
     def start(self):
-        # save_queue = Queue(queue_max_size)
         self._collect()
 
     def start_team(self):
-        # save_queue = Queue(queue_max_size)
         self._collect_team()
 
 
@@ -217,29 +195,6 @@ class CollectorThread:
         self.save_content = save_content
         self.save_edges = save_edges
 
-    # def _save_thread(self, save: Queue):
-    #     while True:
-    #         save_data = save.get(timeout=queue_timeout)
-    #         db = Mongraph(db=self.db)
-    #         db.update(obj={"_id": save_data["_id"]}, patch=save_data, kind=save_data["collection_name"])
-    #         for edge in self.save_edges(save_data):
-    #             if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
-    #                 continue
-    #             db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
-    #                        data={key: value for key, value in edge.items() if key not in ['from', 'to',
-    #                                                                                       'edge_name']})
-    #
-    # def _save_edges_thread(self, save: Queue):
-    #     while True:
-    #         save_edges = save.get(timeout=queue_timeout)
-    #         db = Mongraph(db=self.db)
-    #         for edge in save_edges:
-    #             if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name")):
-    #                 continue
-    #             db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
-    #                        data={key: value for key, value in edge.items() if key not in ['from', 'to',
-    #                                                                                       'edge_name']})
-
     def _collect_thread(self, repositories: Queue, save: Queue):
         while True:
             repository = repositories.get(timeout=queue_timeout)
@@ -247,9 +202,10 @@ class CollectorThread:
                                            since=self.since, until=self.until, slug=self.slug, next_repo=repository)
             for page in return_pagination:
                 edges = find(self.edges, page)
-                for node in edges:
-                    queue_input = (self.save_content(self, page, node), self.save_edges)
-                    save.put(queue_input)
+                if edges is not None:
+                    for node in edges:
+                        queue_input = (self.save_content(self, page, node), self.save_edges)
+                        save.put(queue_input)
 
     def _collect_commit_stats_thread(self, repositories: Queue, save: Queue):
         while True:
@@ -268,23 +224,20 @@ class CollectorThread:
                                            since=self.since, until=self.until, slug=repository)
             for page in return_pagination:
                 edges = find(self.edges, page)
-                for node in edges:
-                    queue_input = self.save_edges(page, node)
-                    save.put(queue_input)
+                if edges is not None:
+                    for node in edges:
+                        queue_input = self.save_edges(page, node)
+                        save.put(queue_input)
 
     @staticmethod
     def _start_threads(query_result: iter, collect_type: object, queue_type: Queue):
         repositories_queue = Queue(queue_max_size)
-        # save_queue = Queue(queue_max_size)
         print(query_result)
         workers = [Thread(target=collect_type, args=(repositories_queue, queue_type)) for _ in range(num_of_threads)]
-        # workers2 = [Thread(target=save_type, args=(save_queue,)) for _ in range(num_of_threads)]
         for repo in query_result:
             repositories_queue.put(str(repo))
         [t.start() for t in workers]
-        # [t.start() for t in workers2]
         [t.join() for t in workers]
-        # [t.join() for t in workers2]
 
     def start(self, stats=None, team_dev=None):
         query_result = self.query_db(self)
