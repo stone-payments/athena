@@ -15,7 +15,7 @@ from api_modules import *
 # import collections
 # conn = Connection(username="root", password="")
 # db = conn["athena_teste"]
-value = 0
+# value = 0
 
 app = Flask(__name__, static_url_path='/static')
 CORS(app)
@@ -41,6 +41,12 @@ def get_commits_repo():
 @app.route('/get_members_repo')
 def get_members_repo():
     response = repo_members()
+    return response
+
+
+@app.route('/get_repo_infos')
+def get_repo_infos():
+    response = repo_infos()
     return response
 
 

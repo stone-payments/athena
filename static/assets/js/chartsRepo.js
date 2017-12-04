@@ -95,81 +95,81 @@ $(function() {
         console.log(error);
       }
     });
-//    $.ajax({
-//      url: address+'/get_commits_repo?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay+'&org='+ orgSelector,
-//      type: 'GET',
-//      success: function(response) {
-//        returnedData = JSON.parse(response);
-//        let labelsCommit = returnedData.map(function(num) {
-//          return num.day;
-//        });
-//        let dataCommits = returnedData.map(function(num) {
-//          return num.number;
-//        });
-//        let ctx = document.getElementById("commitsCharts").getContext('2d');
-//
-//        if (commitsCharts != null) {
-//          commitsCharts.destroy();
-//        }
-//        commitsCharts = new Chart(ctx, {
-//          type: 'line',
-//          data: {
-//            labels: labelsCommit,
-//            datasets: [{
-//              label: 'num of Commits',
-//              data: dataCommits,
-//              backgroundColor: [
-//                'rgba(255, 99, 132, 0.2)',
-//                'rgba(54, 162, 235, 0.2)',
-//                'rgba(255, 206, 86, 0.2)',
-//                'rgba(75, 192, 192, 0.2)',
-//                'rgba(153, 102, 255, 0.2)',
-//                'rgba(255, 159, 64, 0.2)'
-//              ],
-//              borderColor: [
-//                'rgba(255,99,132,1)',
-//                'rgba(54, 162, 235, 1)',
-//                'rgba(255, 206, 86, 1)',
-//                'rgba(75, 192, 192, 1)',
-//                'rgba(153, 102, 255, 1)',
-//                'rgba(255, 159, 64, 1)'
-//              ],
-//              borderWidth: 1,
-//              lineTension: 0
-//            }]
-//          },
-//          options: {
-//            tooltips: {
-//              mode: 'index',
-//              intersect: false
-//            },
-//            scales: {
-//              xAxes: [{
-//                ticks: {
-//                  autoSkip: labelsCommit.length > 31 ? true : false,
-//                  beginAtZero: true,
-//                  responsive: true
-//                }
-//              }],
-//              yAxes: [{
-//                ticks: {
-//                  suggestedMax: 10,
-//                  beginAtZero: true,
-//                  callback: function(value, index, values) {
-//                    if (Math.floor(value) === value) {
-//                      return value;
-//                    }
-//                  }
-//                }
-//              }]
-//            }
-//          },
-//        });
-//      },
-//      error: function(error) {
-//        console.log(error);
-//      }
-//    });
+    $.ajax({
+      url: address+'/get_commits_repo?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay+'&org='+ orgSelector,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        let labelsCommit = returnedData.map(function(num) {
+          return num.day;
+        });
+        let dataCommits = returnedData.map(function(num) {
+          return num.count;
+        });
+        let ctx = document.getElementById("commitsCharts").getContext('2d');
+
+        if (commitsCharts != null) {
+          commitsCharts.destroy();
+        }
+        commitsCharts = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labelsCommit,
+            datasets: [{
+              label: 'num of Commits',
+              data: dataCommits,
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1,
+              lineTension: 0
+            }]
+          },
+          options: {
+            tooltips: {
+              mode: 'index',
+              intersect: false
+            },
+            scales: {
+              xAxes: [{
+                ticks: {
+                  autoSkip: labelsCommit.length > 31 ? true : false,
+                  beginAtZero: true,
+                  responsive: true
+                }
+              }],
+              yAxes: [{
+                ticks: {
+                  suggestedMax: 10,
+                  beginAtZero: true,
+                  callback: function(value, index, values) {
+                    if (Math.floor(value) === value) {
+                      return value;
+                    }
+                  }
+                }
+              }]
+            }
+          },
+        });
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
     $.ajax({
       url: address+'/get_members_repo?name=' + name+'&org='+ orgSelector,
       type: 'GET',
@@ -193,46 +193,52 @@ $(function() {
         console.log(error);
       }
     });
-//    $.ajax({
-//      url: address+'/get_best_practices_repo?name=' + name+'&org='+ orgSelector,
-//      type: 'GET',
-//      success: function(response) {
-//        returnedData = JSON.parse(response);
-//        $("#readme").empty();
-//        $("#openSource").empty();
-//        $("#license").empty();
-//        $("#active").empty();
-//        let openSource = String(returnedData[0]['open'][0]['openSource']);
-//        let license = (returnedData[0]['open'][0]['licenseType'] == null ? "None" : String(returnedData[0]['open'][0]['license']));
-//        let readme = (returnedData[0]['open'][0]['readme'] == null ? "None" : String(returnedData[0]['open'][0]['readme']));
-//        let active = Number(returnedData[0]['active']);
-//        $("#readme").append(readme);
-//        $("#openSource").append(openSource);
-//        $("#license").append(license);
-//        if (active > 0) {
-//          $("#active").append("True").css("text-align", "center");
-//        } else {
-//          $("#active").append("False").css("text-align", "center");
-//        }
-//        if (active == 404) {
-//          $(".content").hide();
-//          $(document).ready(function() {
-//            $.notify({
-//              icon: 'pe-7s-close-circle',
-//              message: "User does not exist"
-//            }, {
-//              type: 'danger',
-//              timer: 1000
-//            });
-//          });
-//        } else {
-//          $(".content").show();
-//        }
-//      },
-//      error: function(error) {
-//        console.log(error);
-//      }
-//    });
+    $.ajax({
+      url: address+'/get_best_practices_repo?name=' + name+'&org='+ orgSelector,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        $("#readme").empty();
+        $("#openSource").empty();
+        $("#license").empty();
+        let repoName = String(returnedData[0]['repoName']);
+        let forks = String(returnedData[0]['forks']);
+        let stargazers = String(returnedData[0]['stargazers']);
+        let openSource = String(returnedData[0]['openSource']);
+        let license = (returnedData[0]['licenseType'] == null ? "None" : String(returnedData[0]['licenseType']));
+        let readme = (returnedData[0]['readme'] == null ? "None" : String(returnedData[0]['readme']));
+        let orgLastUpdated = String(returnedData[0]['db_last_updated']);
+        $("#readme").append(readme);
+        $("#openSource").append(openSource);
+        $("#license").append(license);
+        $('#stargazers').text(stargazers + " stargazers");
+        $('#repoName').text(repoName);
+        $('#forks').text(forks + " forks");
+        $('#orgLastUpdated').html('<i class="fa fa-clock-o"></i> '+ orgLastUpdated + ' minutes ago');
+        if (active > 0) {
+          $("#active").append("True").css("text-align", "center");
+        } else {
+          $("#active").append("False").css("text-align", "center");
+        }
+        if (active == 404) {
+          $(".content").hide();
+          $(document).ready(function() {
+            $.notify({
+              icon: 'pe-7s-close-circle',
+              message: "User does not exist"
+            }, {
+              type: 'danger',
+              timer: 1000
+            });
+          });
+        } else {
+          $(".content").show();
+        }
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
 //    $.ajax({
 //      url: address+'/get_issues_repo?name=' + name + '&startDate=' + startDay + '&endDate=' + lastDay,
 //      type: 'GET',

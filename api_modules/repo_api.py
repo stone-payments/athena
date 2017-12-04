@@ -1,17 +1,20 @@
 from flask import request
+import datetime as dt
+import datetime
 from api import *
 from .config import *
 import re
 from operator import itemgetter
+import json
 
 
 def repo_name():
     name = "^" + str(request.args.get("name"))
     org = str(request.args.get("org"))
     compiled_name = re.compile(r'%s' % name, re.I)
-    query_result = db['Repo'].find({'org': org, 'repoName': {'$regex': compiled_name}}, {'_id': 0, 'repoName': 1}).limit(6)
+    query_result = db['Repo'].find({'org': org, 'repoName': {'$regex': compiled_name}},
+                                   {'_id': 0, 'repoName': 1}).limit(6)
     result = [dict(i) for i in query_result]
-    print(result)
     return json.dumps(result)
 
 
@@ -26,74 +29,51 @@ def repo_languages():
     return json.dumps(result)
 
 
-# def repo_commits():
-#     start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-#     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-#     query = [
-#         {'$project': {
-#             "day": {'$dayOfMonth': "$committedDate"},
-#             "month": {'$month': "$committedDate"},
-#             "year": {'$year': "$committedDate"}}},
-#         {'$match': {"year": {'$gte': start_date.year, '$lte': end_date.year},
-#                     "day": {'$gte': start_date.day, '$lte': end_date.day}, "month": {'$gte': start_date.month,
-#                                                                                      '$lte': end_date.month}}},
-#         {'$group': {"_id": "$day",
-#                     "day": {'$first': "$day"},
-#                     "month": {'$first': "$month"},
-#                     "year": {'$first': "$year"},
-#                     'count': {
-#                         "$sum": 1
-#                     }}},
-#         {'$project': {"_id": 0,
-#                       "count": 1,
-#                       "day": 1,
-#                       "month": 1,
-#                       "year": 1
-#                       }}]
-#
-#     aql = """
-#     FOR Commit IN Commit
-#     FILTER LOWER(Commit.repoName) == @name
-#     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
-#     FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
-#     FILTER Commit.org == @org
-#     COLLECT
-#     day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
-#     WITH COUNT INTO number
-#     SORT day ASC
-#     RETURN {
-#       day: day,
-#       number: number
-#     }"""
-#
-#     # start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d').strftime('%Y-%m-%d')
-#     # end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d').strftime('%Y-%m-%d')
-#     org = str(request.args.get("org"))
-#     # delta = end_date - start_date
-#     print(end_date)
-#     # bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date), "org": org}
-#     query_result = db['Commit'].aggregate(query)
-#     # query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
-#     result = [dict(i) for i in query_result]
-#     print(result)
-#     # days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b')
-#     #         for i in range(delta.days + 1)]
-#     # lst = []
-#     #
-#     # def recur(day_slice):
-#     #     day_dict = {}
-#     #     for y in result:
-#     #         if y.get('day') == day_slice:
-#     #             day_dict['day'] = str(y.get('day'))
-#     #             day_dict['number'] = int(y.get('number'))
-#     #             return day_dict
-#     #     day_dict['day'] = day_slice
-#     #     day_dict['number'] = 0
-#     #     return day_dict
-#     # for day in days:
-#     #     lst.append(recur(day))
-#     # return json.dumps(lst)
-#     return json.dumps(result)
+def repo_commits():
+    name = request.args.get("name")
+    org = request.args.get("org")
+    start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
+    print(start_date)
+    print(end_date)
+    query = [{'$match': {'org': org, 'repoName': name, 'committedDate': {'$gte': start_date, '$lt': end_date}}},
+             {'$group': {
+                 '_id': {
+                     'year': {'$year': "$committedDate"},
+                     'month': {'$month': "$committedDate"},
+                     'day': {'$dayOfMonth': "$committedDate"},
+                 },
+                 'count': {'$sum': 1}
+             }},
+             {'$project': {'_id': 0, "year": "$_id.year", "month": "$_id.month", "day": "$_id.day", 'count': 1}}
+             ]
+    delta = end_date - start_date
+    commits_count_list = db.Commit.aggregate(query)
+    commits_count_list = [dict(i) for i in commits_count_list]
+    print(commits_count_list)
+    for commit_count in commits_count_list:
+        commit_count['date'] = dt.datetime(commit_count['year'], commit_count['month'], commit_count['day'], 0, 0)
+    print(commits_count_list)
+    days = [start_date + dt.timedelta(days=i) for i in range(delta.days + 1)]
+    print(days)
+    lst = []
+
+    def fill_all_dates(x):
+        day = {}
+        for y in commits_count_list:
+            if y.get('date') == x:
+                day['day'] = str(y.get('date').strftime('%a %d-%b'))
+                day['count'] = int(y.get('count'))
+                return day
+        day['day'] = x.strftime('%a %d-%b')
+        day['count'] = 0
+        return day
+
+    for x in days:
+        lst.append(fill_all_dates(x))
+    print(lst)
+    return json.dumps(lst)
+
 
 
 def repo_members():
@@ -106,32 +86,34 @@ def repo_members():
     return json.dumps(query_result)
 
 
-def repo_best_practices():
-    aql = """
-    LET a =(
-    FOR Repo IN Repo
-    FILTER Repo.org == @org
-    FILTER LOWER(Repo.repoName) == @name
-    RETURN {openSource:Repo.openSource,readme:Repo.readme,licenseType:Repo.licenseType})
-    LET b =(
-    FOR Commit IN Commit
-    FILTER Commit.org == @org
-    FILTER LOWER(Commit.repoName) == @name
-    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") > @date
-       COLLECT WITH COUNT INTO length
-    RETURN length)
-    RETURN {open:a,active:b}"""
+def repo_infos():
     name = request.args.get("name")
-    date = (dt.datetime.now() + dt.timedelta(-60)).strftime('%Y-%m-%d')
+    # date = (dt.datetime.now() + dt.timedelta(-60)).strftime('%Y-%m-%d')
     org = str(request.args.get("org"))
-    print(date)
-    bind_vars = {"name": str.lower(name), "date": date, "org": org}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bind_vars)
-    result = [dict(i) for i in query_result]
-    if not result[0]["open"]:
-        return json.dumps([{'open': [404], 'active': [404]}])
-    print(result)
-    return json.dumps(result)
+    query = {'org': org, 'repoName': name}
+    projection = {'_id': 0, 'repoName': 1, 'forks': 1, 'stargazers': 1, 'openSource': 1, 'licenseType': 1, 'readme': 1,
+                  'db_last_updated': 1}
+    query_result = db.Repo.find(query, projection)
+    query_result = [dict(i) for i in query_result]
+    query_result[0]['db_last_updated'] = round((dt.datetime.utcnow() -
+                                                query_result[0]['db_last_updated']).total_seconds() / 60)
+    print(query_result)
+    return json.dumps(query_result)
+
+
+def repo_best_practices():
+    name = request.args.get("name")
+    # date = (dt.datetime.now() + dt.timedelta(-60)).strftime('%Y-%m-%d')
+    org = str(request.args.get("org"))
+    query = {'org': org, 'repoName': name}
+    projection = {'_id': 0, 'repoName': 1, 'forks': 1, 'stargazers': 1, 'openSource': 1, 'licenseType': 1, 'readme': 1,
+                  'db_last_updated': 1}
+    query_result = db.Repo.find(query, projection)
+    query_result = [dict(i) for i in query_result]
+    query_result[0]['db_last_updated'] = round((dt.datetime.utcnow() -
+                                                query_result[0]['db_last_updated']).total_seconds() / 60)
+    print(query_result)
+    return json.dumps(query_result)
 
 
 def repo_issues():

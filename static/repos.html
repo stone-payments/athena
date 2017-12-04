@@ -95,7 +95,39 @@
 			</nav>
 			<div class="content" style="display: none;">
 				<div class="container-fluid">
+
+
+
+
 					<div class="row row-eq-height">
+
+
+						<div class="col-md-3">
+							<div class="card card-user">
+								<div class="image" style="background-color: rgb(4, 57, 28);">
+								</div>
+								<div class="content">
+									<div class="author">
+										<img id =avatar class="avatar border-gray"  src="assets/img/blank.gif" alt="..."/>
+											<h4 class="title" id="repoName"><br />
+											</h4>
+									</div>
+									<p class="description text-left"></p><br>
+									<p id="stargazers" class="description text-left">   </p>
+									<p id="forks" class="description text-left"> </p>
+								</div>
+								<div class="footer">
+									<hr>
+									<div class="stats" id="orgLastUpdated">
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
 						<div class="col-md-3">
 							<div class="card ">
 								<div class="header">
@@ -159,27 +191,27 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-3">
-							<div class="card  ">
-								<div class="header">
-									<h4 class="title">Active</h4>
-								</div>
-								<div class="content">
-									<div class="table-full-width">
-										<table class="table">
-											<tbody id="active">
-											</tbody>
-										</table>
-									</div>
-									<div class="footer">
-										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
+						<!--<div class="col-md-3">-->
+							<!--<div class="card  ">-->
+								<!--<div class="header">-->
+									<!--<h4 class="title">Active</h4>-->
+								<!--</div>-->
+								<!--<div class="content">-->
+									<!--<div class="table-full-width">-->
+										<!--<table class="table">-->
+											<!--<tbody id="active">-->
+											<!--</tbody>-->
+										<!--</table>-->
+									<!--</div>-->
+									<!--<div class="footer">-->
+										<!--<hr>-->
+										<!--<div class="stats">-->
+											<!--<i class="fa fa-clock-o"></i>-->
+										<!--</div>-->
+									<!--</div>-->
+								<!--</div>-->
+							<!--</div>-->
+						<!--</div>-->
 					</div>
 					<div class="row row-eq-height">
 						<div class="col-md-4">
@@ -206,7 +238,7 @@
 									<p class="category">Commits - Repository</p>
 								</div>
 								<div class="content">
-									<canvas id="myChart" class="ct-chart"></canvas>
+									<canvas id="commitsCharts" class="ct-chart"></canvas>
 									<div class="footer">
 										<hr>
 										<div class="stats">

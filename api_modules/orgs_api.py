@@ -61,8 +61,9 @@ def org_commits():
     name = request.args.get("name")
     start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
+    print(start_date)
     print(end_date)
-    query = [{'$match': {'org': name, 'committedDate': {'$gte': start_date, '$lte': end_date}}},
+    query = [{'$match': {'org': name, 'committedDate': {'$gte': start_date, '$lt': end_date}}},
              {'$group': {
                  '_id': {
                      'year': {'$year': "$committedDate"},
@@ -146,21 +147,20 @@ def org_license():
 
 
 def org_issues():
-    def fill_all_dates(x, commits_count_list):
-        day = {}
-        for y in commits_count_list:
-            if y.get('date') == x:
-                day['day'] = str(y.get('date').strftime('%a %d-%b'))
-                day['count'] = int(y.get('count'))
-                return day
-        day['day'] = x.strftime('%a %d-%b')
-        day['count'] = 0
-        return day
+    def fill_all_dates(day_in_range, issue_count_list):
+        days = {}
+        for issue in issue_count_list:
+            if issue.get('date') == day_in_range:
+                days['day'] = str(issue.get('date').strftime('%a %d-%b'))
+                days['count'] = int(issue.get('count'))
+                return days
+        days['day'] = day_in_range.strftime('%a %d-%b')
+        days['count'] = 0
+        return days
 
     def accumulator(days):
         value_accumulated = 0
         for day in days:
-            print(day)
             if day["count"] > 0:
                 value_accumulated += day["count"]
                 day["count"] = value_accumulated
@@ -168,62 +168,47 @@ def org_issues():
                 day["count"] = value_accumulated
         return days
 
+    def process_data(db_collection, db_query, days_delta):
+        count_list = db[db_collection].aggregate(db_query)
+        count_list = [dict(i) for i in count_list]
+        for count in count_list:
+            count['date'] = dt.datetime(count['year'], count['month'], count['day'], 0, 0)
+        range_days = [start_date + dt.timedelta(days=i) for i in range(days_delta.days + 1)]
+        processed_list = []
+        for day in range_days:
+            processed_list.append(fill_all_dates(day, count_list))
+        processed_list = accumulator(processed_list)
+        return processed_list
+
     name = request.args.get("name")
     start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
-    query = [{'$match': {'org': name, 'createdAt': {'$gte': start_date, '$lte': end_date}}},
-             {'$group': {
-                 '_id': {
-                     'year': {'$year': "$createdAt"},
-                     'month': {'$month': "$createdAt"},
-                     'day': {'$dayOfMonth': "$createdAt"},
-                 },
-                 'count': {'$sum': 1}
-             }},
-             {'$project': {'_id': 0, "year": "$_id.year", "month": "$_id.month", "day": "$_id.day", 'count': 1}}
-             ]
     delta = end_date - start_date
-    commits_count_list = db.Issue.aggregate(query)
-    commits_count_list = [dict(i) for i in commits_count_list]
-    print(commits_count_list)
-    for commit_count in commits_count_list:
-        commit_count['date'] = dt.datetime(commit_count['year'], commit_count['month'], commit_count['day'], 0, 0)
-    print(commits_count_list)
-    days = [start_date + dt.timedelta(days=i) for i in range(delta.days + 1)]
-    print(days)
-    created_issues_list = []
-    created_issues_list = accumulator(created_issues_list)
-    for z in days:
-        created_issues_list.append(fill_all_dates(z, commits_count_list))
-    print(created_issues_list)
-
-    query = [{'$match': {'org': name, 'closedAt': {'$gte': start_date, '$lte': end_date}}},
-             {'$group': {
-                 '_id': {
-                     'year': {'$year': "$closedAt"},
-                     'month': {'$month': "$closedAt"},
-                     'day': {'$dayOfMonth': "$closedAt"},
-                 },
-                 'count': {'$sum': 1}
-             }},
-             {'$project': {'_id': 0, "year": "$_id.year", "month": "$_id.month", "day": "$_id.day", 'count': 1}}
-             ]
-    delta = end_date - start_date
-    commits_count_list = db.Issue.aggregate(query)
-    commits_count_list = [dict(i) for i in commits_count_list]
-    print(commits_count_list)
-    for commit_count in commits_count_list:
-        commit_count['date'] = dt.datetime(commit_count['year'], commit_count['month'], commit_count['day'], 0, 0)
-    print(commits_count_list)
-    days = [start_date + dt.timedelta(days=i) for i in range(delta.days + 1)]
-    print(days)
-    closed_issues_list = []
-    for z in days:
-        closed_issues_list.append(fill_all_dates(z, commits_count_list))
-    print(closed_issues_list)
-    closed_issues_list = accumulator(closed_issues_list)
-    print(closed_issues_list)
-    response = [created_issues_list, closed_issues_list]
+    query_created = [{'$match': {'org': name, 'createdAt': {'$gte': start_date, '$lte': end_date}}},
+                     {'$group': {
+                         '_id': {
+                             'year': {'$year': "$createdAt"},
+                             'month': {'$month': "$createdAt"},
+                             'day': {'$dayOfMonth': "$createdAt"},
+                         },
+                         'count': {'$sum': 1}
+                     }},
+                     {'$project': {'_id': 0, "year": "$_id.year", "month": "$_id.month", "day": "$_id.day", 'count': 1}}
+                     ]
+    query_closed = [{'$match': {'org': name, 'closedAt': {'$gte': start_date, '$lte': end_date}}},
+                    {'$group': {
+                        '_id': {
+                            'year': {'$year': "$closedAt"},
+                            'month': {'$month': "$closedAt"},
+                            'day': {'$dayOfMonth': "$closedAt"},
+                        },
+                        'count': {'$sum': 1}
+                    }},
+                    {'$project': {'_id': 0, "year": "$_id.year", "month": "$_id.month", "day": "$_id.day", 'count': 1}}
+                    ]
+    created_issues_list = process_data('Issue', query_created, delta)
+    closed_issues_list = process_data('Issue', query_closed, delta)
+    response = [closed_issues_list, created_issues_list]
     return json.dumps(response)
 
 
@@ -235,6 +220,6 @@ def org_info():
     print(query_result)
     org_info_list = [dict(i) for i in query_result]
     org_info_list[0]['db_last_updated'] = round((dt.datetime.utcnow() -
-                                                 org_info_list[0]['db_last_updated']).total_seconds()/60)
+                                                 org_info_list[0]['db_last_updated']).total_seconds() / 60)
     print(org_info_list)
     return json.dumps(org_info_list)
