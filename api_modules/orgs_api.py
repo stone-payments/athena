@@ -209,6 +209,7 @@ def org_issues():
     created_issues_list = process_data('Issue', query_created, delta)
     closed_issues_list = process_data('Issue', query_closed, delta)
     response = [closed_issues_list, created_issues_list]
+    print(response)
     return json.dumps(response)
 
 
