@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from config import *
 from clients import ClientRest
 from clients import GraphQLClient
@@ -61,10 +61,10 @@ def parse_multiple_languages(object_to_be_parsed, edge, key, value):
     list_languages = []
     try:
         for node in find(edge, object_to_be_parsed):
-            temp = {'language': str((find(key, node))), 'size': round(((find(value, node) /
-                                                                        find('totalSize', object_to_be_parsed)) * 100),
-                                                                      2)}
-            list_languages.append(temp)
+            language = {'language': str((find(key, node))), 'size': round(((find(value, node) /
+                                                                            find('totalSize',
+                                                                                 object_to_be_parsed)) * 100), 2)}
+            list_languages.append(language)
         return list_languages
     except Exception as a:
         print(a)
@@ -75,3 +75,11 @@ def convert_datetime(value):
     if value is not None:
         return datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
     return value
+
+
+def since_time(since_time_delta):
+    return (datetime.datetime.utcnow() + datetime.timedelta(since_time_delta)).strftime('%Y-%m-%d') + "T00:00:00Z"
+
+
+def until_time(until_time_delta):
+    return (datetime.datetime.utcnow() + datetime.timedelta(until_time_delta)).strftime('%Y-%m-%d') + "T00:00:00Z"

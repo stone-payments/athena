@@ -1,7 +1,7 @@
 from collections_edges import *
 from createDB import create_database_if_not_exists, create_collection_if_not_exists
 from config import *
-from graphql_queries import *
+from graphql_mongodb_queries import *
 import time
 
 db = create_database_if_not_exists(db_name=db_name, db_url=db_url)
@@ -30,4 +30,3 @@ while True:
     start_time = time.time()
     job(orgs)
     print("--- %s seconds ---" % (time.time() - start_time))
-    time.sleep(rest_minutes * 60)

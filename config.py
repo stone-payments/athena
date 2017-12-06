@@ -1,4 +1,3 @@
-import datetime
 import os
 from queue import Queue
 
@@ -12,12 +11,12 @@ url_rest_api = os.getenv("GITHUB_REST_URL")
 number_of_repos = 100
 repo_number_of_repos = 100
 timeout = 100.001
-since_time = (datetime.datetime.utcnow() + datetime.timedelta(-3)).strftime('%Y-%m-%d') + "T00:00:00Z"
-until_time = (datetime.datetime.utcnow() + datetime.timedelta(+1)).strftime('%Y-%m-%d') + "T00:00:00Z"
+since_time_days_delta = -3  # days ago
+until_time_days_delta = +1  # delta days from now
 orgs = ["stone-payments", "mundipagg", "cappta", "equals-conc", "pagarme"]
 update = 1  # update every x hours
 queue_max_size = 1500000
-num_of_threads = 3
+num_of_threads = 1
 queue_timeout = 15
 rest_minutes = 20  # minutes to rest and start collect again
 rate_limit_to_sleep = 10  # minimum remaining api value to wait next reset
@@ -31,3 +30,4 @@ full_text_indexes = [["Repo", "repoName"], ["Teams", "teamName"], ["Issue", "org
                      ["Commit", "org"], ["Fork", "org"], ["Dev", "login"]]
 save_queue = Queue(queue_max_size)
 save_edges_name_queue = Queue(queue_max_size)
+abuse_time_sleep = 2
