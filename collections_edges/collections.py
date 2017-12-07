@@ -26,9 +26,9 @@ def org_collection(db, org, query, collection_name, edge_name="edges"):
         ]
         return save_edges
 
-    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
-                      save_content=content, save_edges=edges)
+    start = CollectorGeneric(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                             number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
+                             save_content=content, save_edges=edges)
     start.start()
 
 
@@ -69,9 +69,9 @@ def repo(db, org, query, collection_name, edge_name="edges"):
         ]
         return save_edges
 
-    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
-                      save_content=content, save_edges=edges)
+    start = CollectorGeneric(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                             number_of_repo=repo_number_of_repos, since=since_time, until=until_time,
+                             save_content=content, save_edges=edges)
     start.start()
 
 
@@ -98,9 +98,9 @@ def dev(db, org, query, collection_name, edge_name="edges"):
         ]
         return save_edges
 
-    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      number_of_repo=number_of_repos, since=since_time, until=until_time,
-                      save_content=content, save_edges=edges)
+    start = CollectorGeneric(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                             number_of_repo=number_of_repos, since=since_time, until=until_time,
+                             save_content=content, save_edges=edges)
     start.start()
 
 
@@ -144,10 +144,10 @@ def teams(db, org, query, collection_name, edge_name="edges"):
         ]
         return collect_member_of_team, collect_repositories_of_team
 
-    start = Collector(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                      number_of_repo=number_of_repos, since=since_time, until=until_time,
-                      save_content=content, save_edges=edges)
-    start.start_team()
+    start = CollectorTeam(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                          number_of_repo=number_of_repos, since=since_time, until=until_time,
+                          save_content=content, save_edges=edges)
+    start.start()
 
 
 # TEAMS_DEV ###############################
@@ -168,10 +168,10 @@ def teams_dev(db, org, query, query_db, edges_name="edges"):
         ]
         return save_edges
 
-    start = CollectorRestrictedItems(db=db, org=org, edges=edges_name, query=query,
-                                     query_db=query_db, number_of_repo=number_of_repos, save_content=content,
-                                     save_edges=edges)
-    start.start(team_dev=True)
+    start = CollectorRestrictedTeam(db=db, org=org, edges=edges_name, query=query,
+                                    query_db=query_db, number_of_repo=number_of_repos, save_content=content,
+                                    save_edges=edges)
+    start.start()
 
 
 # TEAMS_REPO ###############################
@@ -192,10 +192,10 @@ def teams_repo(db, org, query, query_db, edges_name="edges"):
         ]
         return save_edges
 
-    start = CollectorRestrictedItems(db=db, org=org, edges=edges_name, query=query,
-                                     query_db=query_db, number_of_repo=number_of_repos, save_content=content,
-                                     save_edges=edges)
-    start.start(team_dev=True)
+    start = CollectorRestrictedTeam(db=db, org=org, edges=edges_name, query=query,
+                                    query_db=query_db, number_of_repo=number_of_repos, save_content=content,
+                                    save_edges=edges)
+    start.start()
 
 
 # COMMITS ###############################
@@ -242,9 +242,9 @@ def commit_collector(db, org, query, query_db, collection_name, edge_name="edges
         ]
         return save_edges
 
-    start = CollectorRestrictedItems(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                                     since=since_time, until=until_time, query_db=query_db,
-                                     number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start = CollectorRestricted(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                                since=since_time, until=until_time, query_db=query_db,
+                                number_of_repo=number_of_repos, save_content=content, save_edges=edges)
     start.start()
 
 
@@ -267,10 +267,10 @@ def stats_collector(db, org, query, stats_query, collection_name, edge_name="edg
         ]
         return save_edges
 
-    start = CollectorRestrictedItems(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                                     query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
-                                     save_edges=edges)
-    start.start(stats=True)
+    start = CollectorStats(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                           query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
+                           save_edges=edges)
+    start.start()
 
 
 # FORK ###############################
@@ -308,9 +308,9 @@ def fork_collector(db, org, query, query_db, collection_name, edge_name="edges")
         ]
         return save_edges
 
-    start = CollectorRestrictedItems(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                                     since=since_time, until=until_time, query_db=query_db,
-                                     number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start = CollectorRestricted(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                                since=since_time, until=until_time, query_db=query_db,
+                                number_of_repo=number_of_repos, save_content=content, save_edges=edges)
     start.start()
 
 
@@ -348,7 +348,7 @@ def issue(db, org, query, query_db, collection_name, edge_name="edges"):
         ]
         return save_edges
 
-    start = CollectorRestrictedItems(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                                     since=since_time, until=until_time, query_db=query_db,
-                                     number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+    start = CollectorRestricted(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                                since=since_time, until=until_time, query_db=query_db,
+                                number_of_repo=number_of_repos, save_content=content, save_edges=edges)
     start.start()

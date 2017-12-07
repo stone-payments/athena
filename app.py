@@ -3,11 +3,12 @@ from createDB import create_database_if_not_exists, create_collection_if_not_exi
 from config import *
 from graphql_mongodb_queries import *
 import time
+from saver import SaverThread
 
 db = create_database_if_not_exists(db_name=db_name, db_url=db_url)
 create_collection_if_not_exists(db, hash_indexes, hash_indexes_unique,
                                 full_text_indexes)
-saver = Saver(db=db, queue=save_queue, edges_name_queue=save_edges_name_queue)
+saver = SaverThread(db=db, queue=save_queue, edges_name_queue=save_edges_name_queue)
 saver.start()
 
 
