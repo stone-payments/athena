@@ -31,3 +31,5 @@ full_text_indexes = [["Repo", "repoName"], ["Teams", "teamName"], ["Issue", "org
 save_queue = Queue(queue_max_size)
 save_edges_name_queue = Queue(queue_max_size)
 abuse_time_sleep = 2
+max_interval = 50  # max interval time for requests
+max_retries = 10  # max request retries

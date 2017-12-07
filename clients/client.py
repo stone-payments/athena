@@ -1,6 +1,10 @@
 import json
 import requests
 import time
+from request_retry import retry
+from config import max_interval, max_retries
+
+requests_retry = retry(obj=requests, interval=max_interval, retries=max_retries)
 
 
 class GraphQLClient:
@@ -14,7 +18,7 @@ class GraphQLClient:
                 'variables': variables}
         if self.token != "":
             headers = {'Authorization': 'bearer %s' % self.token}
-            req = requests.post(self.endpoint, json.dumps(data), headers=headers, timeout=self.timeout)
+            req = requests_retry.post(self.endpoint, json.dumps(data), headers=headers, timeout=self.timeout)
             return req.json()
         else:
             raise NameError("Token is not Defined")
@@ -30,7 +34,7 @@ class ClientRest:
         print(query)
         if self.token != "":
             headers = {'Authorization': 'token %s' % self.token}
-            req = requests.get(query, headers=headers, timeout=self.timeout)
+            req = requests_retry.get(query, headers=headers, timeout=self.timeout)
             if req.json().get("message"):
                 time.sleep(5)
             return req.json()
