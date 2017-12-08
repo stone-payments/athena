@@ -9,21 +9,22 @@ $(function() {
   ]
   colorStone = ['#0B3B1F', '#1DAC4B', '#380713', '#74121D', '#C52233', '#595708', '#657212', '#ABC421']
 
-  let xhr;
+
   $('#name').autoComplete({
-    minChars: 1,
-    source: function(term, response) {
-      try {
-        xhr.abort();
-      } catch (e) {}
-      xhr = $.getJSON(address+'/get_user_login?name=' + term, function(result) {
-        let returnedData = result.map(function(num) {
-          return num.data;
+      minChars: 1,cache: false, delay : 20,
+      source: function(term, response) {
+      $('.autocomplete-suggestion').show();
+
+       $.getJSON(address+'/get_user_login?name=' + term, function(result) {
+          let returnedData = result.map(function(num) {
+            return num.login;
+          });
+          console.log(returnedData);
+          response(returnedData);
         });
-        response(returnedData);
-      });
-    }
-  });
+      }
+    });
+
   $('#name').keypress(function(e) {
     if (e.which == 13) { //Enter key pressed
       $('#find').click(); //Trigger search button click event
@@ -40,19 +41,18 @@ $(function() {
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
-        let url = String(returnedData[0]['avatar']);
+        let url = String(returnedData[0]['avatarUrl']);
         let username = String(returnedData[0]['login']);
         let following = String(returnedData[0]['following']);
         let followers = String(returnedData[0]['followers']);
-        let pullrequests = String(returnedData[0]['pullrequests']);
-        let contributed = String(returnedData[0]['contributed']);
+        let orgLastUpdated = String(returnedData[0]['db_last_updated']);
+        let responseCode = String(returnedData[0]['response']);
         $('#avatar').attr("src", url);
         $('#username').text(username);
-        $('#contributed').text(contributed + " Contributed Repositories");
-        $('#pullrequests').text(pullrequests + " Pull Requests");
         $('#followers').text(followers + " Followers");
         $('#following').text(following + " Following");
-        if (following == '-'){
+        $('#orgLastUpdated').html('<i class="fa fa-clock-o"></i> '+ orgLastUpdated + ' minutes ago');
+        if (responseCode == 404){
           $(".content").hide();
           $(document).ready(function() {
         		$.notify({
@@ -155,7 +155,7 @@ $(function() {
         returnedData = JSON.parse(response);
         $("#contributed_repo").empty();
         returnedData.map(function(num) {
-          memberName = num.member;
+          memberName = num;
           html = `<tr>
                         <td style="width:10px;">
                                 <i class="pe-7s-angle-right-circle"></i>

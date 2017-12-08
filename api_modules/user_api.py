@@ -2,23 +2,23 @@ from flask import request
 from api import *
 from .config import *
 import datetime as dt
+import re
 
 
 def avatar():
-    aql = """
-    FOR Dev IN Dev
-    FILTER LOWER(Dev.login) == @login
-    RETURN {login:Dev.login,avatar:Dev.avatarUrl,followers:Dev.followers,following:Dev.following,
-            contributed:Dev.contributedRepositories,pullrequests:Dev.pullRequests}"""
-    login = request.args.get("login")
-    bindvars = {"login": str.lower(login)}
-    queryresult = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bindvars)
-    result = [dict(i) for i in queryresult]
-    if not result:
-        return json.dumps([{'login': 'user does not exist', 'avatar': 'assets/img/default-avatar.png', 'followers': "-",
-                            'following': "-", 'contributed': "-", 'pullrequests': "-"}])
-    print(result)
-    return json.dumps(result)
+    name = request.args.get("login")
+    query = {'login': name}
+    projection = {'_id': 0, 'collection_name': 0}
+    query_result = db.Dev.find(query, projection)
+    query_result = [dict(i) for i in query_result]
+    if not query_result:
+        return json.dumps([{'response': 404}])
+    print(query_result)
+    query_result[0]['db_last_updated'] = round((dt.datetime.utcnow() -
+                                                query_result[0]['db_last_updated']).total_seconds() / 60)
+    query_result[0]['response'] = 200
+    print(query_result)
+    return json.dumps(query_result)
 
 
 def user_commit():
@@ -92,20 +92,13 @@ def user_language():
 
 
 def user_contributed_repo():
-    aql = """
-    FOR Commit IN Commit
-    FILTER LOWER(Commit.author) == @name
-    FILTER Commit.committedDate >= @startDate
-    FILTER Commit.committedDate <= @endDate
-    RETURN DISTINCT {member:Commit.repoName}"""
-    name = request.args.get("name")
     start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
-    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result = [dict(i) for i in query_result]
-    print(result)
-    return json.dumps(result)
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
+    name = request.args.get("name")
+    query_result = db.Commit.find({'author': name, 'committedDate': {'$gte': start_date, '$lt': end_date}},
+                                  {'_id': 0, 'repoName': 1}).distinct("repoName")
+    print(query_result)
+    return json.dumps(query_result)
 
 
 def user_issue():
@@ -280,14 +273,12 @@ def user_team():
 
 
 def user_login():
-    aql = """
-    FOR Dev IN FULLTEXT(Dev, "login",@name)
-    LIMIT 6
-    RETURN {data:Dev.login}
-    """
-    name = "prefix:" + str(request.args.get("name"))
-    bind_vars = {"name": name}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    name = "^" + str(request.args.get("name"))
+    compiled_name = re.compile(r'%s' % name, re.I)
+    query_result = db['Dev'].find({'login': {'$regex': compiled_name}},
+                                  {'_id': 0, 'login': 1}).limit(6)
     result = [dict(i) for i in query_result]
+    if not query_result:
+        return json.dumps([{'response': 404}])
     print(result)
     return json.dumps(result)

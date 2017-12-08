@@ -92,7 +92,6 @@ def repo_members():
 
 def repo_infos():
     name = request.args.get("name")
-    # date = (dt.datetime.now() + dt.timedelta(-60)).strftime('%Y-%m-%d')
     org = str(request.args.get("org"))
     query = {'org': org, 'repoName': name}
     projection = {'_id': 0, 'repoName': 1, 'forks': 1, 'stargazers': 1, 'openSource': 1, 'licenseType': 1, 'readme': 1,
@@ -161,7 +160,7 @@ def repo_issues():
 
     name = request.args.get("name")
     org = request.args.get("org")
-    start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
     delta = end_date - start_date
     query_created = [{'$match': {'org': org, 'repoName': name, 'createdAt': {'$gte': start_date, '$lte': end_date}}},

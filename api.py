@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from flask import request
 from flask_cors import CORS, cross_origin
-from pyArango.connection import *
+# from pyArango.connection import *
 import json
 import datetime, calendar
 import datetime as dt
