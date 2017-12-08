@@ -1,5 +1,5 @@
 from collections_edges import *
-from createDB import create_database_if_not_exists, create_collection_if_not_exists
+from create_db import create_database_if_not_exists, create_collection_if_not_exists
 from config import *
 from graphql_mongodb_queries import *
 import time
@@ -8,13 +8,13 @@ from saver import SaverThread
 db = create_database_if_not_exists(db_name=db_name, db_url=db_url)
 create_collection_if_not_exists(db, hash_indexes, hash_indexes_unique,
                                 full_text_indexes)
+save_queue = Queue(queue_max_size)
 saver = SaverThread(db=db, queue=save_queue, edges_name_queue=save_edges_name_queue)
 saver.start()
 
 
 def job(orgs_list):
     for org in orgs_list:
-        print(org)
         org_collection(db, org, org_query, "Org")
         repo(db, org, repo_query, "Repo")
         dev(db, org, dev_query, "Dev")

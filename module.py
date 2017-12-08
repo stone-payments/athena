@@ -4,8 +4,8 @@ from clients import ClientRest
 from clients import GraphQLClient
 import time
 
-client = GraphQLClient(url, token, timeout)
-clientRest2 = ClientRest(token, timeout)
+client_graphql = GraphQLClient(url, token, timeout)
+client_rest = ClientRest(token, timeout)
 
 
 # PAGINATION ###############################
@@ -13,29 +13,26 @@ clientRest2 = ClientRest(token, timeout)
 
 def pagination_universal(query, number_of_repo=None, next_cursor=None, next_repo=None, org=None, slug=None, since=None,
                          until=None):
-    pag = client.execute(query,
-                         {
-                             "number_of_repos": number_of_repo,
-                             "next": next_cursor,
-                             "next2": next_repo,
-                             "org": org,
-                             "slug": slug,
-                             "sinceTime": since,
-                             "untilTime": until
-                         })
-    print(since)
-    print(until)
-    print(pag)
+    pag = client_graphql.execute(query,
+                                 {
+                                     "number_of_repos": number_of_repo,
+                                     "next": next_cursor,
+                                     "next2": next_repo,
+                                     "org": org,
+                                     "slug": slug,
+                                     "sinceTime": since,
+                                     "untilTime": until
+                                 })
     return pag
 
 
 # FIND ###############################
 
 
-def find(key, json) -> iter:
+def find_key(key, json) -> iter:
     if isinstance(json, list):
         for item in json:
-            f = find(key, item)
+            f = find_key(key, item)
             if f is not None:
                 return f
     elif isinstance(json, dict):
@@ -43,7 +40,7 @@ def find(key, json) -> iter:
             return json[key]
         else:
             for inner in json.values():
-                f = find(key, inner)
+                f = find_key(key, inner)
                 if f is not None:
                     return f
     return None
@@ -63,10 +60,11 @@ def limit_validation(rate_limit=None):
 def parse_multiple_languages(object_to_be_parsed, edge, key, value):
     list_languages = []
     try:
-        for node in find(edge, object_to_be_parsed):
-            language = {'language': str((find(key, node))), 'size': round(((find(value, node) /
-                                                                            find('totalSize',
-                                                                                 object_to_be_parsed)) * 100), 2)}
+        for node in find_key(edge, object_to_be_parsed):
+            language = {'language': str((find_key(key, node))), 'size': round(((find_key(value, node) /
+                                                                                find_key('totalSize',
+                                                                                         object_to_be_parsed)) * 100),
+                                                                              2)}
             list_languages.append(language)
         return list_languages
     except Exception as a:
@@ -82,4 +80,3 @@ def convert_datetime(value):
 
 def utc_time(since_time_delta):
     return (datetime.datetime.utcnow() + datetime.timedelta(since_time_delta)).strftime('%Y-%m-%d') + "T00:00:00Z"
-

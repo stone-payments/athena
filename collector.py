@@ -2,6 +2,7 @@ import ast
 from module import *
 from saver import *
 from pagination import Pagination
+from app import save_queue
 
 
 class Collector:
@@ -27,12 +28,12 @@ class CollectorTeam(Collector):
         return_pagination = Pagination(org=self.org, query=self.query, updated_time=self.time,
                                        number_of_repo=self.number_of_repo, slug=self.slug, next_repo=self.next_repo)
         for page in return_pagination:
-            edges = find(self.edges_name, page)
+            edges = find_key(self.edges_name, page)
             if edges is not None:
                 for node in edges:
                     team = self.save_content(self, edges, node)
-                    members, repositories = self.save_edges(team, find('members_edge', node),
-                                                            find('repo_edge', node))
+                    members, repositories = self.save_edges(team, find_key('members_edge', node),
+                                                            find_key('repo_edge', node))
                     save = SaverTeam(db=self.db)
                     save.save(team, members, repositories)
 
@@ -45,7 +46,7 @@ class CollectorGeneric(Collector):
         pagination = Pagination(org=self.org, query=self.query, updated_time=self.time,
                                 number_of_repo=self.number_of_repo, slug=self.slug, next_repo=self.next_repo)
         for page in pagination:
-            edges = find(self.edges_name, page)
+            edges = find_key(self.edges_name, page)
             if edges is not None:
                 for node in edges:
                     print(node)
@@ -95,7 +96,7 @@ class CollectorRestricted(CollectorRestrictedItems):
             return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
                                            updated_time=self.time, slug=self.slug, next_repo=repository)
             for page in return_pagination:
-                edges = find(self.edges, page)
+                edges = find_key(self.edges, page)
                 if edges is not None:
                     for node in edges:
                         queue_input = (self.save_content(self, page, node), self.save_edges)
@@ -112,7 +113,7 @@ class CollectorStats(CollectorRestrictedItems):
             repository = repositories.get(timeout=queue_timeout)
             repository = ast.literal_eval(repository)
             rest_query = self.query(self, repository)
-            result = clientRest2.execute(url_rest_api, rest_query, str(repository['oid']))
+            result = client_rest.execute(url_rest_api, rest_query, str(repository['oid']))
             time.sleep(abuse_time_sleep)
             queue_input = (self.save_content(result, repository["_id"]), self.save_edges)
             save.put(queue_input)
@@ -129,7 +130,7 @@ class CollectorRestrictedTeam(CollectorRestrictedItems):
             return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
                                            updated_time=self.time, slug=repository)
             for page in return_pagination:
-                edges = find(self.edges, page)
+                edges = find_key(self.edges, page)
                 if edges is not None:
                     for node in edges:
                         print(node)

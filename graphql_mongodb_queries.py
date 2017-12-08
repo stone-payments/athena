@@ -38,32 +38,28 @@ def query_stats_mongo(self):
 def issue_mongo(self):
     dictionary = [dict(x) for x in self.db.Repo.find({"org": self.org, "issues": {"$gt": 0}},
                                                      {'repoName': 1, '_id': 0})]
-    query_list = []
-    [query_list.append(str(value["repoName"])) for value in dictionary]
+    query_list = [str(value["repoName"]) for value in dictionary]
     return query_list
 
 
 def query_fork_mongo(self):
     dictionary = [dict(x) for x in self.db.Repo.find({"org": self.org, "forks": {"$gt": 0}},
                                                      {'repoName': 1, '_id': 0})]
-    query_list = []
-    [query_list.append(str(value["repoName"])) for value in dictionary]
+    query_list = [str(value["repoName"]) for value in dictionary]
     return query_list
 
 
 def query_team_mongo(self):
     dictionary = [dict(x) for x in self.db.Teams.find({"org": self.org, "membersCount": {"$gt": 100}},
                                                       {'slug': 1, '_id': 0})]
-    query_list = []
-    [query_list.append(str(value["slug"])) for value in dictionary]
+    query_list = [str(value["slug"]) for value in dictionary]
     return query_list
 
 
 def query_commit_mongo(self):
     dictionary = [dict(x) for x in
                   self.db.Repo.find({'committed_today': True, 'org': self.org}, {'repoName': 1, '_id': 0})]
-    query_list = []
-    [query_list.append(str(value["repoName"])) for value in dictionary]
+    query_list = [str(value["repoName"]) for value in dictionary]
     return query_list
 
 
@@ -74,14 +70,12 @@ def stats_query(self, repository):
 def query_teams_dev_mongo(self):
     dictionary = [dict(x) for x in self.db.Teams.find({'org': self.org, "membersCount": {'$gt': 100}},
                                                       {'slug': 1, '_id': 0})]
-    query_list = []
-    [query_list.append(str(value["slug"])) for value in dictionary]
+    query_list = [str(value["slug"]) for value in dictionary]
     return query_list
 
 
 def query_teams_repo_mongo(self):
     dictionary = [dict(x) for x in self.db.Teams.find({'org': self.org, "repoCount": {'$gt': 100}},
                                                       {'slug': 1, '_id': 0})]
-    query_list = []
-    [query_list.append(str(value["slug"])) for value in dictionary]
+    query_list = [str(value["slug"]) for value in dictionary]
     return query_list

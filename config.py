@@ -28,7 +28,6 @@ hash_indexes_unique = []
 skip_list_indexes = [["Issue", "closeAt"], ["Issue", "createdAt"], ["Commit", "committedDate"], ["Fork", "createdAt"]]
 full_text_indexes = [["Repo", "repoName"], ["Teams", "teamName"], ["Issue", "org"],
                      ["Commit", "org"], ["Fork", "org"], ["Dev", "login"]]
-save_queue = Queue(queue_max_size)
 save_edges_name_queue = Queue(queue_max_size)
 abuse_time_sleep = 2
 max_interval = 50  # max interval time for requests

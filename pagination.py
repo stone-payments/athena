@@ -23,23 +23,23 @@ class Pagination:
         self.edges_name = edges_name
 
     def __iter__(self):
-        self.has_next_page = True
-        self.cursor = None
+        self.__has_next_page = True
+        self.__cursor = None
         return self
 
     def __next__(self):
-        if self.has_next_page:
+        if self.__has_next_page:
             time.sleep(abuse_time_sleep)
             return self.__next_page()
         else:
             raise StopIteration()
 
     def __next_page(self):
-        response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=self.cursor,
-                                        org=self.org, since=self.time(since_time_days_delta),
-                                        until=self.time(until_time_days_delta), slug=self.slug,
-                                        next_repo=self.next_repo)
-        limit_validation(rate_limit=find('rateLimit', response))
-        self.has_next_page = find('hasNextPage', response)
-        self.cursor = find('endCursor', response)
-        return response
+        __response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=self.cursor,
+                                          org=self.org, since=self.time(since_time_days_delta),
+                                          until=self.time(until_time_days_delta), slug=self.slug,
+                                          next_repo=self.next_repo)
+        limit_validation(rate_limit=find_key('rateLimit', __response))
+        self.has_next_page = find_key('hasNextPage', __response)
+        self.cursor = find_key('endCursor', __response)
+        return __response
