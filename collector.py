@@ -5,15 +5,14 @@ from pagination import Pagination
 
 
 class Collector:
-    def __init__(self, db: object, collection_name: object, org: object, edges: object, query: object,
-                 save_content: type, save_edges: type, number_of_repo: object = None,
-                 next_repo: object = None, slug: object = None, since: type = since_time, until: type = until_time):
+    def __init__(self, db: object, collection_name: object, org: str, edges: object, query: object,
+                 save_content: callable, save_edges: callable, number_of_repo: int = None,
+                 next_repo: str = None, slug: str = None, updated_utc_time: callable = utc_time):
         self.db = db
         self.org = org
         self.query = query
         self.edges_name = edges
-        self.since = since
-        self.until = until
+        self.time = updated_utc_time
         self.number_of_repo = number_of_repo
         self.slug = slug
         self.next_repo = next_repo
@@ -25,7 +24,7 @@ class Collector:
 class CollectorTeam(Collector):
 
     def _collect_team(self):
-        return_pagination = Pagination(org=self.org, query=self.query, since=self.since, until=self.until,
+        return_pagination = Pagination(org=self.org, query=self.query, updated_time=self.time,
                                        number_of_repo=self.number_of_repo, slug=self.slug, next_repo=self.next_repo)
         for page in return_pagination:
             edges = find(self.edges_name, page)
@@ -43,7 +42,7 @@ class CollectorTeam(Collector):
 
 class CollectorGeneric(Collector):
     def _collect(self):
-        pagination = Pagination(org=self.org, query=self.query, since=self.since, until=self.until,
+        pagination = Pagination(org=self.org, query=self.query, updated_time=self.time,
                                 number_of_repo=self.number_of_repo, slug=self.slug, next_repo=self.next_repo)
         for page in pagination:
             edges = find(self.edges_name, page)
@@ -63,17 +62,16 @@ class CollectorGeneric(Collector):
 
 
 class CollectorRestrictedItems:
-    def __init__(self, db: object, collection_name: object = None, org: object = None, edges: object = "edges",
-                 query: type = None, query_db: type = None, save_content: type = None, save_edges: type = None,
-                 number_of_repo: object = None, slug: object = None, since: type = since_time,
-                 until: type = until_time):
+    def __init__(self, db: object, org: str, collection_name: str = None, edges: str = "edges",
+                 query: callable = None, query_db: callable = None, save_content: callable = None,
+                 save_edges: callable = None, number_of_repo: int = None, slug: str = None,
+                 updated_utc_time: callable = utc_time):
         self.db = db
         self.org = org
         self.query = query
         self.query_db = query_db
         self.edges = edges
-        self.since = since
-        self.until = until
+        self.time = updated_utc_time
         self.number_of_repo = number_of_repo
         self.slug = slug
         self.collection_name = collection_name
@@ -95,7 +93,7 @@ class CollectorRestricted(CollectorRestrictedItems):
         while True:
             repository = repositories.get(timeout=queue_timeout)
             return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
-                                           since=self.since, until=self.until, slug=self.slug, next_repo=repository)
+                                           updated_time=self.time, slug=self.slug, next_repo=repository)
             for page in return_pagination:
                 edges = find(self.edges, page)
                 if edges is not None:
@@ -129,7 +127,7 @@ class CollectorRestrictedTeam(CollectorRestrictedItems):
         while True:
             repository = repositories.get(timeout=queue_timeout)
             return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
-                                           since=self.since, until=self.until, slug=repository)
+                                           updated_time=self.time, slug=repository)
             for page in return_pagination:
                 edges = find(self.edges, page)
                 if edges is not None:

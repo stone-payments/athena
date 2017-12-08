@@ -23,6 +23,9 @@ def pagination_universal(query, number_of_repo=None, next_cursor=None, next_repo
                              "sinceTime": since,
                              "untilTime": until
                          })
+    print(since)
+    print(until)
+    print(pag)
     return pag
 
 
@@ -77,9 +80,6 @@ def convert_datetime(value):
     return value
 
 
-def since_time(since_time_delta):
+def utc_time(since_time_delta):
     return (datetime.datetime.utcnow() + datetime.timedelta(since_time_delta)).strftime('%Y-%m-%d') + "T00:00:00Z"
 
-
-def until_time(until_time_delta):
-    return (datetime.datetime.utcnow() + datetime.timedelta(until_time_delta)).strftime('%Y-%m-%d') + "T00:00:00Z"
