@@ -18,7 +18,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
                 history(first:1,since:$sinceTime,until:$untilTime){
         					edges{
                     node{
-                      committedDate
+                      committedInRangeDate: committedDate
                     }
                   }
                 }

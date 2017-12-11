@@ -1,5 +1,4 @@
 import os
-from queue import Queue
 
 token = os.getenv("GRAPHQL_TOKEN")
 db_name = "athena"
@@ -11,7 +10,7 @@ url_rest_api = os.getenv("GITHUB_REST_URL")
 number_of_repos = 100
 repo_number_of_repos = 100
 timeout = 100.001
-since_time_days_delta = 0  # days ago
+since_time_days_delta = -5  # days ago
 until_time_days_delta = +1  # delta days from now
 orgs = ["stone-payments", "mundipagg", "cappta", "equals-conc", "pagarme"]
 update = 1  # update every x hours
@@ -28,7 +27,6 @@ hash_indexes_unique = []
 skip_list_indexes = [["Issue", "closeAt"], ["Issue", "createdAt"], ["Commit", "committedDate"], ["Fork", "createdAt"]]
 full_text_indexes = [["Repo", "repoName"], ["Teams", "teamName"], ["Issue", "org"],
                      ["Commit", "org"], ["Fork", "org"], ["Dev", "login"]]
-save_edges_name_queue = Queue(queue_max_size)
 abuse_time_sleep = 2
 max_interval = 50  # max interval time for requests
 max_retries = 10  # max request retries

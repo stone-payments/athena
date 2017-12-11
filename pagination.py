@@ -34,12 +34,22 @@ class Pagination:
         else:
             raise StopIteration()
 
+    def __pagination_universal(self):
+        response_page = client_graphql.execute(self.query,
+                                               {
+                                                   "number_of_repos": self.number_of_repo,
+                                                   "next": self.__cursor,
+                                                   "next2": self.next_repo,
+                                                   "org": self.org,
+                                                   "slug": self.slug,
+                                                   "sinceTime": self.time(since_time_days_delta),
+                                                   "untilTime": self.time(until_time_days_delta)
+                                               })
+        return response_page
+
     def __next_page(self):
-        __response = pagination_universal(self.query, number_of_repo=self.number_of_repo, next_cursor=self.cursor,
-                                          org=self.org, since=self.time(since_time_days_delta),
-                                          until=self.time(until_time_days_delta), slug=self.slug,
-                                          next_repo=self.next_repo)
+        __response = self.__pagination_universal()
         limit_validation(rate_limit=find_key('rateLimit', __response))
-        self.has_next_page = find_key('hasNextPage', __response)
-        self.cursor = find_key('endCursor', __response)
+        self.__has_next_page = find_key('hasNextPage', __response)
+        self.__cursor = find_key('endCursor', __response)
         return __response

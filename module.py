@@ -8,24 +8,6 @@ client_graphql = GraphQLClient(url, token, timeout)
 client_rest = ClientRest(token, timeout)
 
 
-# PAGINATION ###############################
-
-
-def pagination_universal(query, number_of_repo=None, next_cursor=None, next_repo=None, org=None, slug=None, since=None,
-                         until=None):
-    pag = client_graphql.execute(query,
-                                 {
-                                     "number_of_repos": number_of_repo,
-                                     "next": next_cursor,
-                                     "next2": next_repo,
-                                     "org": org,
-                                     "slug": slug,
-                                     "sinceTime": since,
-                                     "untilTime": until
-                                 })
-    return pag
-
-
 # FIND ###############################
 
 

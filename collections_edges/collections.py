@@ -42,7 +42,7 @@ def repo(db, org, query, collection_name, edge_name="edges"):
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
-            "_id": node["node"]["repoId"].replace("/", "@"),
+            "_id": node["node"]["repoId"],
             "repoName": string_validate(node["node"]["name"], not_none=True),
             "description": string_validate(node["node"]["description"]),
             "url": string_validate(node["node"]["url"]),
@@ -60,7 +60,7 @@ def repo(db, org, query, collection_name, edge_name="edges"):
             "db_last_updated": datetime.datetime.utcnow(),
             "languages": parse_multiple_languages(node, "language_edges", "languageName",
                                                   "languageSize"),
-            "committed_today": bool_validate(False if find_key('committedDate', node) is None else True)
+            "committed_today": bool_validate(False if find_key('committedInRangeDate', node) is None else True)
         }
         return save_content
 
@@ -152,7 +152,7 @@ def teams(db, org, query, collection_name, edge_name="edges"):
 
 # TEAMS_DEV ###############################
 
-def teams_dev(db, org, query, query_db, edges_name="edges"):
+def teams_dev(db, org, query, query_db, save_queue_type, edges_name="edges"):
     def content(*_):
         save_content = {
         }
@@ -171,12 +171,12 @@ def teams_dev(db, org, query, query_db, edges_name="edges"):
     start = CollectorRestrictedTeam(db=db, org=org, edges=edges_name, query=query,
                                     query_db=query_db, number_of_repo=number_of_repos, save_content=content,
                                     save_edges=edges)
-    start.start()
+    start.start(save_queue_type)
 
 
 # TEAMS_REPO ###############################
 
-def teams_repo(db, org, query, query_db, edges_name="edges"):
+def teams_repo(db, org, query, query_db, save_queue_type, edges_name="edges"):
     def content(*_):
         save_content = {
         }
@@ -195,12 +195,12 @@ def teams_repo(db, org, query, query_db, edges_name="edges"):
     start = CollectorRestrictedTeam(db=db, org=org, edges=edges_name, query=query,
                                     query_db=query_db, number_of_repo=number_of_repos, save_content=content,
                                     save_edges=edges)
-    start.start()
+    start.start(save_queue_type)
 
 
 # COMMITS ###############################
 
-def commit_collector(db, org, query, query_db, collection_name, edge_name="edges"):
+def commit_collector(db, org, query, query_db, collection_name, save_queue_type, edge_name="edges", ):
     def content(self, response, node):
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
@@ -245,12 +245,12 @@ def commit_collector(db, org, query, query_db, collection_name, edge_name="edges
     start = CollectorRestricted(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                                 updated_utc_time=utc_time, query_db=query_db,
                                 number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start()
+    start.start(save_queue_type)
 
 
 # STATS ###############################
 
-def stats_collector(db, org, query, stats_query, collection_name, edge_name="edges"):
+def stats_collector(db, org, query, stats_query, collection_name, save_queue_type, edge_name="edges"):
     def content(node, commit_id):
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
@@ -270,12 +270,12 @@ def stats_collector(db, org, query, stats_query, collection_name, edge_name="edg
     start = CollectorStats(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                            query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
                            save_edges=edges)
-    start.start()
+    start.start(save_queue_type)
 
 
 # FORK ###############################
 
-def fork_collector(db, org, query, query_db, collection_name, edge_name="edges"):
+def fork_collector(db, org, query, query_db, collection_name, save_queue_type, edge_name="edges"):
     def content(self, response, node):
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
@@ -311,12 +311,12 @@ def fork_collector(db, org, query, query_db, collection_name, edge_name="edges")
     start = CollectorRestricted(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                                 updated_utc_time=utc_time, query_db=query_db,
                                 number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start()
+    start.start(save_queue_type)
 
 
 # ISSUES ###############################
 
-def issue(db, org, query, query_db, collection_name, edge_name="edges"):
+def issue(db, org, query, query_db, collection_name, save_queue_type, edge_name="edges", ):
     def content(self, response, node):
         save_content = {
             "collection_name": string_validate(collection_name),
@@ -351,4 +351,4 @@ def issue(db, org, query, query_db, collection_name, edge_name="edges"):
     start = CollectorRestricted(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                                 updated_utc_time=utc_time, query_db=query_db,
                                 number_of_repo=number_of_repos, save_content=content, save_edges=edges)
-    start.start()
+    start.start(save_queue_type)

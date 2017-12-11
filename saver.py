@@ -1,7 +1,8 @@
 from mongraph import *
 from validators import *
-from config import num_of_threads, Queue
+from config import num_of_threads
 from threading import Thread
+from queue import Queue
 
 
 class Saver:
