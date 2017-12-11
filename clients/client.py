@@ -1,8 +1,8 @@
 import json
-import requests
 import time
-from request_retry import retry
-from config import max_interval, max_retries
+import requests
+from clients.request_retry import retry
+from custom_configurations.config import max_interval, max_retries
 
 requests_retry = retry(obj=requests, interval=max_interval, retries=max_retries)
 
@@ -30,7 +30,7 @@ class ClientRest:
         self.timeout = timeout
 
     def execute(self, url: str, query: str, temp: str) -> object:
-        query = url + query + temp
+        query = '{}{}{}'.format(url, query, temp)
         print(query)
         if self.token != "":
             headers = {'Authorization': 'token %s' % self.token}

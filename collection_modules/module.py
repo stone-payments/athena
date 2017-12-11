@@ -1,14 +1,11 @@
 import datetime
-from config import *
+import time
 from clients import ClientRest
 from clients import GraphQLClient
-import time
+from custom_configurations.config import *
 
 client_graphql = GraphQLClient(url, token, timeout)
 client_rest = ClientRest(token, timeout)
-
-
-# FIND ###############################
 
 
 def find_key(key, json) -> iter:
@@ -28,9 +25,6 @@ def find_key(key, json) -> iter:
     return None
 
 
-# HANDLING EXCEPTIONS ###############
-
-
 def limit_validation(rate_limit=None):
     if rate_limit is not None and rate_limit["remaining"] < rate_limit_to_sleep:
         limit_time = (datetime.datetime.strptime(rate_limit["resetAt"], '%Y-%m-%dT%H:%M:%SZ') -
@@ -40,18 +34,14 @@ def limit_validation(rate_limit=None):
 
 
 def parse_multiple_languages(object_to_be_parsed, edge, key, value):
-    list_languages = []
-    try:
-        for node in find_key(edge, object_to_be_parsed):
-            language = {'language': str((find_key(key, node))), 'size': round(((find_key(value, node) /
-                                                                                find_key('totalSize',
-                                                                                         object_to_be_parsed)) * 100),
-                                                                              2)}
-            list_languages.append(language)
+    if find_key(edge, object_to_be_parsed) is not None:
+        list_languages = [{'language': str((find_key(key, node))), 'size': round(((find_key(value, node) /
+                                                                                   find_key('totalSize',
+                                                                                            object_to_be_parsed)) * 100),
+                                                                                 2)}
+                          for node in find_key(edge, object_to_be_parsed)]
         return list_languages
-    except Exception as a:
-        print(a)
-        return None
+    return None
 
 
 def convert_datetime(value):

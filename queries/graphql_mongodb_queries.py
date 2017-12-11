@@ -64,7 +64,7 @@ def query_commit_mongo(self):
 
 
 def stats_query(self, repository):
-    return self.org + "/" + str(repository["repoName"]) + '/commits/'
+    return '{}{}{}{}'.format(self.org, '/', str(repository["repoName"]), '/commits/')
 
 
 def query_teams_dev_mongo(self):

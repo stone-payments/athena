@@ -1,6 +1,5 @@
-from module import *
-import time
-from config import *
+from collection_modules.module import *
+from custom_configurations.config import *
 
 
 class Pagination:

@@ -19,4 +19,3 @@ def create_collection_if_not_exists(db, hash_indexes, hash_indexes_unique,
         db[hash_index_unique[0]].create_index([hash_index_unique[1], ASCENDING], unique=True)
     for full_text_index in full_text_indexes:
         db[full_text_index[0]].create_index([(full_text_index[1], TEXT)])
-#

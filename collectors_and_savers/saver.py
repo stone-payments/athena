@@ -1,8 +1,8 @@
-from mongraph import *
-from validators import *
-from config import num_of_threads
-from threading import Thread
 from queue import Queue
+from threading import Thread
+from collection_modules.validators import *
+from custom_configurations.config import num_of_threads
+from mongodb_connect.mongraph import *
 
 
 class Saver:
