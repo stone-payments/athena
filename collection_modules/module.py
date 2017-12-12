@@ -29,18 +29,16 @@ def limit_validation(rate_limit=None):
     if rate_limit is not None and rate_limit["remaining"] < rate_limit_to_sleep:
         limit_time = (datetime.datetime.strptime(rate_limit["resetAt"], '%Y-%m-%dT%H:%M:%SZ') -
                       datetime.datetime.utcnow()).total_seconds()
-        print("wait " + str(limit_time / 60) + " mins")
+        print('{} {} {}'.format('wait', str(limit_time / 60), 'mins'))
         return time.sleep(limit_time)
 
 
 def parse_multiple_languages(object_to_be_parsed, edge, key, value):
     if find_key(edge, object_to_be_parsed) is not None:
-        list_languages = [{'language': str((find_key(key, node))), 'size': round(((find_key(value, node) /
-                                                                                   find_key('totalSize',
-                                                                                            object_to_be_parsed)) * 100),
-                                                                                 2)}
-                          for node in find_key(edge, object_to_be_parsed)]
-        return list_languages
+        return [{'language': str((find_key(key, node))), 'size': round(((find_key(value, node) /
+                                                                         find_key('totalSize',
+                                                                                  object_to_be_parsed)) * 100), 2)} for
+                node in find_key(edge, object_to_be_parsed)]
     return None
 
 
@@ -51,4 +49,5 @@ def convert_datetime(value):
 
 
 def utc_time(since_time_delta):
-    return (datetime.datetime.utcnow() + datetime.timedelta(since_time_delta)).strftime('%Y-%m-%d') + "T00:00:00Z"
+    return '{}{}'.format((datetime.datetime.utcnow() + datetime.timedelta(since_time_delta)).strftime('%Y-%m-%d'),
+                         "T00:00:00Z")
