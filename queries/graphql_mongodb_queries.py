@@ -1,3 +1,5 @@
+from mongodb_connect.mongraph import list_reponse_query
+
 with open("queries/repoQuery.graphql", "r") as repo_query:
     repo_query = repo_query.read()
 
@@ -30,37 +32,42 @@ with open("queries/org_query.graphql", "r") as org_query:
 
 
 def query_stats_mongo(self):
-    dictionary = [dict(x) for x in self.db.Commit.find({"additions": None, "org": self.org},
-                                                       {'repoName': 1, 'oid': 1, '_id': 1})]
-    return dictionary
+    query = {"additions": None, "org": self.org}
+    projection = {'repoName': 1, 'oid': 1, '_id': 1}
+    collection = 'Commit'
+    return self.db.query(collection, query, projection)
 
 
 def issue_mongo(self):
-    dictionary = [dict(x) for x in self.db.Repo.find({"org": self.org, "issues": {"$gt": 0}},
-                                                     {'repoName': 1, '_id': 0})]
-    query_list = [str(value["repoName"]) for value in dictionary]
-    return query_list
+    query = {"org": self.org, "issues": {"$gt": 0}}
+    projection = {'repoName': 1, '_id': 0}
+    collection = 'Repo'
+    key_to_be_returned = 'repoName'
+    return list_reponse_query(self.db, collection, query, projection, key_to_be_returned)
 
 
 def query_fork_mongo(self):
-    dictionary = [dict(x) for x in self.db.Repo.find({"org": self.org, "forks": {"$gt": 0}},
-                                                     {'repoName': 1, '_id': 0})]
-    query_list = [str(value["repoName"]) for value in dictionary]
-    return query_list
+    query = {'org': self.org, 'forks': {'$gt': 0}}
+    projection = {'repoName': 1, '_id': 0}
+    collection = 'Repo'
+    key_to_be_returned = 'repoName'
+    return list_reponse_query(self.db, collection, query, projection, key_to_be_returned)
 
 
 def query_team_mongo(self):
-    dictionary = [dict(x) for x in self.db.Teams.find({"org": self.org, "membersCount": {"$gt": 100}},
-                                                      {'slug': 1, '_id': 0})]
-    query_list = [str(value["slug"]) for value in dictionary]
-    return query_list
+    query = {"org": self.org, "membersCount": {"$gt": 100}}
+    projection = {'slug': 1, '_id': 0}
+    collection = 'Teams'
+    key_to_be_returned = 'slug'
+    return list_reponse_query(self.db, collection, query, projection, key_to_be_returned)
 
 
 def query_commit_mongo(self):
-    dictionary = [dict(x) for x in
-                  self.db.Repo.find({'committed_today': True, 'org': self.org}, {'repoName': 1, '_id': 0})]
-    query_list = [str(value["repoName"]) for value in dictionary]
-    return query_list
+    query = {'committed_today': True, 'org': self.org}
+    projection = {'repoName': 1, '_id': 0}
+    collection = 'Repo'
+    key_to_be_returned = 'repoName'
+    return list_reponse_query(self.db, collection, query, projection, key_to_be_returned)
 
 
 def stats_query(self, repository):
@@ -68,14 +75,16 @@ def stats_query(self, repository):
 
 
 def query_teams_dev_mongo(self):
-    dictionary = [dict(x) for x in self.db.Teams.find({'org': self.org, "membersCount": {'$gt': 100}},
-                                                      {'slug': 1, '_id': 0})]
-    query_list = [str(value["slug"]) for value in dictionary]
-    return query_list
+    query = {'org': self.org, "membersCount": {'$gt': 100}}
+    projection = {'slug': 1, '_id': 0}
+    collection = 'Teams'
+    key_to_be_returned = 'slug'
+    return list_reponse_query(self.db, collection, query, projection, key_to_be_returned)
 
 
 def query_teams_repo_mongo(self):
-    dictionary = [dict(x) for x in self.db.Teams.find({'org': self.org, "repoCount": {'$gt': 100}},
-                                                      {'slug': 1, '_id': 0})]
-    query_list = [str(value["slug"]) for value in dictionary]
-    return query_list
+    query = {'org': self.org, "repoCount": {'$gt': 100}}
+    projection = {'slug': 1, '_id': 0}
+    collection = 'Teams'
+    key_to_be_returned = 'slug'
+    return list_reponse_query(self.db, collection, query, projection, key_to_be_returned)

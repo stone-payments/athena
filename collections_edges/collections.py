@@ -78,10 +78,9 @@ def repo(db, org, query, collection_name, edge_name="edges"):
 
 
 def dev(db, org, query, collection_name, edge_name="edges"):
-    def content(self, _, node):
+    def content(_, node):
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
-            "org": string_validate(self.org, not_none=True),
             "_id": find_key("id", node),
             "devName": string_validate(find_key("name", node)),
             "followers": int_validate(node["node"]["followers"]["totalCount"]),
@@ -210,7 +209,6 @@ def commit_collector(db, org, query, query_db, collection_name, save_queue_type,
             "branchName": string_validate(find_key('branchName', response)),
             "messageHeadline": string_validate(find_key('messageHeadline', node)),
             "oid": not_null(find_key('oid', node)),
-            # "committedDate": string_validate(find('committedDate', node), not_none=True),
             "committedDate": convert_datetime(find_key('committedDate', node)),
             "author": string_validate(find_key('login', node)),
             "devId": string_validate(find_key('devId', node)),
@@ -266,9 +264,9 @@ def stats_collector(db, org, query, stats_query, collection_name, save_queue_typ
         ]
         return save_edges
 
-    start = CollectorStats(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                           query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
-                           save_edges=edges)
+    start = CollectorCommitStats(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
+                                 query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
+                                 save_edges=edges)
     start.start(save_queue_type)
 
 

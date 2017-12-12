@@ -1,12 +1,10 @@
-from clients.create_db import create_database_if_not_exists, create_collection_if_not_exists
 from collections_edges import *
 from collectors_and_savers.saver import SaverThread
 from custom_configurations.config import *
 from queries.graphql_mongodb_queries import *
+from mongodb_connect.mongraph import *
 
-db = create_database_if_not_exists(db_name=db_name, db_url=db_url)
-create_collection_if_not_exists(db, hash_indexes, hash_indexes_unique,
-                                full_text_indexes)
+db = Mongraph(db_name, db_url, hash_indexes, hash_indexes_unique, full_text_indexes)
 save_queue = Queue(queue_max_size)
 save_edges_name_queue = Queue(queue_max_size)
 saver = SaverThread(db=db, queue=save_queue, edges_name_queue=save_edges_name_queue)

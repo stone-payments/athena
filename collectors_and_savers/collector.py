@@ -31,7 +31,7 @@ class Collector:
 
 
 class CollectorTeam(Collector):
-    def _collect_team(self):
+    def _collect(self):
         return_pagination = Pagination(org=self.org, query=self.query, updated_time=self.time,
                                        number_of_repo=self.number_of_repo, slug=self.slug, next_repo=self.next_repo)
         for page in return_pagination:
@@ -45,7 +45,7 @@ class CollectorTeam(Collector):
                     save.save(team, members, repositories)
 
     def start(self):
-        self._collect_team()
+        self._collect()
 
 
 class CollectorGeneric(Collector):
@@ -106,8 +106,8 @@ class CollectorRestricted(CollectorRestrictedItems):
         _start_repository_queue_worker(query_result, self._collect, save_edges_name_queue)
 
 
-class CollectorStats(CollectorRestrictedItems):
-    def _collect_commit_stats(self, repositories: Queue, save: Queue):
+class CollectorCommitStats(CollectorRestrictedItems):
+    def _collect(self, repositories: Queue, save: Queue):
         while True:
             repository = repositories.get(timeout=queue_timeout)
             repository = ast.literal_eval(repository)
@@ -119,11 +119,11 @@ class CollectorStats(CollectorRestrictedItems):
 
     def start(self, save_edges_name_queue):
         query_result = self.query_db(self)
-        _start_repository_queue_worker(query_result, self._collect_commit_stats, save_edges_name_queue)
+        _start_repository_queue_worker(query_result, self._collect, save_edges_name_queue)
 
 
 class CollectorRestrictedTeam(CollectorRestrictedItems):
-    def _collect_team_dev(self, repositories: Queue, save: Queue):
+    def _collect(self, repositories: Queue, save: Queue):
         while True:
             repository = repositories.get(timeout=queue_timeout)
             return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
@@ -138,4 +138,4 @@ class CollectorRestrictedTeam(CollectorRestrictedItems):
 
     def start(self, save_queue):
         query_result = self.query_db(self)
-        _start_repository_queue_worker(query_result, self._collect_team_dev, save_queue)
+        _start_repository_queue_worker(query_result, self._collect, save_queue)
