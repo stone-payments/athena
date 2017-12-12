@@ -1,21 +1,22 @@
-# from collection_modules.validators import *
 from collectors_and_savers.collector import *
 
 
 # REPO ###############################
 
 def org_collection(db, org, query, collection_name, edge_name="edges"):
-    def content(self, node):
+    def content(**kwargs):
+        page = kwargs.get('page')
+        org_name = kwargs.get('org')
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
-            "org": string_validate(self.org, not_none=True),
-            "_id": not_null(find_key('id', node)),
-            "avatarUrl": string_validate(find_key('avatarUrl', node)),
-            "description": string_validate(find_key('description', node)),
-            "membersCount": int_validate(find_key('membersCount', node)),
-            "teamsCount": int_validate(find_key('teamsCount', node)),
-            "repoCount": int_validate(find_key('repoCount', node)),
-            "projectCount": int_validate(find_key('projectCount', node)),
+            "org": string_validate(org_name, not_none=True),
+            "_id": not_null(find_key('id', page)),
+            "avatarUrl": string_validate(find_key('avatarUrl', page)),
+            "description": string_validate(find_key('description', page)),
+            "membersCount": int_validate(find_key('membersCount', page)),
+            "teamsCount": int_validate(find_key('teamsCount', page)),
+            "repoCount": int_validate(find_key('repoCount', page)),
+            "projectCount": int_validate(find_key('projectCount', page)),
             "db_last_updated": datetime.datetime.utcnow(),
         }
         return save_content
@@ -32,7 +33,9 @@ def org_collection(db, org, query, collection_name, edge_name="edges"):
 
 
 def repo(db, org, query, collection_name, edge_name="edges"):
-    def content(self, _, node):
+    def content(**kwargs):
+        node = kwargs.get('node')
+        org_name = kwargs.get('org')
         readme_ranges = find_key('ranges', node)
         if readme_ranges:
             readme = "OK" if readme_ranges[-1]['endingLine'] >= 5 else "Poor"
@@ -40,7 +43,7 @@ def repo(db, org, query, collection_name, edge_name="edges"):
             readme = None
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
-            "org": string_validate(self.org, not_none=True),
+            "org": string_validate(org_name, not_none=True),
             "_id": node["node"]["repoId"],
             "repoName": string_validate(node["node"]["name"], not_none=True),
             "description": string_validate(node["node"]["description"]),
@@ -78,7 +81,8 @@ def repo(db, org, query, collection_name, edge_name="edges"):
 
 
 def dev(db, org, query, collection_name, edge_name="edges"):
-    def content(_, node):
+    def content(**kwargs):
+        node = kwargs.get('node')
         save_content = {
             "collection_name": string_validate(collection_name, not_none=True),
             "_id": find_key("id", node),

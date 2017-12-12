@@ -29,44 +29,43 @@ class Collector:
         self.save_content = save_content
         self.save_edges = save_edges
 
-
-class CollectorTeam(Collector):
     def _collect(self):
         return_pagination = Pagination(org=self.org, query=self.query, updated_time=self.time,
                                        number_of_repo=self.number_of_repo, slug=self.slug, next_repo=self.next_repo)
         for page in return_pagination:
             edges = find_key(self.edges_name, page)
-            if edges is not None:
-                for node in edges:
-                    team = self.save_content(self, edges, node)
-                    members, repositories = self.save_edges(team, find_key('members_edge', node),
-                                                            find_key('repo_edge', node))
-                    save = SaverTeam(db=self.db)
-                    save.save(team, members, repositories)
+            self.process_edges(edges, return_pagination=return_pagination, page=page)
+
+    def process_edges(self, edges, **kwargs): pass
 
     def start(self):
         self._collect()
+
+
+class CollectorTeam(Collector):
+    def process_edges(self, edges, **kwargs):
+        if edges is not None:
+            for node in edges:
+                print(node)
+                team = self.save_content(self, edges, node)
+                members, repositories = self.save_edges(team, find_key('members_edge', node),
+                                                        find_key('repo_edge', node))
+                save = SaverTeam(db=self.db)
+                save.save(team, members, repositories)
 
 
 class CollectorGeneric(Collector):
-    def _collect(self):
-        return_pagination = Pagination(org=self.org, query=self.query, updated_time=self.time,
-                                       number_of_repo=self.number_of_repo, slug=self.slug, next_repo=self.next_repo)
-        for page in return_pagination:
-            edges = find_key(self.edges_name, page)
-            if edges is not None:
-                for node in edges:
-                    print(node)
-                    queue_input = self.save_content(self, page, node)
-                    save = SaverGeneric(db=self.db)
-                    save.save(queue_input, return_pagination, save_edges=self.save_edges)
-            else:
-                queue_input = self.save_content(self, page)
+    def process_edges(self, edges, **kwargs):
+        if edges is not None:
+            for node in edges:
+                print(node)
+                queue_input = self.save_content(node=node, org=self.org, page=kwargs.get('page'))
                 save = SaverGeneric(db=self.db)
-                save.save(queue_input, return_pagination, save_edges=self.save_edges)
-
-    def start(self):
-        self._collect()
+                save.save(queue_input, kwargs.get('return_pagination'), save_edges=self.save_edges)
+        else:
+            queue_input = self.save_content(org=self.org, page=kwargs.get('page'))
+            save = SaverGeneric(db=self.db)
+            save.save(queue_input, kwargs.get('return_pagination'), save_edges=self.save_edges)
 
 
 class CollectorRestrictedItems:
