@@ -1,35 +1,5 @@
 from mongodb_connect.mongraph import list_reponse_query
 
-with open("queries/repoQuery.graphql", "r") as repo_query:
-    repo_query = repo_query.read()
-
-with open("queries/devQuery.graphql", "r") as dev_query:
-    dev_query = dev_query.read()
-
-with open("queries/teamsQuery.graphql", "r") as teams_query:
-    teams_query = teams_query.read()
-
-with open("queries/commitQuery.graphql", "r") as commit_query:
-    commit_query = commit_query.read()
-
-with open("queries/readmeQuery.graphql", "r") as readme_query:
-    readme_query = readme_query.read()
-
-with open("queries/forkQuery.graphql", "r") as fork_query:
-    fork_query = fork_query.read()
-
-with open("queries/issueQuery.graphql", "r") as issue_query:
-    issue_query = issue_query.read()
-
-with open("queries/teamsDevQuery.graphql", "r") as teams_dev_query:
-    teams_dev_query = teams_dev_query.read()
-
-with open("queries/teamsRepoQuery.graphql", "r") as teams_repo_query:
-    teams_repo_query = teams_repo_query.read()
-
-with open("queries/org_query.graphql", "r") as org_query:
-    org_query = org_query.read()
-
 
 def query_stats_mongo(self):
     query = {"additions": None, "org": self.org}

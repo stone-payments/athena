@@ -46,7 +46,6 @@ class CollectorTeam(Collector):
     def process_edges(self, edges, **kwargs):
         if edges is not None:
             for node in edges:
-                print(node)
                 team = self.save_content(self, edges, node)
                 members, repositories = self.save_edges(team, find_key('members_edge', node),
                                                         find_key('repo_edge', node))
@@ -58,7 +57,6 @@ class CollectorGeneric(Collector):
     def process_edges(self, edges, **kwargs):
         if edges is not None:
             for node in edges:
-                print(node)
                 queue_input = self.save_content(node=node, org=self.org, page=kwargs.get('page'))
                 save = SaverGeneric(db=self.db)
                 save.save(queue_input, kwargs.get('return_pagination'), save_edges=self.save_edges)
@@ -85,24 +83,29 @@ class CollectorRestrictedItems:
         self.save_content = save_content
         self.save_edges = save_edges
 
-
-class CollectorRestricted(CollectorRestrictedItems):
     def _collect(self, repositories: Queue, save: Queue):
         while True:
             repository = repositories.get(timeout=queue_timeout)
             return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
                                            updated_time=self.time, slug=self.slug, next_repo=repository)
             for page in return_pagination:
-                print(page)
                 edges = find_key(self.edges, page)
                 if edges is not None:
                     for node in edges:
-                        queue_input = (self.save_content(self, page, node), self.save_edges)
-                        save.put(queue_input)
+                        self.process_edges(page, node, save)
 
-    def start(self, save_edges_name_queue):
+    def process_edges(self, page, node, save):
+        pass
+
+    def start(self, queue_type):
         query_result = self.query_db(self)
-        _start_repository_queue_worker(query_result, self._collect, save_edges_name_queue)
+        _start_repository_queue_worker(query_result, self._collect, queue_type)
+
+
+class CollectorRestricted(CollectorRestrictedItems):
+    def process_edges(self, page, node, save: Queue):
+        queue_input = (self.save_content(self, page, node), self.save_edges)
+        save.put(queue_input)
 
 
 class CollectorCommitStats(CollectorRestrictedItems):
@@ -116,25 +119,8 @@ class CollectorCommitStats(CollectorRestrictedItems):
             queue_input = (self.save_content(result, repository["_id"]), self.save_edges)
             save.put(queue_input)
 
-    def start(self, save_edges_name_queue):
-        query_result = self.query_db(self)
-        _start_repository_queue_worker(query_result, self._collect, save_edges_name_queue)
-
 
 class CollectorRestrictedTeam(CollectorRestrictedItems):
-    def _collect(self, repositories: Queue, save: Queue):
-        while True:
-            repository = repositories.get(timeout=queue_timeout)
-            return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
-                                           updated_time=self.time, slug=repository)
-            for page in return_pagination:
-                edges = find_key(self.edges, page)
-                if edges is not None:
-                    for node in edges:
-                        print(node)
-                        queue_input = self.save_edges(page, node)
-                        save.put(queue_input)
-
-    def start(self, save_queue):
-        query_result = self.query_db(self)
-        _start_repository_queue_worker(query_result, self._collect, save_queue)
+    def process_edges(self, page, node, save: Queue):
+        queue_input = self.save_edges(page, node)
+        save.put(queue_input)

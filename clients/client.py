@@ -11,11 +11,11 @@ class Retry:
         self.times = times
 
     def __call__(self, *args, **kwargs):
-        for t in range(self.times):
+        for attempts in range(self.times):
             try:
                 return self.request(*args, **kwargs)
             except TimeoutError as e:
-                if t == self.times - 1:
+                if attempts == self.times - 1:
                     raise e
             time.sleep(self.interval)
 
@@ -53,7 +53,6 @@ class ClientRest:
 
     def execute(self, url: str, query: str, temp: str) -> object:
         query = '{}{}{}'.format(url, query, temp)
-        print(query)
         if self.token != "":
             headers = {'Authorization': 'token %s' % self.token}
             req = requests_retry.get(query, headers=headers, timeout=self.timeout)

@@ -186,7 +186,7 @@ def teams_repo(db, org, query, query_db, save_queue_type, edges_name="edges"):
 
     def edges(response, node):
         save_edges = [{
-            "edge_name": "dev_to_repo",
+            "edge_name": "repo_to_team",
             'to': find_key('teamId', response),
             'from': find_key('repoId', node),
             "db_last_updated": datetime.datetime.utcnow(),
