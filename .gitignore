@@ -1,8 +1,8 @@
 
 ### Python template
 # Byte-compiled / optimized / DLL files
+__pycache__
 __pycache__/
-*.py[cod]
 *$py.class
 
 # C extensions
@@ -111,12 +111,6 @@ venv.bak/
 out
 gen
 
+collections_and_edges/__pycache__
+graphqlclient/__pycache__
 
-
-collection_modules/__pycache__/
-
-collectors_and_savers/__pycache__/
-custom_configurations/__pycache__/
-graphql_queries/__pycache__/
-mongodb_connect/__pycache__/
-mongodb_queries/__pycache__/
