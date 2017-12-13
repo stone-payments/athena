@@ -3,6 +3,7 @@ from api import *
 from .config import *
 import datetime as dt
 import re
+import json
 
 
 def avatar():
@@ -89,6 +90,17 @@ def user_language():
         x['size'] = round((x['size'] / soma * 100), 2)
     print(result)
     return json.dumps(result[:12])
+
+    name = request.args.get("name")
+    org = str(request.args.get("org"))
+    query_result = db['Repo'].find({'org': org, 'repoName': name}, {"languages": 1, "_id": 0})
+    result = [dict(i) for i in query_result]
+    if not result:
+        return json.dumps([{'response': 404}])
+    result = (result[0]['languages'])
+    result = sorted(result, key=itemgetter('size'), reverse=True)
+    print(result)
+    return json.dumps(result)
 
 
 def user_contributed_repo():
@@ -255,19 +267,21 @@ def user_stats():
 
 
 def user_team():
-    aql = """
-    FOR Teams IN Teams
-    FOR TeamsDev in TeamsDev
-    FOR Dev IN Dev
-    FILTER TeamsDev._from == Dev._id
-    FILTER TeamsDev._to == Teams._id
-    FILTER LOWER(Dev.login) == @name
-    RETURN DISTINCT{teams:Teams.teamName}
-    """
     name = request.args.get("name")
-    bind_vars = {"name": str.lower(name)}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    query = [{'$lookup': {
+        'from': 'Teams', 'localField': 'to', 'foreignField': '_id', 'as': 'Team'}}
+        , {'$lookup': {
+            'from': 'Dev', 'localField': 'from', 'foreignField': '_id', 'as': 'Dev'}},
+        {
+            '$match':
+                {"Dev.0.login": name, 'type': 'dev_to_team'}
+        },
+        {'$sort': {'Team.teamName': 1}},
+        {'$project': {'_id': 0, "Team.teamName": 1, 'Team.org': 1}}
+    ]
+    query_result = db.edges.aggregate(query)
     result = [dict(i) for i in query_result]
+    result = [x['Team'][0] for x in result]
     print(result)
     return json.dumps(result)
 

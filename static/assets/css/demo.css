@@ -65,3 +65,17 @@
   display: -ms-flexbox;
   display: flex;
 }
+
+.list-group-item {
+border: 0px solid #ddd;
+}
+
+.list-group {
+    margin-top: 20px;
+}
+
+.list-group-item>.badge {
+   float: none;
+   min-width: 45px;
+   margin-right: 10px;
+}

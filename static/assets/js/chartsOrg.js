@@ -40,11 +40,11 @@ $(function() {
         let orgName = String(returnedData[0]['org']);
         let orgLastUpdated = String(returnedData[0]['db_last_updated']);
         $('#avatar').attr("src", url);
-        $('#membersCount').text(membersCount + " Members");
+        $('#membersCount').text(membersCount);
         $('#orgName').text(orgName);
-        $('#repoCount').text(repoCount + " Repositories");
-        $('#teamsCount').text(teamsCount + " Teams");
-        $('#projectCount').text(projectCount + " Projects");
+        $('#repoCount').text(repoCount);
+        $('#teamsCount').text(teamsCount);
+        $('#projectCount').text(projectCount);
         $('#orgLastUpdated').html('<i class="fa fa-clock-o"></i> '+ orgLastUpdated + ' minutes ago');
 //        if (following == '-'){
 //          $(".content").hide();

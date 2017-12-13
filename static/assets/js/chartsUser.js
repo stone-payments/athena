@@ -49,8 +49,8 @@ $(function() {
         let responseCode = String(returnedData[0]['response']);
         $('#avatar').attr("src", url);
         $('#username').text(username);
-        $('#followers').text(followers + " Followers");
-        $('#following').text(following + " Following");
+        $('#followers').text(followers);
+        $('#following').text(following);
         $('#orgLastUpdated').html('<i class="fa fa-clock-o"></i> '+ orgLastUpdated + ' minutes ago');
         if (responseCode == 404){
           $(".content").hide();
@@ -178,13 +178,17 @@ $(function() {
         returnedData = JSON.parse(response);
         $("#user_teams").empty();
         returnedData.map(function(num) {
-          memberName = num.teams;
-          html = `<tr>
+          memberName = num.teamName;
+          org = num.org;
+          html =   `<tr>
                         <td style="width:10px;">
                                 <i class="pe-7s-angle-right-circle"></i>
                         </td>
-                        <td>${memberName}</td>
+                        <td>${memberName}
+
+                        </td>
                         <td class="td-actions text-right">
+                        <span class="label label-success">${org}</span>
                         </td>
                     </tr>`
           $("#user_teams").append(html);
