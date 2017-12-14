@@ -82,7 +82,7 @@ $(function() {
           return num.day;
         });
         let dataCommits = returnedData.map(function(num) {
-          return num.number;
+          return num.count;
         });
         let ctx = document.getElementById("commmit_chart").getContext('2d');
         if (commmit_chart != null) {
@@ -207,10 +207,10 @@ $(function() {
           return num.day;
         });
         let dataIssues1 = returnedData[0].map(function(num) {
-          return num.number;
+          return num.count;
         });
         let dataIssues2 = returnedData[1].map(function(num) {
-          return num.number;
+          return num.count;
         });
         let ctx = document.getElementById("stats_chart").getContext('2d');
         if (stats_chart != null) {

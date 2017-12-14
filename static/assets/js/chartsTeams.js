@@ -18,19 +18,21 @@ $(function() {
 
   let xhr;
   $('#name').autoComplete({
-    minChars: 1,
+    minChars: 1,cache: false, delay : 20,
     source: function(term, response) {
-      try {
-        xhr.abort();
-      } catch (e) {}
-      xhr = $.getJSON(address+'/get_team_name?name=' + term+'&org='+ orgSelector, function(result) {
+    $('.autocomplete-suggestion').show();
+     $.getJSON(address+'/get_team_name?name=' + term+'&org='+ orgSelector, function(result) {
+        console.log(orgSelector);
         let returnedData = result.map(function(num) {
-          return num.data;
+          return num.slug;
         });
+        console.log(returnedData);
         response(returnedData);
       });
     }
   });
+
+
   $('#name').keypress(function(e) {
     if (e.which == 13) { //Enter key pressed
       $('#find').click(); //Trigger search button click event
@@ -44,43 +46,47 @@ $(function() {
       lastDay = JSON.parse($("#teamsRangeDate").val()).end;
     }
     $.ajax({
-      url: address+'/get_open_source_team?org=' + orgSelector + '&team=' + name,
+      url: address+'/get_open_source_team?org=' + orgSelector + '&name=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
-        let openSource = Number(returnedData[0]['openSource']);
-        let notOpenSource = Number(returnedData[0]['notOpenSource']);
+        let labels = returnedData.map(function(num) {
+          return num.status;
+        });
+        let dataSize = returnedData.map(function(num) {
+          return num.count;
+        });
         if (openSourceChart != null) {
           openSourceChart.destroy();
         }
-        if (openSource == 404){
-          $(".content").hide();
-          $(document).ready(function() {
-            $.notify({
-              icon: 'pe-7s-close-circle',
-              message: "User does not exist"
-            }, {
-              type: 'danger',
-              timer: 1000,
-              placement: {
-            		from: 'top',
-            		align: 'right'
-            	},
-            });
-          });
-        }
-        else {
-          $(".content").show();
-        }
+//        if (openSource == 404){
+//          $(".content").hide();
+//          $(document).ready(function() {
+//            $.notify({
+//              icon: 'pe-7s-close-circle',
+//              message: "User does not exist"
+//            }, {
+//              type: 'danger',
+//              timer: 1000,
+//              placement: {
+//            		from: 'top',
+//            		align: 'right'
+//            	},
+//            });
+//          });
+//        }
+//        else {
+//          $(".content").show();
+//        }
         openSourceChart = new Chart(document.getElementById("openSourceChart"), {
           type: 'doughnut',
           data: {
-            labels: ['openSource', 'Private'],
+            labels: labels,
             datasets: [{
               label: "",
               backgroundColor: ['#0B3B1F', '#C52233'],
               borderWidth: 1,
-              data: [openSource, notOpenSource]
+              data: dataSize
             }]
           },
           options: {
@@ -93,25 +99,32 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/get_readme_team?org=' + orgSelector + '&team=' + name,
+      url: address+'/get_readme_team?org=' + orgSelector + '&name=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
-        let ok = Number(returnedData[0]['ok']);
-        let poor = Number(returnedData[0]['poor']);
-        let none = Number(returnedData[0]['bad']);
+//        let ok = Number(returnedData[0]['ok']);
+//        let poor = Number(returnedData[0]['poor']);
+//        let none = Number(returnedData[0]['bad']);
+        console.log(returnedData);
+        let labels = returnedData.map(function(num) {
+          return num.status;
+        });
+        let dataSize = returnedData.map(function(num) {
+          return num.count;
+        });
         if (readmeChart != null) {
           readmeChart.destroy();
         }
         readmeChart = new Chart(document.getElementById("readmeChart"), {
           type: 'doughnut',
           data: {
-            labels: ['OK', 'Poor', 'None'],
+            labels: labels,
             datasets: [{
               label: "Languages (%)",
-              backgroundColor: ['#0B3B1F', '#ABC421', '#C52233'],
+              backgroundColor: ['#ABC421', '#0B3B1F', '#C52233'],
               borderWidth: 1,
-              data: [ok, poor, none]
+              data: dataSize
             }]
           },
           options: {

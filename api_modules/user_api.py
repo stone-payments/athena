@@ -23,45 +23,47 @@ def avatar():
 
 
 def user_commit():
-    aql = """
-    FOR Commit IN Commit
-    FILTER LOWER(Commit.author) == @name
-    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
-    FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
-    COLLECT
-    day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
-    WITH COUNT INTO number
-    SORT day ASC
-    RETURN {
-      day: day,
-      number: number
-    }"""
     name = request.args.get("name")
-    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
+    print(start_date)
+    print(end_date)
+    query = [{'$match': {'author': name, 'committedDate': {'$gte': start_date, '$lt': end_date}}},
+             {'$group': {
+                 '_id': {
+                     'year': {'$year': "$committedDate"},
+                     'month': {'$month': "$committedDate"},
+                     'day': {'$dayOfMonth': "$committedDate"},
+                 },
+                 'count': {'$sum': 1}
+             }},
+             {'$project': {'_id': 0, "year": "$_id.year", "month": "$_id.month", "day": "$_id.day", 'count': 1}}
+             ]
     delta = end_date - start_date
-    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result = [dict(i) for i in query_result]
-    print(result)
-    days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
-            range(delta.days + 1)]
+    commits_count_list = db.Commit.aggregate(query)
+    commits_count_list = [dict(i) for i in commits_count_list]
+    print(commits_count_list)
+    for commit_count in commits_count_list:
+        commit_count['date'] = dt.datetime(commit_count['year'], commit_count['month'], commit_count['day'], 0, 0)
+    print(commits_count_list)
+    days = [start_date + dt.timedelta(days=i) for i in range(delta.days + 1)]
+    print(days)
     lst = []
 
-    def recur(x):
+    def fill_all_dates(x):
         day = {}
-        for y in result:
-            if y.get('day') == x:
-                day['day'] = str(y.get('day'))
-                day['number'] = int(y.get('number'))
+        for y in commits_count_list:
+            if y.get('date') == x:
+                day['day'] = str(y.get('date').strftime('%a %d-%b'))
+                day['count'] = int(y.get('count'))
                 return day
-        day['day'] = x
-        day['number'] = 0
+        day['day'] = x.strftime('%a %d-%b')
+        day['count'] = 0
         return day
 
     for x in days:
-        lst.append(recur(x))
-    # print(lst)
+        lst.append(fill_all_dates(x))
+    print(lst)
     return json.dumps(lst)
 
 
@@ -198,70 +200,70 @@ def user_issue():
 
 
 def user_stats():
-    aql = """
-        FOR Commit IN Commit
-        FILTER LOWER(Commit.author) == @name
-        FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
-        FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
-        COLLECT day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
-        AGGREGATE additions = SUM(Commit.additions)
-        RETURN {day:day,number:additions}"""
+    def fill_all_dates(day_in_range, issue_count_list):
+        days = {}
+        for issue in issue_count_list:
+            if issue.get('date') == day_in_range:
+                days['day'] = str(issue.get('date').strftime('%a %d-%b'))
+                days['count'] = int(issue.get('count'))
+                return days
+        days['day'] = day_in_range.strftime('%a %d-%b')
+        days['count'] = 0
+        return days
+
+    def process_data(db_collection, db_query, days_delta):
+        count_list = db[db_collection].aggregate(db_query)
+
+        count_list = [dict(i) for i in count_list]
+        print(count_list)
+        for count in count_list:
+            count['date'] = dt.datetime(count['year'], count['month'], count['day'], 0, 0)
+        range_days = [start_date + dt.timedelta(days=i) for i in range(days_delta.days + 1)]
+        processed_list = []
+        for day in range_days:
+            processed_list.append(fill_all_dates(day, count_list))
+        # processed_list = accumulator(processed_list)
+        return processed_list
+
     name = request.args.get("name")
-    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
-    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d')
+    start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
     delta = end_date - start_date
-    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result = [dict(i) for i in query_result]
-    days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
-            range(delta.days + 1)]
-    lst = []
-
-    def recur(x):
-        day = {}
-        for y in result:
-            if y.get('day') == x:
-                day['day'] = str(y.get('day'))
-                day['number'] = int(y.get('number'))
-                return day
-        day['day'] = x
-        day['number'] = 0
-        return day
-
-    value = 0
-    for x in days:
-        lst.append(recur(x))
-
-        aql = """
-                FOR Commit IN Commit
-                FILTER LOWER(Commit.author) == @name
-                FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") >= @startDate
-                FILTER DATE_FORMAT(Commit.committedDate,"%Y-%mm-%dd") <= @endDate
-                COLLECT day = DATE_FORMAT(Commit.committedDate,"%www %dd-%mmm")
-                AGGREGATE deletions = SUM(Commit.deletions)
-                RETURN {day:day,number:deletions}"""
-    bind_vars = {"name": str.lower(name), "startDate": str(start_date), "endDate": str(end_date)}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
-    result = [dict(i) for i in query_result]
-    days = [dt.datetime.strptime(str(start_date + timedelta(days=i)), '%Y-%m-%d %H:%M:%S').strftime('%a %d-%b') for i in
-            range(delta.days + 1)]
-    lst2 = []
-
-    def recur(x):
-        day = {}
-        for y in result:
-            if y.get('day') == x:
-                day['day'] = str(y.get('day'))
-                day['number'] = int(y.get('number'))
-                return day
-        day['day'] = x
-        day['number'] = 0
-        return day
-
-    value = 0
-    for x in days:
-        lst2.append(recur(x))
-    response = [lst, lst2]
+    query_addttions = [
+        {'$match': {'author': name, 'committedDate': {'$gte': start_date, '$lte': end_date}}},
+        {
+            '$group':
+                {
+                    '_id': {'author': "$author",
+                            'year': {'$year': "$committedDate"},
+                            'month': {'$month': "$committedDate"},
+                            'day': {'$dayOfMonth': "$committedDate"},
+                            },
+                    'totalAmount': {'$sum': '$additions'}
+                }
+        },
+        {'$project': {'_id': 0, "year": "$_id.year", "month": "$_id.month", "day": "$_id.day", 'author': '$_id.author',
+                      'count': '$totalAmount'}}
+    ]
+    query_deletions = [
+        {'$match': {'author': name, 'committedDate': {'$gte': start_date, '$lte': end_date}}},
+        {
+            '$group':
+                {
+                    '_id': {'author': "$author",
+                            'year': {'$year': "$committedDate"},
+                            'month': {'$month': "$committedDate"},
+                            'day': {'$dayOfMonth': "$committedDate"},
+                            },
+                    'totalAmount': {'$sum': '$deletions'}
+                }
+        },
+        {'$project': {'_id': 0, "year": "$_id.year", "month": "$_id.month", "day": "$_id.day", 'author': '$_id.author',
+                      'count': '$totalAmount'}}
+    ]
+    addttions_list = process_data('Commit', query_addttions, delta)
+    deletions_list = process_data('Commit', query_deletions, delta)
+    response = [addttions_list, deletions_list]
     print(response)
     return json.dumps(response)
 

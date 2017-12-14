@@ -55,8 +55,8 @@ def repo_commits():
     delta = end_date - start_date
     commits_count_list = db.Commit.aggregate(query)
     commits_count_list = [dict(i) for i in commits_count_list]
-    if not commits_count_list:
-        return json.dumps([{'response': 404}])
+    # if not commits_count_list:
+    #     return json.dumps([{'response': 404}])
     print(commits_count_list)
     for commit_count in commits_count_list:
         commit_count['date'] = dt.datetime(commit_count['year'], commit_count['month'], commit_count['day'], 0, 0)
@@ -87,6 +87,7 @@ def repo_members():
     org = str(request.args.get("org"))
     query_result = db.Commit.find({'org': org, 'repoName': name, 'author': {'$ne': None}},
                                   {'_id': 0, 'author': 1}).distinct("author")
+    print(query_result)
     return json.dumps(query_result)
 
 

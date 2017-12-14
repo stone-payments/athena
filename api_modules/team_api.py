@@ -2,6 +2,9 @@ from flask import request
 from .config import *
 import datetime as dt
 from api import *
+import re
+from operator import itemgetter
+import json
 
 
 def team_languages():
@@ -28,60 +31,41 @@ def team_languages():
     result = [dict(i) for i in query_result]
     soma = sum(item['size'] for item in result)
     for x in result:
-        x['size'] = round((x['size']/soma*100), 2)
+        x['size'] = round((x['size'] / soma * 100), 2)
     print(result)
     return json.dumps(result[:12])
 
 
 def team_open_source():
-    aql = """
-    LET openSource = (
-    FOR Repo IN Repo
-    FOR Teams In Teams
-    FOR TeamsRepo IN TeamsRepo
-    FILTER TeamsRepo._from == Repo._id
-    FILTER TeamsRepo._to == Teams._id
-    FILTER LOWER(Repo.org) == @org
-    FILTER Repo.openSource == True
-    FILTER LOWER(Teams.teamName) == @team
-        COLLECT 
-        day = Repo.openSource
-    WITH COUNT INTO number
-    RETURN number)
-    LET notOpenSource = (
-    FOR Repo IN Repo
-    FOR Teams In Teams
-    FOR TeamsRepo IN TeamsRepo
-    FILTER TeamsRepo._from == Repo._id
-    FILTER TeamsRepo._to == Teams._id
-    FILTER LOWER(Repo.org) == @org
-    FILTER Repo.openSource == False
-    FILTER LOWER(Teams.teamName) == @team
-        COLLECT 
-        day = Repo.openSource
-    WITH COUNT INTO number
-    RETURN number)
-    RETURN {openSource,notOpenSource}"""
-    team = request.args.get("team")
     org = request.args.get("org")
-    bind_vars = {"team": str.lower(team), "org": str.lower(org)}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bind_vars)
-    result = [dict(i) for i in query_result]
-    if not result[0]["openSource"]:
-        return json.dumps([{'openSource': [404], 'notOpenSource': [404]}])
-    try:
-        result_open_source = int(result[0]["openSource"][0])
-    except:
-        result_open_source = 0
-    try:
-        resultnot_open_source = int(result[0]["notOpenSource"][0])
-    except:
-        resultnot_open_source = 0
-    soma = result_open_source + resultnot_open_source
-    for x in result:
-        x['openSource'] = round(result_open_source/soma*100, 1)
-        x['notOpenSource'] = round(resultnot_open_source/soma*100, 1)
-    return json.dumps(result)
+    name = request.args.get("name")
+    query = [
+        {'$lookup': {'from': 'Repo', 'localField': 'from', 'foreignField': '_id', 'as': 'Repo'}}
+        , {'$lookup': {'from': 'Teams', 'localField': 'to', 'foreignField': '_id', 'as': 'Teams'}},
+        {
+            '$match':
+                {'Teams.0.slug': name, 'type': 'repo_to_team', 'Teams.0.org': org}},
+        {'$group': {
+            '_id': {
+                'status': "$Repo.openSource",
+            },
+            'count': {'$sum': 1}
+        }},
+        {'$sort': {'_id.status': -1}},
+        {'$project': {"status": "$_id.status", "_id": 0, 'count': 1}}
+    ]
+    query_result = db.edges.aggregate(query)
+    readme_status_list = [dict(i) for i in query_result]
+    print(readme_status_list)
+    soma = sum([readme_status['count'] for readme_status in readme_status_list])
+    for readme_status in readme_status_list:
+        if readme_status['status'][0] is None:
+            readme_status['status'] = 'None'
+        else:
+            readme_status['status'] = readme_status['status'][0]
+        readme_status['count'] = round(int(readme_status['count']) / soma * 100, 1)
+    print(readme_status_list)
+    return json.dumps(readme_status_list)
 
 
 def team_commits():
@@ -130,6 +114,7 @@ def team_commits():
         day['day'] = x
         day['number'] = 0
         return day
+
     for x in days:
         lst.append(recur(x))
     # print(lst)
@@ -137,74 +122,35 @@ def team_commits():
 
 
 def team_readme():
-    aql = """
-    LET ok = (
-    FOR Repo IN Repo
-    FOR Teams In Teams
-    FOR TeamsRepo IN TeamsRepo
-    FILTER TeamsRepo._from == Repo._id
-    FILTER TeamsRepo._to == Teams._id
-    FILTER LOWER(Repo.org) == @org
-    FILTER LOWER(Teams.teamName) == @team
-    FILTER Repo.readme == 'OK'
-        COLLECT 
-        day = Repo.readme
-    WITH COUNT INTO number
-    RETURN number)
-    LET poor = (
-        FOR Repo IN Repo
-    FOR Teams In Teams
-    FOR TeamsRepo IN TeamsRepo
-    FILTER TeamsRepo._from == Repo._id
-    FILTER TeamsRepo._to == Teams._id
-    FILTER LOWER(Repo.org) == @org
-    FILTER LOWER(Teams.teamName) == @team
-    FILTER Repo.readme == 'Poor'
-        COLLECT 
-        day = Repo.readme
-    WITH COUNT INTO number
-    RETURN number)
-        LET bad = (
-        FOR Repo IN Repo
-    FOR Teams In Teams
-    FOR TeamsRepo IN TeamsRepo
-    FILTER TeamsRepo._from == Repo._id
-    FILTER TeamsRepo._to == Teams._id
-    FILTER LOWER(Repo.org) == @org
-    FILTER LOWER(Teams.teamName) == @team
-    FILTER Repo.readme == null
-        COLLECT 
-        day = Repo.readme
-    WITH COUNT INTO number
-    RETURN number)
-    RETURN {ok,poor,bad}"""
-    team = request.args.get("team")
     org = request.args.get("org")
-    bind_vars = {"team": str.lower(team), "org": str.lower(org)}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100, bindVars=bind_vars)
-    result = [dict(i) for i in query_result]
-    if not result[0]["ok"]:
-        return json.dumps([{'ok': [404], 'poor': [404], 'bad': [404]}])
-    try:
-        result_ok = int(result[0]["ok"][0])
-    except:
-        result_ok = 0
-    try:
-        result_poor = int(result[0]["poor"][0])
-    except:
-        result_poor = 0
-    try:
-        result_bad = int(result[0]["bad"][0])
-    except:
-        result_bad = 0
-    soma = result_ok + result_poor + result_bad
-    print(result)
-    for x in result:
-        x['ok'] = round(result_ok/soma*100, 1)
-        x['poor'] = round(result_poor/soma*100, 1)
-        x['bad'] = round(result_bad/soma*100, 1)
-    print(result)
-    return json.dumps(result)
+    name = request.args.get("name")
+    query = [
+        {'$lookup': {'from': 'Repo', 'localField': 'from', 'foreignField': '_id', 'as': 'Repo'}}
+        , {'$lookup': {'from': 'Teams', 'localField': 'to', 'foreignField': '_id', 'as': 'Teams'}},
+        {
+            '$match':
+                {'Teams.0.slug': name, 'type': 'repo_to_team', 'Teams.0.org': org}},
+        {'$group': {
+            '_id': {
+                'status': "$Repo.readme",
+            },
+            'count': {'$sum': 1}
+        }},
+        {'$sort': {'_id.status': -1}},
+        {'$project': {"status": "$_id.status", "_id": 0, 'count': 1}}
+    ]
+    query_result = db.edges.aggregate(query)
+    readme_status_list = [dict(i) for i in query_result]
+    print(readme_status_list)
+    soma = sum([readme_status['count'] for readme_status in readme_status_list])
+    for readme_status in readme_status_list:
+        if readme_status['status'][0] is None:
+            readme_status['status'] = 'None'
+        else:
+            readme_status['status'] = readme_status['status'][0]
+        readme_status['count'] = round(int(readme_status['count']) / soma * 100, 1)
+    print(readme_status_list)
+    return json.dumps(readme_status_list)
 
 
 def team_license():
@@ -233,7 +179,7 @@ def team_license():
     for x in result:
         if x['day'] is None:
             x['day'] = "None"
-        x['number'] = round(x['number']/soma*100, 2)
+        x['number'] = round(x['number'] / soma * 100, 2)
     print(soma)
     print(result)
     return json.dumps(result)
@@ -264,17 +210,14 @@ def team_repo_members():
 
 
 def team_name():
-    aql = """
-    FOR Teams IN FULLTEXT(Teams, "teamName",@name)
-    FILTER Teams.org == @org
-    LIMIT 6
-    RETURN {data:Teams.teamName}
-    """
-    name = "prefix:" + str(request.args.get("name"))
-    org = str(request.args.get("org"))
-    bind_vars = {"name": name, "org": org}
-    query_result = db.AQLQuery(aql, rawResults=True, batchSize=100000, bindVars=bind_vars)
+    name = "^" + str(request.args.get("name"))
+    org = request.args.get("org")
+    compiled_name = re.compile(r'%s' % name, re.I)
+    query_result = db['Teams'].find({'slug': {'$regex': compiled_name}, 'org': org},
+                                    {'_id': 0, 'slug': 1}).limit(6)
     result = [dict(i) for i in query_result]
+    if not query_result:
+        return json.dumps([{'response': 404}])
     print(result)
     return json.dumps(result)
 
@@ -333,6 +276,7 @@ def issues_team():
             else:
                 day["number"] = value_accumulated
         return days
+
     result_created = accumulator(result_created)
 
     aql_closed = """
