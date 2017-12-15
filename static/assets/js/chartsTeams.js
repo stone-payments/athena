@@ -137,15 +137,15 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/get_license_type_team?org=' + orgSelector + '&team=' + name,
+      url: address+'/get_license_type_team?org=' + orgSelector + '&name=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
         let labelsLicense = returnedData.map(function(num) {
-          return num.day;
+          return num.status;
         });
         let dataLicense = returnedData.map(function(num) {
-          return num.number;
+          return num.count;
         });
         if (LicenseType != null) {
           LicenseType.destroy();
@@ -190,15 +190,15 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/get_languages_team?org=' + orgSelector + '&team=' + name,
+      url: address+'/get_languages_team?org=' + orgSelector + '&name=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
         let labels = returnedData.map(function(num) {
-          return num.name;
+          return num.language;
         });
         let dataSize = returnedData.map(function(num) {
-          return num.size;
+          return num.count;
         });
         if (languages != null) {
           languages.destroy();
@@ -243,7 +243,7 @@ $(function() {
       }
     });
     $.ajax({
-      url: address+'/get_repo_members_team?org=' + 'stone-payments' + '&team=' + name,
+      url: address+'/get_repo_members_team?org=' + 'stone-payments' + '&name=' + name,
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
@@ -274,7 +274,7 @@ $(function() {
           return num.day;
         });
         let dataCommits = returnedData.map(function(num) {
-          return num.number;
+          return num.count;
         });
         let ctx = document.getElementById("commitsChart").getContext('2d');
 
@@ -350,10 +350,10 @@ $(function() {
           return num.day;
         });
         let dataIssues1 = returnedData[0].map(function(num) {
-          return num.number;
+          return num.count;
         });
         let dataIssues2 = returnedData[1].map(function(num) {
-          return num.number;
+          return num.count;
         });
         let ctx = document.getElementById("issuesChart").getContext('2d');
         if (issuesChart != null) {

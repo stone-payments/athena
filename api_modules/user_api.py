@@ -24,7 +24,7 @@ def avatar():
 
 def user_commit():
     name = request.args.get("name")
-    start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
     print(start_date)
     print(end_date)
@@ -226,7 +226,7 @@ def user_stats():
         return processed_list
 
     name = request.args.get("name")
-    start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
     delta = end_date - start_date
     query_addttions = [
