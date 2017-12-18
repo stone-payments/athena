@@ -1,21 +1,7 @@
-import os
 from flask import Flask
-from flask import request
-from flask_cors import CORS, cross_origin
-# from pyArango.connection import *
-import json
-import datetime, calendar
-import datetime as dt
-from datetime import date, timedelta, datetime
+from flask_cors import CORS
 from api_modules import *
-# from team_api import *
-# from repo_api import *
-# from orgs_api import *
-# from config import *
-# import collections
-# conn = Connection(username="root", password="")
-# db = conn["athena_teste"]
-# value = 0
+
 
 app = Flask(__name__, static_url_path='/static')
 CORS(app)
@@ -100,6 +86,12 @@ def get_readme_org():
     return response
 
 
+@app.route('/get_open_source_readme_org')
+def get_open_source_readme_org():
+    response = open_source_readme_org()
+    return response
+
+
 @app.route('/get_license_type_org')
 def get_license_type_org():
     response = org_license()
@@ -172,21 +164,9 @@ def get_user_commit():
     return response
 
 
-@app.route('/get_user_language')
-def get_user_language():
-    response = user_language()
-    return response
-
-
 @app.route('/get_user_contributed_repo')
 def get_user_contributed_repo():
     response = user_contributed_repo()
-    return response
-
-
-@app.route('/get_user_issue')
-def get_user_issue():
-    response = user_issue()
     return response
 
 

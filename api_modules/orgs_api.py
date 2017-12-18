@@ -1,10 +1,7 @@
 import datetime as dt
-import datetime
-from datetime import date
 import json
 from operator import itemgetter
 from flask import request
-from bson import json_util
 from api_modules import db
 
 
@@ -35,6 +32,11 @@ def org_languages():
 
 
 def org_open_source():
+    def find_key(array_to_be_find, keys):
+        for key in keys:
+            if not any(d['openSource'] is key for d in array_to_be_find):
+                array_to_be_find.append({'count': 0, 'openSource': key})
+
     name = request.args.get("name")
     query = [{'$match': {'org': name}},
              {'$group': {
@@ -53,13 +55,18 @@ def org_open_source():
         if open_source_status['openSource'] is None:
             open_source_status['openSource'] = 'None'
         open_source_status['count'] = round(int(open_source_status['count']) / soma * 100, 1)
-    open_source_type_list = sorted(open_source_type_list, key=itemgetter('count'), reverse=True)
+    if len(open_source_type_list) < 2:
+        find_key(open_source_type_list, [True, False])
+        # for key in [True, False]:
+        #     if not any(d['openSource'] is key for d in open_source_type_list):
+        #         open_source_type_list.append({'count': 0, 'openSource': key})
+    open_source_type_list = sorted(open_source_type_list, key=itemgetter('openSource'), reverse=False)
     return json.dumps(open_source_type_list)
 
 
 def org_commits():
     name = request.args.get("name")
-    start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
     print(start_date)
     print(end_date)
@@ -103,6 +110,10 @@ def org_commits():
 
 
 def org_readme():
+    def find_key(array_to_be_find, keys):
+        for key in keys:
+            if not any(d['status'] == key for d in array_to_be_find):
+                array_to_be_find.append({'count': 0, 'status': key})
     name = request.args.get("name")
     query = [{'$match': {'org': name}},
              {'$group': {
@@ -121,6 +132,38 @@ def org_readme():
         if readme_status['status'] is None:
             readme_status['status'] = 'None'
         readme_status['count'] = round(int(readme_status['count']) / soma * 100, 1)
+    if len(readme_status_list) < 3:
+        find_key(readme_status_list, ['None', 'Poor', 'OK'])
+    readme_status_list = sorted(readme_status_list, key=itemgetter('status'), reverse=True)
+    return json.dumps(readme_status_list)
+
+
+def open_source_readme_org():
+    def find_key(array_to_be_find, keys):
+        for key in keys:
+            if not any(d['status'] == key for d in array_to_be_find):
+                array_to_be_find.append({'count': 0, 'status': key})
+    name = request.args.get("name")
+    query = [{'$match': {'org': name, 'openSource': True}},
+             {'$group': {
+                 '_id': {
+                     'status': "$readme",
+                 },
+                 'count': {'$sum': 1}
+             }},
+             {'$sort': {'_id.status': -1}},
+             {'$project': {'_id': 0, "status": "$_id.status", 'count': 1}}
+             ]
+    query_result = db.Repo.aggregate(query)
+    readme_status_list = [dict(i) for i in query_result]
+    soma = sum([readme_status['count'] for readme_status in readme_status_list])
+    for readme_status in readme_status_list:
+        if readme_status['status'] is None:
+            readme_status['status'] = 'None'
+        readme_status['count'] = round(int(readme_status['count']) / soma * 100, 1)
+    if len(readme_status_list) < 3:
+        find_key(readme_status_list, ['None', 'Poor', 'OK'])
+    readme_status_list = sorted(readme_status_list, key=itemgetter('status'), reverse=True)
     return json.dumps(readme_status_list)
 
 
@@ -133,14 +176,13 @@ def org_license():
                  },
                  'count': {'$sum': 1}
              }},
-             {'$project': {'_id': 0, "license": "$_id.license", 'count': 1}}
+             {'$project': {'_id': 0, "license": {'$ifNull': ["$_id.license", "None"]}, 'count': 1}}
              ]
     query_result = db.Repo.aggregate(query)
     license_type_list = [dict(i) for i in query_result]
+    print(license_type_list)
     soma = sum([license_type['count'] for license_type in license_type_list])
     for license_type in license_type_list:
-        if license_type['license'] is None:
-            license_type['license'] = 'None'
         license_type['count'] = round(int(license_type['count']) / soma * 100, 1)
     license_type_list = sorted(license_type_list, key=itemgetter('count'), reverse=True)
     return json.dumps(license_type_list)
@@ -181,7 +223,7 @@ def org_issues():
         return processed_list
 
     name = request.args.get("name")
-    start_date = datetime.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
+    start_date = dt.datetime.strptime(request.args.get("startDate"), '%Y-%m-%d')
     end_date = dt.datetime.strptime(request.args.get("endDate"), '%Y-%m-%d') + dt.timedelta(seconds=86399)
     delta = end_date - start_date
     query_created = [{'$match': {'org': name, 'createdAt': {'$gte': start_date, '$lte': end_date}}},

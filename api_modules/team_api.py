@@ -1,9 +1,7 @@
 from flask import request
 from .config import *
 import datetime as dt
-from api import *
 import re
-from operator import itemgetter
 import json
 
 
@@ -27,7 +25,7 @@ def team_languages():
             'count': {'$sum': '$languages.size'}
         }},
         {'$sort': {'count': -1}},
-        { '$limit': 12},
+        {'$limit': 12},
         {'$project': {"language": "$_id.language", "_id": 0, 'count': 1}}
     ]
     query_result = db.edges.aggregate(query)

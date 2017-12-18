@@ -70,11 +70,31 @@
 											<h4 class="title" id="orgName"><br />
 											</h4>
 									</div>
-									<p class="description text-left"></p><br>
-									<p id="membersCount" class="description text-left">   </p>
-									<p id="teamsCount" class="description text-left"> </p>
-									<p id="repoCount" class="description text-left"></p>
-									<p id="projectCount" class="description text-left"></p><br>
+									<ul class="list-group">
+									  <li class="list-group-item">
+										  <span class="badge"><div id="membersCount"></div></span>
+										Members
+									  </li>
+									  <li class="list-group-item">
+										<span class="badge"><div id="teamsCount"></div></span>
+										Teams
+									  </li>
+										<li class="list-group-item">
+										<span class="badge"><div id="repoCount"></div></span>
+										Repositories
+									  </li>
+										<li class="list-group-item">
+										<span class="badge"><div id="projectCount"></div></span>
+										Projects
+									  </li>
+									</ul>
+
+
+									<!--<p class="description text-left"></p>-->
+									<!--<p id="membersCount" class="description text-left">   </p>-->
+									<!--<p id="teamsCount" class="description text-left"> </p>-->
+									<!--<p id="repoCount" class="description text-left"></p>-->
+									<!--<p id="projectCount" class="description text-left"></p>-->
 								</div>
 								<div class="footer">
 									<hr>
@@ -113,7 +133,7 @@
 						<div class="col-md-3">
 							<div class="card ">
 								<div class="header">
-									<h4 class="title">Readme</h4>
+									<h4 class="title">Total Readme</h4>
 									<p class="category">Readme - Org (%)</p>
 								</div>
 								<div class="content">
@@ -135,13 +155,13 @@
 						<div class="col-md-3">
 							<div class="card  ">
 								<div class="header">
-									<h4 class="title">License</h4>
-									<p class="category">License - Org (%)</p>
+									<h4 class="title">OpenSource Readme</h4>
+									<p class="category">OpenSource Repositories Readme - Org (%)</p>
 								</div>
 								<div class="content" style="max-height:500px">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="LicenseType" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<canvas id="openSourceReadme" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
 											</tbody>
 										</table>
 									</div>
@@ -192,7 +212,7 @@
 						</div>
 					</div>
 					<div class="row row-eq-height">
-						<div class="col-md-12">
+						<div class="col-md-8">
 							<div class="card ">
 								<div class="header">
 									<h4 class="title">Issues</h4>
@@ -203,6 +223,24 @@
 									<div class="footer">
 										<div class="legend">
 										</div>
+										<hr>
+										<div class="stats">
+											<i class="fa fa-clock-o"></i>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="card  ">
+								<div class="header">
+									<h4 class="title">License</h4>
+									<p class="category">License - Org (%)</p>
+								</div>
+								<div class="content" style="max-height:500px">
+											<canvas id="LicenseType" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											</tbody>
+									<div class="footer">
 										<hr>
 										<div class="stats">
 											<i class="fa fa-clock-o"></i>

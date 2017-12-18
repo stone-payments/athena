@@ -4,6 +4,7 @@ $(function() {
   let issuesChart = null;
   let openSourceChart = null;
   let readmeChart = null;
+  let openSourceReadme = null;
   let LicenseType = null;
   let startDay = moment().startOf('month').format('YYYY-MM-DD');
   let lastDay = moment().format("YYYY-MM-") + moment().daysInMonth();
@@ -275,6 +276,43 @@ $(function() {
         console.log(error);
         if (readmeChart != null) {
           readmeChart.destroy();
+        }
+      }
+    });
+    $.ajax({
+      url: address+'/get_open_source_readme_org?name=' + name,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        let labelsReadme = returnedData.map(function(num) {
+          return num.status;
+        });
+        let dataReadme = returnedData.map(function(num) {
+          return num.count;
+        });
+        if (openSourceReadme != null) {
+          openSourceReadme.destroy();
+        }
+        openSourceReadme = new Chart(document.getElementById("openSourceReadme"), {
+          type: 'doughnut',
+          data: {
+            labels: labelsReadme,
+            datasets: [{
+              label: "",
+              backgroundColor: [ '#ABC421', '#0B3B1F', '#C52233'],
+              borderWidth: 1,
+              data: dataReadme
+            }]
+          },
+          options: {
+            responsive: true
+          }
+        });
+      },
+      error: function(error) {
+        console.log(error);
+        if (openSourceReadme != null) {
+          openSourceReadme.destroy();
         }
       }
     });

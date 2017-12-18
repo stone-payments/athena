@@ -1,7 +1,5 @@
 from flask import request
 import datetime as dt
-import datetime
-from api import *
 from .config import *
 import re
 from operator import itemgetter

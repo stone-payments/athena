@@ -349,10 +349,10 @@ $(function() {
         let labelsIssues1 = returnedData[0].map(function(num) {
           return num.day;
         });
-        let dataIssues1 = returnedData[0].map(function(num) {
+        let closedIssue = returnedData[0].map(function(num) {
           return num.count;
         });
-        let dataIssues2 = returnedData[1].map(function(num) {
+        let createdIssue = returnedData[1].map(function(num) {
           return num.count;
         });
         let ctx = document.getElementById("issuesChart").getContext('2d');
@@ -364,8 +364,8 @@ $(function() {
           data: {
             labels: labelsIssues1,
             datasets: [{
-                label: 'num of Closed Issues',
-                data: dataIssues1,
+                label: 'num of Created Issues',
+                data: createdIssue,
                 backgroundColor: [
                   'rgba(54, 162, 235, 0.2)',
                   'rgba(255, 206, 86, 0.2)',
@@ -384,8 +384,8 @@ $(function() {
                 lineTension: 0
               },
               {
-                label: 'num of Created Issues',
-                data: dataIssues2,
+                label: 'num of Closed Issues',
+                data: closedIssue,
                 backgroundColor: [
                   'rgba(255, 99, 132, 0.2)',
                   'rgba(54, 162, 235, 0.2)',
