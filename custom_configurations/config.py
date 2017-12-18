@@ -1,7 +1,7 @@
 import os
 
 token = os.getenv("GRAPHQL_TOKEN")
-db_name = "athena2"
+db_name = "athena"
 db_url = os.getenv("MONGODB_URL")
 username = os.getenv("MONGODB_USER")
 password = os.getenv("MONGODB_PASS")

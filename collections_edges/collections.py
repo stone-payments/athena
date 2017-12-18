@@ -223,19 +223,19 @@ def commit_collector(db, org, query, query_db, collection_name, save_queue_type,
 
     def edges(node):
         save_edges = [{
-            "edge_name": "commit_dev",
+            "edge_name": "dev_to_commit",
             "to": find_key('commitId', node),
             "from": find_key('devId', node),
             "db_last_updated": datetime.datetime.utcnow(),
         },
             {
-                "edge_name": "commit_repo",
+                "edge_name": "repo_to_commit",
                 "to": find_key('commitId', node),
                 "from": find_key('repositoryId', node),
                 "db_last_updated": datetime.datetime.utcnow(),
             },
             {
-                "edge_name": "dev_repo",
+                "edge_name": "repo_to_dev",
                 "to": find_key('devId', node),
                 "from": find_key('repositoryId', node),
                 "db_last_updated": datetime.datetime.utcnow(),
