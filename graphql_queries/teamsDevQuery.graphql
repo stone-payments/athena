@@ -1,0 +1,24 @@
+query ($number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
+  organization(login: $org) {
+    team(slug: $next2) {
+      name
+      teamId:id
+      members(first: $number_of_repos, after: $next) {
+        edges {
+          node {
+            name
+            memberId:id
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+  rateLimit {
+    remaining
+    resetAt
+  }
+}

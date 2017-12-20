@@ -2,8 +2,9 @@
 
 Athena is a GitHub BI platform.
 
+  - See orgs performance
   - See users profiles
-  - See users perfomance 
+  - Manage several teams and repositories information
   - And other metrics
 
 # Why?
@@ -15,9 +16,9 @@ dev and team to enhance the projects performance.
 
 Athena uses a number of open source projects to work properly:
 
-* [ArangoDB] - Graph NoSQL Database!
+* [MongoDB] - NoSQL Database!
 * [Python] 
 
 ### Get Started
 
-Select a specific metric to show the results requested
+On config.py input the info required and run app.py

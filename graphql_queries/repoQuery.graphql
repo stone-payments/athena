@@ -1,0 +1,79 @@
+query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimestamp!, $untilTime:GitTimestamp!) {
+  organization(login: $org) {
+    repositories(first: $number_of_repos, after: $next) {
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      edges {
+        node {
+          defaultBranchRef {
+            target {
+              ...on Commit{
+                blame(path: "README.md"){
+                  ranges{
+                    endingLine
+                  }
+                }
+                history(first:1,since:$sinceTime,until:$untilTime){
+        					edges{
+                    node{
+                      committedInRangeDate: committedDate
+                    }
+                  }
+                }
+              }
+              repository {
+                licenseInfo {
+                  licenseId: id
+                  licenseType: key
+                }
+              }
+            }
+          }
+          languages(first: $number_of_repos) {
+            pageInfo {
+              endCursor
+            }
+            languagesCount: totalCount
+            totalSize
+            language_edges:edges {
+              languageSize:size
+              node {
+                languageId: id
+                languageName: name
+              }
+            }
+          }
+          repoId:id
+          name
+          description
+          url
+          nameWithOwner
+          isPrivate
+          primaryLanguage {
+            priLanguage: name
+          }
+          forks {
+            totalForks:totalCount
+          }
+          stargazers {
+            totalStars:totalCount
+          }
+          watchers {
+            totalWatchers:totalCount
+          }
+          issues {
+            totalIssues:totalCount
+          }
+          createdAt
+        }
+        cursor
+      }
+    }
+  }
+  rateLimit{
+    remaining
+    resetAt
+  }
+}

@@ -1,0 +1,20 @@
+query ($org: String!) {
+  organization(login: $org) {
+    id
+    avatarUrl
+    description
+    members {
+      membersCount: totalCount
+    }
+    websiteUrl
+    teams {
+      teamsCount: totalCount
+    }
+    repositories {
+      repoCount: totalCount
+    }
+    projects {
+      projectCount:totalCount
+    }
+  }
+}
