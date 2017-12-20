@@ -8,10 +8,10 @@ def dev(db, org, query, collection_name, edge_name="edges"):
             "collection_name": string_validate(collection_name, not_none=True),
             "_id": find_key("id", node),
             "devName": string_validate(find_key("name", node)),
-            "followers": int_validate(node["node"]["followers"]["totalCount"]),
-            "following": int_validate(node["node"]["following"]["totalCount"]),
-            "login": string_validate(node["node"]["login"], not_none=True),
-            "avatarUrl": string_validate(node["node"]["avatarUrl"]),
+            "followers": int_validate(find_key("totalFollowers", node)),
+            "following": int_validate(find_key("totalFollowing", node)),
+            "login": string_validate(find_key("login", node), not_none=True),
+            "avatarUrl": string_validate(find_key("avatarUrl", node)),
             "db_last_updated": datetime.datetime.utcnow(),
         }
         return save_content

@@ -1,7 +1,7 @@
 import os
 
 token = os.getenv("GRAPHQL_TOKEN")
-db_name = "athena"
+db_name = os.getenv("DB_NAME")
 db_url = os.getenv("MONGODB_URL")
 username = os.getenv("MONGODB_USER")
 password = os.getenv("MONGODB_PASS")
@@ -10,8 +10,8 @@ url_rest_api = os.getenv("GITHUB_REST_URL")
 number_of_repos = 100
 repo_number_of_repos = 100
 timeout = 100.001
-since_time_days_delta = -5  # days ago
-until_time_days_delta = +1  # delta days from now
+since_time_days_delta = os.getenv("SINCE_TIME_DAYS_DELTA")  # days ago ex: -5
+until_time_days_delta = os.getenv("UNTIL_TIME_DAYS_DELTA")  # delta days from now ex: +1
 orgs = ["stone-payments", "mundipagg", "cappta", "equals-conc", "pagarme"]
 update = 1  # update every x hours
 queue_max_size = 1500000

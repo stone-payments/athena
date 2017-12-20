@@ -10,10 +10,10 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
           id
           name
           followers(first: 1) {
-            totalCount
+            totalFollowers:totalCount
           }
           following(first: 1) {
-            totalCount
+            totalFollowing:totalCount
           }
           login
           avatarUrl
