@@ -94,7 +94,7 @@ def team_commits():
         {"$unwind": "$Commit2"},
         {
             '$match':
-                {"Commit2.type": 'commit_dev'}
+                {"Commit2.type": 'dev_to_commit'}
         },
         {'$lookup': {'from': 'Commit', 'localField': 'Commit2.to', 'foreignField': '_id', 'as': 'Commit3'}},
         {'$project': {"_id": 0, 'date': '$Commit3.committedDate'}},

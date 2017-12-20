@@ -239,6 +239,8 @@ $(function() {
         $("#readme").empty();
         $("#openSource").empty();
         $("#license").empty();
+        $("#forks").empty();
+        $("#orgLastUpdated").empty();
         let repoName = String(returnedData[0]['repoName']);
         let forks = String(returnedData[0]['forks']);
         let stargazers = String(returnedData[0]['stargazers']);
@@ -250,9 +252,9 @@ $(function() {
         $("#readme").append(readme);
         $("#openSource").append(openSource);
         $("#license").append(license);
-        $('#stargazers').text(stargazers + " stargazers");
+        $('#stargazers').append(stargazers);
         $('#repoName').text(repoName);
-        $('#forks').text(forks + " forks");
+        $('#forks').append(forks);
         $('#orgLastUpdated').html('<i class="fa fa-clock-o"></i> '+ orgLastUpdated + ' minutes ago');
 
         if (errorMessage == 404) {

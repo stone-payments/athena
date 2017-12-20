@@ -2847,6 +2847,6 @@ body > .navbar-collapse {
     -ms-overflow-style: -ms-autohiding-scrollbar;
     -webkit-overflow-scrolling: touch; } }
 
-#readme,#openSource,#license{
+#readme,#openSource,#license,#stargazers,#forks{
   text-align: center;
 }

@@ -71,11 +71,34 @@ border: 0px solid #ddd;
 }
 
 .list-group {
-    margin-top: 20px;
+    margin-top: 0px;
 }
 
 .list-group-item>.badge {
    float: none;
    min-width: 45px;
    margin-right: 10px;
+}
+
+.title-green {
+color: white;
+    display: flex;
+    /* justify-content: center; */
+    align-items: center;
+    height: 100%;
+    margin-left: 20px;"}
+
+
+.title-white {
+    margin: 0;
+    color: white;
+    font-weight: 300;
+}
+
+.header-white {
+    color: white;
+}
+
+#forks,#stargazers{
+  text-align: center;
 }
