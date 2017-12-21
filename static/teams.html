@@ -31,7 +31,7 @@
 		<div class="sidebar" data-color="" data-image="assets/img/stone-new.png">
 			<div class="sidebar-wrapper">
 				<div class="logo">
-					<a href="http://www.creative-tim.com" class="simple-text">
+					<a class="simple-text">
                     ATHENA
                 </a>
 				</div>
@@ -105,7 +105,7 @@
 								<div class="content">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="auto" height="150"></canvas>
 											</tbody>
 										</table>
 									</div>
@@ -127,7 +127,7 @@
 								<div class="content">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="readmeChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<canvas id="readmeChart" class="ct-chart ct-perfect-fourth" width="auto" height="150"></canvas>
 											</tbody>
 										</table>
 									</div>
@@ -149,7 +149,7 @@
 								<div class="content" style="max-height:500px">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="LicenseType" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<canvas id="LicenseType" class="ct-chart ct-perfect-fourth" width="auto" height="150"></canvas>
 											</tbody>
 										</table>
 									</div>
@@ -164,14 +164,15 @@
 						</div>
 					</div>
 					<div class="row row-eq-height">
-						<div class="col-md-8">
+
+						<div class="col-md-12 col-lg-12 .col-xl-8">
 							<div class="card">
 								<div class="header">
-									<h4 class="title">Languages</h4>
-									<p class="category">Top 12 Languages - Team (%)</p>
+									<h4 class="title">Commits</h4>
+									<p class="category">Commits - Team</p>
 								</div>
 								<div class="content">
-									<canvas id="languages" class="ct-chart ct-perfect-fourth" width="auto" max-height:500px;></canvas>
+									<canvas id="commitsChart" class="ct-chart ct-perfect-fourth" width="auto" height="70"></canvas>
 									<div class="footer">
 										<hr>
 										<div class="stats">
@@ -181,13 +182,14 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-4">
+
+						<div class="col-md-12 col-lg-4 .col-xl-4">
 							<div class="card ">
 								<div class="header">
 									<h4 class="title">Members</h4>
 									<p class="category">Team Members</p>
 								</div>
-								<div class="content" style="overflow: auto;max-height:500px;">
+								<div class="content-members">
 									<div class="table-full-width">
 										<table class="table">
 											<tbody id="members">
@@ -203,16 +205,14 @@
 								</div>
 							</div>
 						</div>
-					</div>
-					<div class="row row-eq-height">
-						<div class="col-md-12">
+						<div class="col-md-4 col-lg-8 .col-xl-4">
 							<div class="card">
 								<div class="header">
-									<h4 class="title">Commits</h4>
-									<p class="category">Commits - Team</p>
+									<h4 class="title">Languages</h4>
+									<p class="category">Top 12 Languages - Team (%)</p>
 								</div>
 								<div class="content">
-									<canvas id="commitsChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+									<canvas id="languages" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 									<div class="footer">
 										<hr>
 										<div class="stats">
@@ -222,16 +222,16 @@
 								</div>
 							</div>
 						</div>
-					</div>
-					<div class="row row-eq-height">
-						<div class="col-md-12">
+
+
+						<div class="col-md-8 col-lg-12 .col-xl-8">
 							<div class="card ">
 								<div class="header">
 									<h4 class="title">Issues</h4>
 									<p class="category">Issues - Team</p>
 								</div>
 								<div class="content">
-									<canvas id="issuesChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+									<canvas id="issuesChart" class="ct-chart ct-perfect-fourth" width="auto" height="70"></canvas>
 									<div class="footer">
 										<div class="legend">
 										</div>
@@ -244,7 +244,6 @@
 							</div>
 						</div>
 					</div>
-
 				</div>
 			</div>
 			<footer class="footer">

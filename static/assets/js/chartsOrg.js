@@ -100,6 +100,10 @@ $(function() {
             },
             scales: {
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
 
                   beginAtZero: true,
@@ -109,6 +113,9 @@ $(function() {
                 }
               }],
               xAxes: [{
+              gridLines: {
+                            display: false
+                        },
                 ticks: {
                   autoSkip: false,
                   responsive: true
@@ -148,7 +155,7 @@ $(function() {
               label: 'num of Commits',
               data: dataCommits,
               backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
+                'rgba(24, 165, 137, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
                 'rgba(255, 206, 86, 0.2)',
                 'rgba(75, 192, 192, 0.2)',
@@ -156,7 +163,7 @@ $(function() {
                 'rgba(255, 159, 64, 0.2)'
               ],
               borderColor: [
-                'rgba(255,99,132,1)',
+                 'rgba(24, 165, 137, 1)',
                 'rgba(54, 162, 235, 1)',
                 'rgba(255, 206, 86, 1)',
                 'rgba(75, 192, 192, 1)',
@@ -175,6 +182,9 @@ $(function() {
             },
             scales: {
               xAxes: [{
+              gridLines: {
+                            display: false
+                        },
                 ticks: {
                   autoSkip: labelsCommit.length > 31 ? true : false,
                   beginAtZero: true,
@@ -182,6 +192,10 @@ $(function() {
                 }
               }],
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   suggestedMax: 10,
                   beginAtZero: true,
@@ -348,12 +362,19 @@ $(function() {
             },
             scales: {
               xAxes: [{
+              gridLines: {
+                            display: false
+                        },
                 ticks: {
                   autoSkip: false,
                   responsive: true
                 }
               }],
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   autoSkip: true,
                   maxTicksLimit: 100,
@@ -445,12 +466,19 @@ $(function() {
             },
             scales: {
               xAxes: [{
+              gridLines: {
+                            display: false
+                        },
                 ticks: {
                   autoSkip: labelsIssues1.length > 31 ? true : false,
                   responsive: true
                 }
               }],
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   beginAtZero: true,
                   callback: function(value, index, values) {

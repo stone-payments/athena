@@ -123,6 +123,9 @@ $(function() {
             },
             scales: {
               xAxes: [{
+              gridLines: {
+                            display: false,
+                        },
                 ticks: {
                   autoSkip: labelsCommit.length > 31 ? true : false,
                   beginAtZero: true,
@@ -130,6 +133,10 @@ $(function() {
                 }
               }],
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   suggestedMax: 10,
                   beginAtZero: true,
@@ -271,12 +278,19 @@ $(function() {
             },
             scales: {
               xAxes: [{
+              gridLines: {
+                            display: false,
+                        },
                 ticks: {
                   autoSkip: labelsIssues1.length > 31 ? true : false,
                   responsive: true
                 }
               }],
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   suggestedMax: 10,
                   beginAtZero: true,

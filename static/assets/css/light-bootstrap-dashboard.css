@@ -440,7 +440,8 @@ body > .navbar-collapse {
   .main-panel > .footer {
     border-top: 1px solid #e7e7e7; }
   .main-panel .navbar {
-    margin-bottom: 0; }
+    margin-bottom: 0;
+    padding: 0px 15px;}
 
 .main-panel-tv {
   background: rgba(203, 203, 210, 0.15);
@@ -1609,7 +1610,11 @@ body > .navbar-collapse {
     opacity: 1;
     filter: alpha(opacity=100); }
   .card .content {
-    padding: 15px 15px 10px 15px; }
+    padding: 15px 20px 10px 20px; }
+   .card .content-members {
+    padding: 15px 20px 10px 20px;
+    max-height:400px;
+    overflow: auto;}
   .card .header {
     padding: 15px 15px 0; }
   .card .category,
@@ -1670,7 +1675,7 @@ body > .navbar-collapse {
     content: "";
     position: absolute; }
   .card .ct-chart {
-    margin: 30px 0 30px;
+    margin: 30px 0px 30px;
     height: 245px; }
   .card .table tbody td:first-child,
   .card .table thead th:first-child {
@@ -1704,7 +1709,7 @@ body > .navbar-collapse {
 .card-user .title {
   line-height: 24px; }
 .card-user .content {
-  min-height: 240px; }
+  min-height: 214px; }
 
 .card-user .footer,
 .card-price .footer {

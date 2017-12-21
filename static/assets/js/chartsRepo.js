@@ -112,6 +112,10 @@ $(function() {
             },
             scales: {
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   beginAtZero: true,
                   autoSkip: false,
@@ -120,6 +124,9 @@ $(function() {
                 }
               }],
               xAxes: [{
+              gridLines: {
+                            display: false
+                        },
                 ticks: {
                   autoSkip: false,
                   responsive: true
@@ -157,7 +164,7 @@ $(function() {
               label: 'num of Commits',
               data: dataCommits,
               backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
+                'rgba(18, 170, 75, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
                 'rgba(255, 206, 86, 0.2)',
                 'rgba(75, 192, 192, 0.2)',
@@ -165,7 +172,7 @@ $(function() {
                 'rgba(255, 159, 64, 0.2)'
               ],
               borderColor: [
-                'rgba(255,99,132,1)',
+                'rgba(18, 170, 75, 1)',
                 'rgba(54, 162, 235, 1)',
                 'rgba(255, 206, 86, 1)',
                 'rgba(75, 192, 192, 1)',
@@ -177,12 +184,16 @@ $(function() {
             }]
           },
           options: {
+
             tooltips: {
               mode: 'index',
               intersect: false
             },
             scales: {
               xAxes: [{
+              gridLines: {
+                            display: false
+                        },
                 ticks: {
                   autoSkip: labelsCommit.length > 31 ? true : false,
                   beginAtZero: true,
@@ -190,6 +201,10 @@ $(function() {
                 }
               }],
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   suggestedMax: 10,
                   beginAtZero: true,
@@ -240,6 +255,7 @@ $(function() {
         $("#openSource").empty();
         $("#license").empty();
         $("#forks").empty();
+        $('#stargazers').empty();
         $("#orgLastUpdated").empty();
         let repoName = String(returnedData[0]['repoName']);
         let forks = String(returnedData[0]['forks']);
@@ -303,14 +319,14 @@ $(function() {
                 label: 'num of Closed Issues',
                 data: dataIssues1,
                 backgroundColor: [
-                  'rgba(54, 162, 235, 0.2)',
+                   'rgba(255,99,132,0.2)',
                   'rgba(255, 206, 86, 0.2)',
                   'rgba(75, 192, 192, 0.2)',
                   'rgba(153, 102, 255, 0.2)',
                   'rgba(255, 159, 64, 0.2)'
                 ],
                 borderColor: [
-                  'rgba(54, 162, 235, 1)',
+                  'rgba(255,99,132,1)',
                   'rgba(255, 206, 86, 1)',
                   'rgba(75, 192, 192, 1)',
                   'rgba(153, 102, 255, 1)',
@@ -322,7 +338,7 @@ $(function() {
                 label: 'num of Created Issues',
                 data: dataIssues2,
                 backgroundColor: [
-                  'rgba(255, 99, 132, 0.2)',
+
                   'rgba(54, 162, 235, 0.2)',
                   'rgba(255, 206, 86, 0.2)',
                   'rgba(75, 192, 192, 0.2)',
@@ -330,7 +346,7 @@ $(function() {
                   'rgba(255, 159, 64, 0.2)'
                 ],
                 borderColor: [
-                  'rgba(255,99,132,1)',
+
                   'rgba(54, 162, 235, 1)',
                   'rgba(255, 206, 86, 1)',
                   'rgba(75, 192, 192, 1)',
@@ -349,6 +365,9 @@ $(function() {
             },
             scales: {
               xAxes: [{
+              gridLines: {
+                            display: false
+                        },
                 ticks: {
                   autoSkip: labelsIssues1.length > 31 ? true : false,
                   beginAtZero: true,
@@ -356,11 +375,18 @@ $(function() {
                 }
               }],
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
+                  suggestedMax: 10,
                   beginAtZero: true,
-                  autoSkip: false,
-                  responsive: true,
-                  stepSize: 1
+                  callback: function(value, index, values) {
+                    if (Math.floor(value) === value) {
+                      return value;
+                    }
+                  }
                 }
               }]
             }

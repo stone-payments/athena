@@ -151,38 +151,16 @@ $(function() {
           LicenseType.destroy();
         }
         LicenseType = new Chart(document.getElementById("LicenseType"), {
-          type: 'bar',
+          type: 'doughnut',
           data: {
             labels: labelsLicense,
             datasets: [{
               label: "License (%)",
-              backgroundColor: ['rgb(168,169,173)', '#0B3B1F', '#1DAC4B', '#380713', '#74121D', '#C52233', '#595708', '#657212', '#ABC421'],
+              backgroundColor: ['rgb(12,58,31)', 'rgb(18,170,75)','rgb(149,201,61)','rgb(214,234,206)', 'rgb(214,234,206)','rgb(168,169,173)','rgb(92,101,105)'],
               borderWidth: 1,
               data: dataLicense
             }]
           },
-          options: {
-            tooltips: {
-              mode: 'index',
-              intersect: false
-            },
-            scales: {
-              xAxes: [{
-                ticks: {
-                  autoSkip: false,
-                  responsive: true
-                }
-              }],
-              yAxes: [{
-                ticks: {
-                  autoSkip: true,
-                  maxTicksLimit: 100,
-                  responsive: true,
-                  beginAtZero: true
-                }
-              }]
-            },
-          }
         });
       },
       error: function(error) {
@@ -221,6 +199,10 @@ $(function() {
             },
             scales: {
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   beginAtZero: true,
                   autoSkip: false,
@@ -229,6 +211,9 @@ $(function() {
                 }
               }],
               xAxes: [{
+              gridLines: {
+                            display: false,
+                        },
                 ticks: {
                   autoSkip: false,
                   responsive: true
@@ -289,7 +274,7 @@ $(function() {
               label: 'num of Commits',
               data: dataCommits,
               backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
+                'rgba(18, 170, 75, 0.2)',
                 'rgba(54, 162, 235, 0.2)',
                 'rgba(255, 206, 86, 0.2)',
                 'rgba(75, 192, 192, 0.2)',
@@ -297,7 +282,7 @@ $(function() {
                 'rgba(255, 159, 64, 0.2)'
               ],
               borderColor: [
-                'rgba(255,99,132,1)',
+                'rgba(18, 170, 75, 1)',
                 'rgba(54, 162, 235, 1)',
                 'rgba(255, 206, 86, 1)',
                 'rgba(75, 192, 192, 1)',
@@ -316,12 +301,19 @@ $(function() {
             },
             scales: {
               xAxes: [{
+              gridLines: {
+                            display: false,
+                        },
                 ticks: {
                   autoSkip: labelsCommit.length > 31 ? true : false,
                   responsive: true,
                 }
               }],
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   suggestedMax: 10,
                   responsive: true,
@@ -414,12 +406,19 @@ $(function() {
             },
             scales: {
               xAxes: [{
+              gridLines: {
+                            display: false,
+                        },
                 ticks: {
                   autoSkip: labelsIssues1.length > 31 ? true : false,
                   responsive: true
                 }
               }],
               yAxes: [{
+              gridLines: {
+                            drawBorder: true,
+                            color: 'rgba(18, 170, 75, 0.1)'
+                        },
                 ticks: {
                   beginAtZero: true,
                   callback: function(value, index, values) {

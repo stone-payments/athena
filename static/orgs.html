@@ -28,7 +28,7 @@
 		<div class="sidebar">
 			<div class="sidebar-wrapper">
 				<div class="logo">
-					<a href="http://www.creative-tim.com" class="simple-text">
+					<a class="simple-text">
                     ATHENA
                 </a>
 				</div>
@@ -61,7 +61,8 @@
 			</div>
 		</div>
 		<div class="main-panel">
-			<nav class="navbar navbar-default navbar-fixed">
+			<div>
+			<nav class="padding-nav navbar navbar-default navbar-fixed ">
 				<div class="container-fluid">
 					<div class="navbar-header">
 						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation-example-2">
@@ -76,6 +77,7 @@
 				</div>
 
 			</nav>
+				</div>
 			<nav class="navbar navbar-default navbar-fixed">
 				<div class="container-fluid">
 					<div class="navbar-header">
@@ -101,7 +103,7 @@
 				<div class="container-fluid">
 					<div class="row row-eq-height">
 
-						<div class="col-md-3">
+						<div class="col-md-4 col-lg-4">
 							<div class="card card-user">
 								<div class="image" style="background-color: rgb(4, 57, 28);">
 								</div>
@@ -142,7 +144,7 @@
 						</div>
 
 
-						<div class="col-md-3">
+						<div class="col-md-4 col-lg-4">
 							<div class="card ">
 								<div class="header">
 									<h4 class="title">OpenSource</h4>
@@ -151,7 +153,7 @@
 								<div class="content">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<canvas id="openSourceChart" class="ct-chart ct-perfect-fourth" width="auto" height="150"></canvas>
 										</table>
 									</div>
 									<div class="footer">
@@ -163,7 +165,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-3">
+						<div class="col-md-4 col-lg-4">
 							<div class="card ">
 								<div class="header">
 									<h4 class="title">Total Readme</h4>
@@ -172,7 +174,7 @@
 								<div class="content">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="readmeChart" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<canvas id="readmeChart" class="ct-chart ct-perfect-fourth" width="auto" height="150"></canvas>
 											</tbody>
 										</table>
 									</div>
@@ -185,7 +187,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-3">
+						<div class="col-md-4 col-lg-4">
 							<div class="card  ">
 								<div class="header">
 									<h4 class="title">OpenSource Readme</h4>
@@ -194,7 +196,7 @@
 								<div class="content" style="max-height:500px">
 									<div class="table-full-width">
 										<table class="table">
-											<canvas id="openSourceReadme" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
+											<canvas id="openSourceReadme" class="ct-chart ct-perfect-fourth" width="auto" height="150"></canvas>
 											</tbody>
 										</table>
 									</div>
@@ -207,16 +209,15 @@
 								</div>
 							</div>
 						</div>
-					</div>
-					<div class="row row-eq-height">
-						<div class="col-md-4">
+
+						<div class="col-md-4 col-lg-8">
 							<div class="card">
 								<div class="header">
 									<h4 class="title">Languages</h4>
 									<p class="category">Top 12 Languages - Org (%)</p>
 								</div>
 								<div class="content">
-									<canvas id="languages" class="ct-chart ct-perfect-fourth" width="auto" height="210"></canvas>
+									<canvas id="languages" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 									<div class="footer">
 										<hr>
 										<!--<div class="stats">-->
@@ -226,14 +227,14 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-8">
+						<div class="col-md-12 col-lg-12">
 							<div class="card">
 								<div class="header">
 									<h4 class="title">Commits</h4>
 									<p class="category">Commits - Org</p>
 								</div>
 								<div class="content">
-									<canvas id="commitsCharts" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
+									<canvas id="commitsCharts" class="ct-chart ct-perfect-fourth" width="auto" height="70"></canvas>
 									<div class="footer">
 										<hr>
 										<!--<div class="stats">-->
@@ -245,14 +246,14 @@
 						</div>
 					</div>
 					<div class="row row-eq-height">
-						<div class="col-md-8">
+						<div class="col-md-12 col-lg-8">
 							<div class="card ">
 								<div class="header">
 									<h4 class="title">Issues</h4>
 									<p class="category">Issues - Org</p>
 								</div>
 								<div class="content">
-									<canvas id="issuesChart" class="ct-chart" width="auto" height="100"></canvas>
+									<canvas id="issuesChart" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 									<div class="footer">
 										<div class="legend">
 										</div>
@@ -264,7 +265,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-4 col-lg-4">
 							<div class="card  ">
 								<div class="header">
 									<h4 class="title">License</h4>
@@ -274,6 +275,8 @@
 											<canvas id="LicenseType" class="ct-chart ct-perfect-fourth" width="auto" height="200"></canvas>
 											</tbody>
 									<div class="footer">
+										<div class="legend">
+										</div>
 										<hr>
 										<!--<div class="stats">-->
 											<!--<i class="fa fa-clock-o"></i>-->
