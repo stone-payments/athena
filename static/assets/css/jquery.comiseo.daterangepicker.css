@@ -4,8 +4,12 @@
  */
 
 .comiseo-daterangepicker-triggerbutton.ui-button {
-	text-align: left;
-	padding: 3px;
+    text-align: left;
+	padding: 3.3px;
+	font-family: "roboto";
+	font-size: inherit;
+	line-height: inherit;
+    margin-bottom: 3px;
 }
 
 .comiseo-daterangepicker {
@@ -94,3 +98,5 @@
 	background: #b0c4de;
 	color: #fff;
 }
+
+

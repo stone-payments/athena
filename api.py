@@ -31,10 +31,10 @@ def get_members_repo():
     return response
 
 
-@app.route('/get_repo_infos')
-def get_repo_infos():
-    response = repo_infos()
-    return response
+# @app.route('/get_repo_infos')
+# def get_repo_infos():
+#     response = repo_infos()
+#     return response
 
 
 @app.route('/get_best_practices_repo')

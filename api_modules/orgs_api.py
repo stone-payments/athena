@@ -57,9 +57,6 @@ def org_open_source():
         open_source_status['count'] = round(int(open_source_status['count']) / soma * 100, 1)
     if len(open_source_type_list) < 2:
         find_key(open_source_type_list, [True, False])
-        # for key in [True, False]:
-        #     if not any(d['openSource'] is key for d in open_source_type_list):
-        #         open_source_type_list.append({'count': 0, 'openSource': key})
     open_source_type_list = sorted(open_source_type_list, key=itemgetter('openSource'), reverse=False)
     return json.dumps(open_source_type_list)
 

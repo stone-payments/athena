@@ -257,10 +257,12 @@ $(function() {
         $("#forks").empty();
         $('#stargazers').empty();
         $("#orgLastUpdated").empty();
+        $("#description").empty();
         let repoName = String(returnedData[0]['repoName']);
         let forks = String(returnedData[0]['forks']);
         let stargazers = String(returnedData[0]['stargazers']);
         let openSource = String(returnedData[0]['openSource']);
+        let description = String(returnedData[0]['description']);
         let license = (returnedData[0]['licenseType'] == null ? "None" : String(returnedData[0]['licenseType']));
         let readme = (returnedData[0]['readme'] == null ? "None" : String(returnedData[0]['readme']));
         let orgLastUpdated = String(returnedData[0]['db_last_updated']);
@@ -271,6 +273,7 @@ $(function() {
         $('#stargazers').append(stargazers);
         $('#repoName').text(repoName);
         $('#forks').append(forks);
+        $("#description").append(description);
         $('#orgLastUpdated').html('<i class="fa fa-clock-o"></i> '+ orgLastUpdated + ' minutes ago');
 
         if (errorMessage == 404) {
