@@ -17,6 +17,9 @@ query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!, $sinceTi
                 messageHeadline
                 oid
                 committedDate
+                additions
+                deletions
+                changedFiles
                 author {
                   user {
                     devId: id

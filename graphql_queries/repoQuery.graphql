@@ -47,7 +47,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
           }
           repoId:id
           name
-          description
+          description:descriptionHTML
           url
           nameWithOwner
           isPrivate

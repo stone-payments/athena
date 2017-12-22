@@ -16,6 +16,9 @@ def commit_collector(db, org, query, query_db, collection_name, save_queue_type,
             "author": string_validate(find_key('login', node)),
             "devId": string_validate(find_key('devId', node)),
             "commitId": string_validate(find_key('commitId', node)),
+            'additions': int_validate(find_key('additions', node)),
+            'deletions': int_validate(find_key('deletions', node)),
+            'numFiles': int_validate(find_key('changedFiles', node)),
             "db_last_updated": datetime.datetime.utcnow(),
         }
         return save_content

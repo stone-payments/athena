@@ -29,7 +29,7 @@ On config.py input the info required and run app.py
 
 Athena requires [Python](https://www.python.org/) 3 to run.
 
-Create and start a mongodb server.
+Create and start a mongodb docker.
 
 ```sh
 $ docker run --name athena -d mongo
