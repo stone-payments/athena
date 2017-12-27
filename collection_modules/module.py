@@ -3,6 +3,7 @@ import time
 from clients import ClientRest
 from clients import GraphQLClient
 from custom_configurations.config import *
+from collection_modules.log_message import *
 
 client_graphql = GraphQLClient(url, token, timeout)
 client_rest = ClientRest(token, timeout)
@@ -29,7 +30,7 @@ def limit_validation(rate_limit=None):
     if rate_limit is not None and rate_limit["remaining"] < rate_limit_to_sleep:
         limit_time = (datetime.datetime.strptime(rate_limit["resetAt"], '%Y-%m-%dT%H:%M:%SZ') -
                       datetime.datetime.utcnow()).total_seconds()
-        print('{} {} {}'.format('wait', str(limit_time / 60), 'mins'))
+        log.info('{} {} {}'.format('wait', str(limit_time / 60), 'mins'))
         return time.sleep(limit_time)
 
 

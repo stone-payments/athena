@@ -1,4 +1,5 @@
 from mongodb_connect.mongraph import list_reponse_query
+from collection_modules.module import utc_time
 
 
 def query_stats_mongo(self):
@@ -9,7 +10,7 @@ def query_stats_mongo(self):
 
 
 def issue_mongo(self):
-    query = {"org": self.org, "issues": {"$gt": 0}}
+    query = {"org": self.org, "issues": {"$gt": 0}, 'db_last_updated': {'$gte': utc_time(-1)}}
     projection = {'repoName': 1, '_id': 0}
     collection = 'Repo'
     key_to_be_returned = 'repoName'
@@ -17,7 +18,7 @@ def issue_mongo(self):
 
 
 def query_fork_mongo(self):
-    query = {'org': self.org, 'forks': {'$gt': 0}}
+    query = {'org': self.org, 'forks': {'$gt': 0}, 'db_last_updated': {'$gte': utc_time(-1)}}
     projection = {'repoName': 1, '_id': 0}
     collection = 'Repo'
     key_to_be_returned = 'repoName'
@@ -25,7 +26,7 @@ def query_fork_mongo(self):
 
 
 def query_team_mongo(self):
-    query = {"org": self.org, "membersCount": {"$gt": 100}}
+    query = {"org": self.org, "membersCount": {"$gt": 100}, 'db_last_updated': {'$gte': utc_time(-1)}}
     projection = {'slug': 1, '_id': 0}
     collection = 'Teams'
     key_to_be_returned = 'slug'
@@ -33,7 +34,7 @@ def query_team_mongo(self):
 
 
 def query_commit_mongo(self):
-    query = {'committed_today': True, 'org': self.org}
+    query = {'committed_today': True, 'org': self.org, 'db_last_updated': {'$gte': utc_time(-1)}}
     projection = {'repoName': 1, '_id': 0}
     collection = 'Repo'
     key_to_be_returned = 'repoName'
@@ -45,7 +46,7 @@ def stats_query(self, repository):
 
 
 def query_teams_dev_mongo(self):
-    query = {'org': self.org, "membersCount": {'$gt': 100}}
+    query = {'org': self.org, "membersCount": {'$gt': 100}, 'db_last_updated': {'$gte': utc_time(-1)}}
     projection = {'slug': 1, '_id': 0}
     collection = 'Teams'
     key_to_be_returned = 'slug'
@@ -53,7 +54,7 @@ def query_teams_dev_mongo(self):
 
 
 def query_teams_repo_mongo(self):
-    query = {'org': self.org, "repoCount": {'$gt': 100}}
+    query = {'org': self.org, "repoCount": {'$gt': 100}, 'db_last_updated': {'$gte': utc_time(-1)}}
     projection = {'slug': 1, '_id': 0}
     collection = 'Teams'
     key_to_be_returned = 'slug'

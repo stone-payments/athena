@@ -17,4 +17,8 @@ query ($org: String!) {
       projectCount:totalCount
     }
   }
+    rateLimit{
+    remaining
+    resetAt
+  }
 }
