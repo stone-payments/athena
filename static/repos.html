@@ -80,16 +80,14 @@
 					<div class="navbar-header">
 						<a class="navbar-brand">
 							<select id="orgSelector">
-									<option value="stone-payments">stone-payments</option>
-									<option value="pagarme">pagarme</option>
-									<option value="mundipagg">mundipagg</option>
-									<option value="equals-conc">equals-con</option>
-									<option value="cappta">cappta</option>
 									</select>
 							<input autofocus type="text" type="text" id="name" placeholder="Insert repo name">
 							<input id="repoRangeDate" name="repoRangeDate">
 							 <i id="find" class="fa fa-search"></i> </a>
 					</div>
+					<div class="navbar-text" style="float:right;" id="orgLastUpdated">
+											<i class="fa fa-clock-o"></i>
+									</div>
 				</div>
 			</nav>
 			<div class="content" style="display: none;">
@@ -102,7 +100,7 @@
 
 
 						<div class="col-md-6">
-							<div class="card card-user">
+							<div class="card card-user custom">
 								<div class="image" style="background-color: rgb(4, 57, 28);    height: 52px;">
 									<div class="title-green">
 									<h4 class="title-white" id="repoName"><br />
@@ -111,22 +109,11 @@
 								</div>
 
 								<div class="content">
-									<!--<div class="author">-->
-										<!--<img id =avatar class="avatar border-gray"  src="assets/img/blank.gif" alt="..."/>-->
-											<!---->
-									<!--</div>-->
-
 									<p class="description text-left"></p><br>
 									<p id="description" class="description text-left">   </p>
-									<!--<p id="forks" class="description text-left"> </p>-->
 								</div>
 								<div class="footer">
 									<hr>
-									<div class="stats" id="orgLastUpdated">
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
-									</div>
 								</div>
 							</div>
 						</div>
@@ -147,9 +134,6 @@
 									</div>
 									<div class="footer">
 										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
 									</div>
 								</div>
 							</div>
@@ -171,9 +155,6 @@
 									</div>
 									<div class="footer">
 										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
 									</div>
 								</div>
 							</div>
@@ -192,9 +173,6 @@
 									</div>
 									<div class="footer">
 										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
 									</div>
 								</div>
 							</div>
@@ -216,9 +194,6 @@
 									</div>
 									<div class="footer">
 										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
 									</div>
 								</div>
 							</div>
@@ -241,9 +216,6 @@
 									</div>
 									<div class="footer">
 										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
 									</div>
 								</div>
 							</div>
@@ -263,9 +235,6 @@
 									<canvas id="pie-chart" class="ct-chart ct-perfect-fourth" width="auto" height="210"></canvas>
 									<div class="footer">
 										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
 									</div>
 								</div>
 							</div>
@@ -280,9 +249,6 @@
 									<canvas id="commitsCharts" class="ct-chart ct-perfect-fourth" width="auto" height="100"></canvas>
 									<div class="footer">
 										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
 									</div>
 								</div>
 							</div>
@@ -301,9 +267,6 @@
 										<div class="legend">
 										</div>
 										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
 									</div>
 								</div>
 							</div>
@@ -323,9 +286,6 @@
 									</div>
 									<div class="footer">
 										<hr>
-										<div class="stats">
-											<i class="fa fa-clock-o"></i>
-										</div>
 									</div>
 								</div>
 							</div>
@@ -350,9 +310,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js"></script>
 <!--  Notifications Plugin    -->
 <script src="assets/js/bootstrap-notify.js"></script>
-<!-- Light Bootstrap Table Core javascript and methods for Demo purpose -->
 <script src="assets/js/light-bootstrap-dashboard.js"></script>
-<!-- Light Bootstrap Table DEMO methods, don't include it in your project! -->
 <script src="assets/js/demo.js"></script>
 <script src="assets/js/moment.js"></script>
 <script src="assets/js/jquery-ui.min.js"></script>

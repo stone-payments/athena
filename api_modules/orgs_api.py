@@ -5,6 +5,14 @@ from flask import request
 from api_modules import db
 
 
+def org_names():
+    projection = {'_id': 0, 'org': 1}
+    query_result = db.Org.find({}, projection)
+    query_result = [dict(i) for i in query_result]
+    print(query_result)
+    return json.dumps(query_result)
+
+
 def org_languages():
     name = request.args.get("name")
     query = [{'$match': {'org': name}},

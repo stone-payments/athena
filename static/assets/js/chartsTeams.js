@@ -7,7 +7,6 @@ $(function() {
   let LicenseType = null;
   let startDay = moment().startOf('month').format('YYYY-MM-DD');
   let lastDay = moment().format("YYYY-MM-") + moment().daysInMonth();
-  var orgSelector = "stone-payments";
    $('#orgSelector').on('change', function() {
      orgSelector = $('#orgSelector').val();
   }),
@@ -15,8 +14,25 @@ $(function() {
     '#fef5e7', '#fdebd0', '#fad7a0', '#f8c471', '#f5b041', '#f39c12', '#d68910', '#b9770e', '#9c640c', '#7e5109'
   ]
   colorStone = ['#0B3B1F', '#1DAC4B', '#380713', '#74121D', '#C52233', '#595708', '#657212', '#ABC421']
-
-  let xhr;
+    $.ajax({
+              url: address+'/get_org_names',
+              type: 'GET',
+              success: function(response) {
+                returnedData = JSON.parse(response);
+                orgSelector = returnedData[0].org;
+                $("#orgSelector").empty();
+                returnedData.map(function(name) {
+                    $('#orgSelector')
+                     .append($("<option></option>")
+                     .attr("value",name.org)
+                     .text(name.org));
+                });
+              },
+              error: function(error) {
+                console.log(error);
+              }
+            });
+      let xhr;
   $('#name').autoComplete({
     minChars: 1,cache: false, delay : 20,
     source: function(term, response) {
@@ -45,6 +61,35 @@ $(function() {
       startDay = JSON.parse($("#teamsRangeDate").val()).start;
       lastDay = JSON.parse($("#teamsRangeDate").val()).end;
     }
+    $.ajax({
+      url: address+'/team_check_with_exist?org=' + orgSelector + '&name=' + name,
+      type: 'GET',
+      success: function(response) {
+        returnedData = JSON.parse(response);
+        if (returnedData['response'] == 404){
+          $(".content").hide();
+          $(document).ready(function() {
+            $.notify({
+              icon: 'pe-7s-close-circle',
+              message: "Team does not exist"
+            }, {
+              type: 'danger',
+              timer: 1000,
+              placement: {
+            		from: 'top',
+            		align: 'right'
+            	},
+            });
+          });
+        }
+        else {
+          $(".content").show();
+        }
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
     $.ajax({
       url: address+'/get_open_source_team?org=' + orgSelector + '&name=' + name,
       type: 'GET',

@@ -57,6 +57,12 @@ def get_repo_name():
 # Orgs ############
 
 
+@app.route('/get_org_names')
+def get_org_names():
+    response = org_names()
+    return response
+
+
 @app.route('/get_org_info')
 def get_org_info():
     response = org_info()
@@ -106,6 +112,10 @@ def get_issues_org():
 
 
 # Teams ###
+@app.route('/team_check_with_exist')
+def team_check_with_exist():
+    response = check_with_exist()
+    return response
 
 
 @app.route('/get_languages_team')

@@ -13,6 +13,24 @@ $(function() {
   ]
   colorStone = ['#0B3B1F', '#1DAC4B', '#380713', '#74121D', '#C52233', '#595708', '#657212', '#ABC421']
 
+    $.ajax({
+          url: address+'/get_org_names',
+          type: 'GET',
+          success: function(response) {
+            returnedData = JSON.parse(response);
+            $("#name").empty();
+            returnedData.map(function(name) {
+                $('#name')
+                 .append($("<option></option>")
+                 .attr("value",name.org)
+                 .text(name.org));
+            });
+          },
+          error: function(error) {
+            console.log(error);
+          }
+        });
+
   $('#name').keypress(function(e) {
     if (e.which == 13) { //Enter key pressed
       $('#find').click(); //Trigger search button click event
@@ -419,6 +437,7 @@ $(function() {
                 label: 'num of Closed Issues',
                 data: dataIssues1,
                 backgroundColor: [
+                  'rgba(255, 99, 132, 0.2)',
                   'rgba(54, 162, 235, 0.2)',
                   'rgba(255, 206, 86, 0.2)',
                   'rgba(75, 192, 192, 0.2)',
@@ -426,6 +445,7 @@ $(function() {
                   'rgba(255, 159, 64, 0.2)'
                 ],
                 borderColor: [
+                  'rgba(255,99,132,1)',
                   'rgba(54, 162, 235, 1)',
                   'rgba(255, 206, 86, 1)',
                   'rgba(75, 192, 192, 1)',
@@ -438,8 +458,8 @@ $(function() {
               {
                 label: 'num of Created Issues',
                 data: dataIssues2,
+
                 backgroundColor: [
-                  'rgba(255, 99, 132, 0.2)',
                   'rgba(54, 162, 235, 0.2)',
                   'rgba(255, 206, 86, 0.2)',
                   'rgba(75, 192, 192, 0.2)',
@@ -447,7 +467,6 @@ $(function() {
                   'rgba(255, 159, 64, 0.2)'
                 ],
                 borderColor: [
-                  'rgba(255,99,132,1)',
                   'rgba(54, 162, 235, 1)',
                   'rgba(255, 206, 86, 1)',
                   'rgba(75, 192, 192, 1)',

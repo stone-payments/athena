@@ -5,6 +5,17 @@ import re
 import json
 
 
+def check_with_exist():
+    org = request.args.get("org")
+    name = request.args.get("name")
+    query = {'org': org, 'slug': name}
+    query_result = db['Teams'].find(query)
+    query_result = [dict(i) for i in query_result]
+    if not query_result:
+        return json.dumps({'response': 404})
+    return json.dumps({'response': 200})
+
+
 def team_languages():
     org = request.args.get("org")
     name = request.args.get("name")
@@ -62,6 +73,8 @@ def team_open_source():
         {'$project': {"status": "$_id.status", "_id": 0, 'count': 1}}
     ]
     query_result = db.edges.aggregate(query)
+    if not query_result:
+        return json.dumps([{'response': 404}])
     readme_status_list = [dict(i) for i in query_result]
     print(readme_status_list)
     soma = sum([readme_status['count'] for readme_status in readme_status_list])

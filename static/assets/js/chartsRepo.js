@@ -4,10 +4,29 @@ $(function() {
   let issuesChart = null;
   let startDay = moment().startOf('month').format('YYYY-MM-DD');
   let lastDay = moment().format("YYYY-MM-") + moment().daysInMonth();
-  var orgSelector = "stone-payments";
+
    $('#orgSelector').on('change', function() {
      orgSelector = $('#orgSelector').val();
   }),
+
+  $.ajax({
+          url: address+'/get_org_names',
+          type: 'GET',
+          success: function(response) {
+            returnedData = JSON.parse(response);
+            $("#orgSelector").empty();
+            orgSelector = returnedData[0].org;
+            returnedData.map(function(name) {
+                $('#orgSelector')
+                 .append($("<option></option>")
+                 .attr("value",name.org)
+                 .text(name.org));
+            });
+          },
+          error: function(error) {
+            console.log(error);
+          }
+        });
 //$(document).ready(function() {
 //    $('#orgSelector').change(function(){
 //     orgSelector = $('#orgSelector').val();
@@ -26,11 +45,9 @@ $(function() {
     $('.autocomplete-suggestion').show();
 
      $.getJSON(address+'/get_repo_name?name=' + term+'&org='+ orgSelector, function(result) {
-        console.log(orgSelector);
         let returnedData = result.map(function(num) {
           return num.repoName;
         });
-        console.log(returnedData);
         response(returnedData);
       });
 
@@ -83,11 +100,9 @@ $(function() {
       type: 'GET',
       success: function(response) {
         returnedData = JSON.parse(response);
-        console.log(returnedData);
         let labels = returnedData.map(function(num) {
           return num.language;
         });
-        console.log(labels);
         let dataSize = returnedData.map(function(num) {
           return num.size;
         });
@@ -262,7 +277,7 @@ $(function() {
         let forks = String(returnedData[0]['forks']);
         let stargazers = String(returnedData[0]['stargazers']);
         let openSource = String(returnedData[0]['openSource']);
-        let description = String(returnedData[0]['description']);
+        let description = (String(returnedData[0]['description']) == '<div></div>' ? "Description not available" : String(returnedData[0]['description']));
         let license = (returnedData[0]['licenseType'] == null ? "None" : String(returnedData[0]['licenseType']));
         let readme = (returnedData[0]['readme'] == null ? "None" : String(returnedData[0]['readme']));
         let orgLastUpdated = String(returnedData[0]['db_last_updated']);
@@ -303,7 +318,6 @@ $(function() {
         let labelsIssues1 = returnedData[0].map(function(num) {
           return num.day;
         });
-        console.log(labelsIssues1);
         let dataIssues1 = returnedData[0].map(function(num) {
           return num.count;
         });
