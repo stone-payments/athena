@@ -10,8 +10,13 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
           defaultBranchRef {
             target {
               ...on Commit{
-                blame(path: "README.md"){
-                  ranges{
+                blame1: blame(path: "README.md"){
+                  upperCaseReadme :ranges{
+                    endingLine
+                  }
+                }
+                blame2: blame(path: "readme.md"){
+                 lowerCaseReadme: ranges{
                     endingLine
                   }
                 }
@@ -66,6 +71,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
           issues {
             totalIssues:totalCount
           }
+          isFork
           createdAt
         }
         cursor

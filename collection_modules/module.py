@@ -52,3 +52,7 @@ def convert_datetime(value):
 def utc_time(since_time_delta):
     return '{}{}'.format((datetime.datetime.utcnow() + datetime.timedelta(int(since_time_delta))).strftime('%Y-%m-%d'),
                          "T00:00:00Z")
+
+
+def utc_time_datetime_format(since_time_delta):
+    return datetime.datetime.utcnow() + datetime.timedelta(int(since_time_delta))
