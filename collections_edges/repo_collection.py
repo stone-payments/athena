@@ -21,7 +21,6 @@ def repo(db, org, query, collection_name, edge_name="edges"):
             "description": string_validate(find_key('description', node)),
             "url": string_validate(find_key('url', node)),
             "openSource": bool_validate(False if find_key('isPrivate', node) else True),
-            "openSource": bool_validate(False if find_key('isPrivate', node) else True),
             "primaryLanguage": string_validate(find_key('priLanguage', node)),
             "forks": int_validate(find_key('totalForks', node)),
             "issues": int_validate(find_key('totalIssues', node)),

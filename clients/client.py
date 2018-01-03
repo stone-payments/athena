@@ -1,6 +1,7 @@
 import json
 import time
 import requests
+from requests.exceptions import *
 from custom_configurations.config import max_interval, max_retries
 
 
@@ -14,7 +15,7 @@ class Retry:
         for attempts in range(self.times):
             try:
                 return self.request(*args, **kwargs)
-            except TimeoutError as e:
+            except ReadTimeout as e:
                 if attempts == self.times - 1:
                     raise e
             time.sleep(self.interval)
