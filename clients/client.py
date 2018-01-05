@@ -14,10 +14,16 @@ class Retry:
     def __call__(self, *args, **kwargs):
         for attempts in range(self.times):
             try:
-                return self.request(*args, **kwargs)
-            except ReadTimeout as e:
+                response = self.request(*args, **kwargs)
+                if response.json().get('errors'):
+                    raise Exception(response.json())
+                return response
+            except ReadTimeout as exception_message:
                 if attempts == self.times - 1:
-                    raise e
+                    raise exception_message
+            except Exception as exception_message:
+                if attempts == self.times - 1:
+                    raise exception_message
             time.sleep(self.interval)
 
 

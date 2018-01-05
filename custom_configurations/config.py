@@ -8,7 +8,7 @@ password = os.getenv("MONGODB_PASS")
 url = os.getenv("GITHUB_GRAPHQL_URL")  # GitHub GraphQL API url
 url_rest_api = os.getenv("GITHUB_REST_URL")
 number_of_repos = 100
-repo_number_of_repos = 100
+repo_number_of_repos = 50
 timeout = 25.001
 since_time_days_delta = os.getenv("SINCE_TIME_DAYS_DELTA")  # days ago ex: -5
 until_time_days_delta = os.getenv("UNTIL_TIME_DAYS_DELTA")  # delta days from now ex: +1
@@ -28,5 +28,5 @@ skip_list_indexes = [["Issue", "closeAt"], ["Issue", "createdAt"], ["Commit", "c
 full_text_indexes = [["Repo", "repoName"], ["Teams", "teamName"], ["Issue", "org"],
                      ["Commit", "org"], ["Fork", "org"], ["Dev", "login"]]
 abuse_time_sleep = 2
-max_interval = 25  # max interval time for requests
+max_interval = 1  # max interval time for requests
 max_retries = 10  # max request retries
