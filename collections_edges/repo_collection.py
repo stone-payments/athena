@@ -5,9 +5,12 @@ def repo(db, org, query, collection_name, edge_name="edges"):
     def content(**kwargs):
         node = kwargs.get('node')
         org_name = kwargs.get('org')
-        readme_ranges = find_key('ranges', node)
-        if readme_ranges:
-            readme = "OK" if readme_ranges[-1]['endingLine'] >= 5 else "Poor"
+        lower_case_readme = find_key('lowerCaseReadme', node)
+        upper_case_readme = find_key('upperCaseReadme', node)
+        if upper_case_readme:
+            readme = "OK" if upper_case_readme[-1]['endingLine'] >= 5 else "Poor"
+        elif lower_case_readme:
+            readme = "OK" if lower_case_readme[-1]['endingLine'] >= 5 else "Poor"
         else:
             readme = None
         save_content = {
@@ -27,6 +30,7 @@ def repo(db, org, query, collection_name, edge_name="edges"):
             "nameWithOwner": string_validate(find_key('nameWithOwner', node)),
             "licenseId": string_validate(find_key('licenseId', node)),
             "licenseType": string_validate(find_key('licenseType', node)),
+            "isFork": bool_validate(find_key('isFork', node)),
             "readme": string_validate(readme),
             "db_last_updated": datetime.datetime.utcnow(),
             "languages": parse_multiple_languages(node, "language_edges", "languageName",

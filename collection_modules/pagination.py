@@ -1,5 +1,6 @@
 from collection_modules.module import *
 from custom_configurations.config import *
+from collection_modules.log_message import *
 
 
 class Pagination:
@@ -44,6 +45,9 @@ class Pagination:
                                                    "sinceTime": self.time(since_time_days_delta),
                                                    "untilTime": self.time(until_time_days_delta)
                                                })
+        if find_key('errors', response_page) is not None:
+            log.error(response_page)
+        log.info(find_key('hasNextPage', response_page))
         return response_page
 
     def __next_page(self):
