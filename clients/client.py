@@ -3,6 +3,7 @@ import time
 import requests
 from requests.exceptions import *
 from custom_configurations.config import max_interval, max_retries
+from collection_modules.log_message import *
 
 
 class Retry:
@@ -21,7 +22,17 @@ class Retry:
             except ReadTimeout as exception_message:
                 if attempts == self.times - 1:
                     raise exception_message
+            except ConnectionError as ex:
+                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+                log.info(message)
+                log.info("Github Graphql API is possible down")
+                log.info("Resting for 10 min")
+                time.sleep(10)
             except Exception as exception_message:
+                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                message = template.format(type(exception_message).__name__, exception_message.args)
+                log.info(message)
                 if attempts == self.times - 1:
                     raise exception_message
             time.sleep(self.interval)
