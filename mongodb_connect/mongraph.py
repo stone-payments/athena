@@ -1,10 +1,14 @@
 from pymongo import MongoClient
 from pymongo import ASCENDING, TEXT
+import urllib.parse
 
 
 class Mongraph(object):
-    def __init__(self, db_name, db_url, hash_indexes, hash_indexes_unique,
+    def __init__(self, db_name, db_url, username, password, auth_mechanism, hash_indexes, hash_indexes_unique,
                  full_text_indexes):
+        self.auth_mechanism = auth_mechanism
+        self.password = password
+        self.username = username
         self.hash_indexes_unique = hash_indexes_unique
         self.full_text_indexes = full_text_indexes
         self.hash_indexes = hash_indexes
@@ -28,7 +32,10 @@ class Mongraph(object):
     def create_database_if_not_exists(self):
         if self.db_url is None:
             raise NameError("DB URL is not Defined")
-        client = MongoClient(self.db_url)
+        password = urllib.parse.quote_plus(self.password)
+        username = urllib.parse.quote_plus(self.username)
+        client = MongoClient('mongodb://%s:%s@%s/%s?authMechanism=%s' % (username, password, self.db_url, self.db_name,
+                                                                         self.auth_mechanism))
         _db = client[self.db_name]
         self.create_collection_if_not_exists(_db)
         return _db

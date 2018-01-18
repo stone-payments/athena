@@ -5,6 +5,7 @@ db_name = os.getenv("DB_NAME")
 db_url = os.getenv("MONGODB_URL")
 username = os.getenv("MONGODB_USER")
 password = os.getenv("MONGODB_PASS")
+auth_mechanism = os.getenv("AUTH_MECHANISM")
 url = os.getenv("GITHUB_GRAPHQL_URL")  # GitHub GraphQL API url
 url_rest_api = os.getenv("GITHUB_REST_URL")
 number_of_repos = 100
