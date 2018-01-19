@@ -7,7 +7,8 @@ from mongodb_connect.mongraph import *
 from collection_modules.log_message import *
 
 db = Mongraph(db_name=db_name, db_url=db_url, username=username, password=password, auth_mechanism=auth_mechanism,
-              hash_indexes=hash_indexes, hash_indexes_unique=hash_indexes_unique, full_text_indexes=full_text_indexes)
+              hash_indexes=hash_indexes, hash_indexes_unique=hash_indexes_unique,
+              full_text_indexes=full_text_indexes)
 save_queue = Queue(queue_max_size)
 save_edges_name_queue = Queue(queue_max_size)
 saver = SaverThread(db=db, queue=save_queue, edges_name_queue=save_edges_name_queue)

@@ -34,8 +34,8 @@ class Mongraph(object):
             raise NameError("DB URL is not Defined")
         password = urllib.parse.quote_plus(self.password)
         username = urllib.parse.quote_plus(self.username)
-        client = MongoClient('mongodb://%s:%s@%s/%s?authMechanism=%s' % (username, password, self.db_url, self.db_name,
-                                                                         self.auth_mechanism))
+        client = MongoClient('mongodb://%s:%s@%s/%s?authSource=%s' % (username, password, self.db_url, self.db_name,
+                                                                      self.db_name))
         _db = client[self.db_name]
         self.create_collection_if_not_exists(_db)
         return _db
