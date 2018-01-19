@@ -4,9 +4,9 @@ import urllib.parse
 
 
 class Mongraph(object):
-    def __init__(self, db_name, db_url, username, password, auth_mechanism, hash_indexes, hash_indexes_unique,
+    def __init__(self, db_name, db_url, username, password, mongo_port, hash_indexes, hash_indexes_unique,
                  full_text_indexes):
-        self.auth_mechanism = auth_mechanism
+        self.mongo_port = mongo_port
         self.password = password
         self.username = username
         self.hash_indexes_unique = hash_indexes_unique
@@ -32,10 +32,14 @@ class Mongraph(object):
     def create_database_if_not_exists(self):
         if self.db_url is None:
             raise NameError("DB URL is not Defined")
-        password = urllib.parse.quote_plus(self.password)
-        username = urllib.parse.quote_plus(self.username)
-        client = MongoClient('mongodb://%s:%s@%s/%s?authSource=%s' % (username, password, self.db_url, self.db_name,
-                                                                      self.db_name))
+        if self.username and self.password:
+            password = urllib.parse.quote_plus(self.password)
+            username = urllib.parse.quote_plus(self.username)
+            client = MongoClient('mongodb://%s:%s@%s:%s/%s?authSource=%s' % (username, password, self.db_url,
+                                                                             self.mongo_port, self.db_name,
+                                                                             self.db_name))
+        else:
+            client = MongoClient('mongodb://%s:%s/%s' % (self.db_url, self.mongo_port, self.db_name))
         _db = client[self.db_name]
         self.create_collection_if_not_exists(_db)
         return _db
