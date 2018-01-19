@@ -18,6 +18,6 @@ def teams_repo(db, org, query, query_db, save_queue_type, edges_name="edges"):
         return save_edges
 
     start = CollectorRestrictedTeam(db=db, org=org, edges=edges_name, query=query,
-                                    query_db=query_db, number_of_repo=number_of_repos, save_content=content,
+                                    query_db=query_db, number_of_repo=number_pagination, save_content=content,
                                     save_edges=edges)
     start.start(save_queue_type)

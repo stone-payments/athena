@@ -36,5 +36,5 @@ def fork_collector(db, org, query, query_db, collection_name, save_queue_type, e
 
     start = CollectorRestricted(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
                                 updated_utc_time=utc_time, query_db=query_db,
-                                number_of_repo=number_of_repos, save_content=content, save_edges=edges)
+                                number_of_repo=number_pagination, save_content=content, save_edges=edges)
     start.start(save_queue_type)
