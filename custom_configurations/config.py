@@ -17,7 +17,6 @@ orgs = ["stone-payments", "mundipagg", "pagarme", "cappta", "equals-conc"]
 update = 1  # update every x hours
 queue_max_size = 1500000
 num_of_threads = 1
-# queue_timeout = 15
 rest_minutes = 20  # minutes to rest and start collect again
 rate_limit_to_sleep = 10  # minimum remaining api value to wait next reset
 hash_indexes = [["Dev", "devName"], ["Dev", "login"], ["Teams", "teamName"],
