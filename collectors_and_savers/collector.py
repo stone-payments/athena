@@ -1,4 +1,5 @@
 import ast
+import queue
 from collection_modules.module import *
 from collection_modules.pagination import Pagination
 from collectors_and_savers.saver import *
@@ -85,14 +86,17 @@ class CollectorRestrictedItems:
 
     def _collect(self, repositories: Queue, save: Queue):
         while True:
-            repository = repositories.get(timeout=queue_timeout)
-            return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
-                                           updated_time=self.time, slug=self.slug, next_repo=repository)
-            for page in return_pagination:
-                edges = find_key(self.edges, page)
-                if edges is not None:
-                    for node in edges:
-                        self.process_edges(page, node, save)
+            try:
+                repository = repositories.get_nowait()
+                return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
+                                               updated_time=self.time, slug=self.slug, next_repo=repository)
+                for page in return_pagination:
+                    edges = find_key(self.edges, page)
+                    if edges is not None:
+                        for node in edges:
+                            self.process_edges(page, node, save)
+            except queue.Empty:
+                break
 
     def process_edges(self, page, node, save):
         pass
@@ -111,13 +115,16 @@ class CollectorRestricted(CollectorRestrictedItems):
 class CollectorCommitStats(CollectorRestrictedItems):
     def _collect(self, repositories: Queue, save: Queue):
         while True:
-            repository = repositories.get(timeout=queue_timeout)
-            repository = ast.literal_eval(repository)
-            rest_query = self.query(self, repository)
-            result = client_rest.execute(url_rest_api, rest_query, str(repository['oid']))
-            time.sleep(abuse_time_sleep)
-            queue_input = (self.save_content(result, repository["_id"]), self.save_edges)
-            save.put(queue_input)
+            try:
+                repository = repositories.get_nowait()
+                repository = ast.literal_eval(repository)
+                rest_query = self.query(self, repository)
+                result = client_rest.execute(url_rest_api, rest_query, str(repository['oid']))
+                time.sleep(abuse_time_sleep)
+                queue_input = (self.save_content(result, repository["_id"]), self.save_edges)
+                save.put(queue_input)
+            except queue.Empty:
+                break
 
 
 class CollectorRestrictedTeam(CollectorRestrictedItems):

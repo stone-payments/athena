@@ -19,6 +19,6 @@ def stats_collector(db, org, query, stats_query, collection_name, save_queue_typ
         return save_edges
 
     start = CollectorCommitStats(db=db, collection_name=collection_name, org=org, edges=edge_name, query=query,
-                                 query_db=stats_query, number_of_repo=number_of_repos, save_content=content,
+                                 query_db=stats_query, number_of_repo=number_pagination, save_content=content,
                                  save_edges=edges)
     start.start(save_queue_type)

@@ -20,6 +20,16 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
                     endingLine
                   }
                 }
+                blame3: blame(path: "CONTRIBUTING.md") {
+                  upperCaseContributing: ranges {
+                    endingLine
+                  }
+                }
+                blame4: blame(path: "contributing.md") {
+                  lowerCaseContributing: ranges {
+                    endingLine
+                  }
+                }
                 history(first:1,since:$sinceTime,until:$untilTime){
         					edges{
                     node{
