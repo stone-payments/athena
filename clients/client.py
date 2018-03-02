@@ -28,7 +28,7 @@ class Retry:
                 log.info(message)
                 log.info("Github Graphql API is possible down")
                 log.info("Resting for 10 min")
-                time.sleep(10)
+                time.sleep(600)
             except Exception as exception_message:
                 template = "An exception of type {0} occurred. Arguments:\n{1!r}"
                 message = template.format(type(exception_message).__name__, exception_message.args)
