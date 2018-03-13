@@ -7,6 +7,16 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
       }
       edges {
         node {
+            a:object(expression: "HEAD:README.md") {
+                ... on Blob {
+                  upperCaseTextReadme:text
+                }
+              }
+              b:object(expression: "HEAD:readme.md") {
+                ... on Blob {
+                  lowerCaseTextReadme:text
+                }
+              }
           defaultBranchRef {
             target {
               ...on Commit{
