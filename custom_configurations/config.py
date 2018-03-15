@@ -9,7 +9,7 @@ mongo_port = os.getenv("MONGO_PORT")
 url = os.getenv("GITHUB_GRAPHQL_URL")  # GitHub GraphQL API url
 url_rest_api = os.getenv("GITHUB_REST_URL")
 number_pagination = 100  # Number of items paginated
-number_pagination_repositories = 50  # Number of items paginated by repository query
+number_pagination_repositories = 30  # Number of items paginated by repository query
 timeout = 25.001
 since_time_days_delta = os.getenv("SINCE_TIME_DAYS_DELTA")  # days ago ex: -5
 until_time_days_delta = os.getenv("UNTIL_TIME_DAYS_DELTA")  # delta days from now ex: +1
@@ -27,6 +27,6 @@ hash_indexes_unique = []
 skip_list_indexes = [["Issue", "closeAt"], ["Issue", "createdAt"], ["Commit", "committedDate"], ["Fork", "createdAt"]]
 full_text_indexes = [["Repo", "repoName"], ["Teams", "teamName"], ["Issue", "org"],
                      ["Commit", "org"], ["Fork", "org"], ["Dev", "login"]]
-abuse_time_sleep = 2
+abuse_time_sleep = 0.7
 max_interval = 1  # max interval time for requests
 max_retries = 10  # max request retries
