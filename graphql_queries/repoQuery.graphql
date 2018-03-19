@@ -79,9 +79,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
           primaryLanguage {
             priLanguage: name
           }
-          forks {
-            totalForks:totalCount
-          }
+          totalForks: forkCount
           stargazers {
             totalStars:totalCount
           }
