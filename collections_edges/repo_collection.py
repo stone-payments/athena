@@ -1,4 +1,5 @@
 from collectors_and_savers.collector import *
+from collection_modules.language_detect import text_to_language
 
 
 def repo(db, org, query, collection_name, edge_name="edges"):
@@ -9,12 +10,20 @@ def repo(db, org, query, collection_name, edge_name="edges"):
         upper_case_readme = find_key('upperCaseReadme', node)
         lower_case_contributing = find_key('lowerCaseContributing', node)
         upper_case_contributing = find_key('upperCaseContributing', node)
+        lower_case_text_readme = find_key('lowerCaseTextReadme', node)
+        upper_case_text_readme = find_key('upperCaseTextReadme', node)
         if upper_case_readme:
             readme = "OK" if upper_case_readme[-1]['endingLine'] >= 5 else "Poor"
         elif lower_case_readme:
             readme = "OK" if lower_case_readme[-1]['endingLine'] >= 5 else "Poor"
         else:
             readme = None
+        if upper_case_text_readme and readme is not None:
+            readme_language = text_to_language(upper_case_text_readme)
+        elif lower_case_text_readme and readme is not None:
+            readme_language = text_to_language(lower_case_text_readme)
+        else:
+            readme_language = None
         if upper_case_contributing:
             contributing = "OK"
         elif lower_case_contributing:
@@ -40,6 +49,7 @@ def repo(db, org, query, collection_name, edge_name="edges"):
             "licenseType": string_validate(find_key('licenseType', node)),
             "isFork": bool_validate(find_key('isFork', node)),
             "readme": string_validate(readme),
+            "readmeLanguage": string_validate(readme_language),
             "contributing": string_validate(contributing),
             "db_last_updated": datetime.datetime.utcnow(),
             "languages": parse_multiple_languages(node, "language_edges", "languageName",
