@@ -37,5 +37,5 @@ def job(orgs_list):
         Issue(db, org, issue_query, issue_mongo, "Issue", save_edges_name_queue).collect()
 
 
-while True:
-    job(orgs)
+# while True:
+#     job(orgs)

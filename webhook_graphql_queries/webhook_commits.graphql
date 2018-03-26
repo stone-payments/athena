@@ -1,0 +1,40 @@
+query ($branch: String!, $number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
+  repository(owner: $org, name: $next2) {
+    repositoryId: id
+    repoName: name
+    ref(qualifiedName: $branch) {
+      target {
+        ... on Commit {
+          history(first: $number_of_repos, after: $next, since:"2018-03-07T17:45:47Z", until:"2018-03-22T18:22:27Z") {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
+            edges {cursor
+              node {
+                commitId: id
+                messageHeadline
+                oid
+                committedDate
+                additions
+                pushedDate
+                deletions
+                changedFiles
+                author {
+                  user {
+                    devId: id
+                    login
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  rateLimit {
+    remaining
+    resetAt
+  }
+}

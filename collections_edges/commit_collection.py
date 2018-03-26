@@ -1,8 +1,12 @@
-from collectors_and_savers.collector import *
+from collectors_and_savers.collector import CollectorRestricted, string_validate, not_null, find_key, convert_datetime, \
+    int_validate, number_pagination, utc_time
+from collectors_and_savers.webhook_collector import Collector
+import datetime
 
 
 class Commit:
-    def __init__(self, db, org, query, query_db, collection_name, save_queue_type, edge_name="edges"):
+    def __init__(self, db, org, query, query_db=None, collection_name="Commit", save_queue_type=None, edge_name="edges",
+                 branch_name=None, since_commit=None, until_commit=None):
         self.db = db
         self.org = org
         self.query = query
@@ -10,6 +14,9 @@ class Commit:
         self.collection_name = collection_name
         self.save_queue_type = save_queue_type
         self.edge_name = edge_name
+        self.branch_name = branch_name
+        self.until_commit = until_commit
+        self.since_commit = since_commit
 
     def content(self, response, node):
         save_content = {
@@ -61,3 +68,11 @@ class Commit:
                                     query_db=self.query_db, number_of_repo=number_pagination, save_content=self.content,
                                     save_edges=self.edges)
         start.start(self.save_queue_type)
+
+    def collect_webhook(self):
+        print('entrei collect webhook')
+        start = Collector(db=self.db, collection_name=self.collection_name, org=self.org, branch_name=self.branch_name,
+                          until=self.until_commit, since=self.since_commit,
+                          edges=self.edge_name, query=self.query, save_content=self.content, save_edges=self.edges)
+        start.start()
+

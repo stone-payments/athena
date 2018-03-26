@@ -1,7 +1,6 @@
 import json
 import os
 import re
-
 import requests
 
 
@@ -13,31 +12,38 @@ class ClientRest(object):
     def headers(self):
         return {"Authorization": "token %s" % self._token}
 
-    def main_request(self, url, method, data={}):
-        print(self.headers())
+    def main_request(self, url, method, data=None):
+        if data is None:
+            data = {}
         try:
             r = requests.request(method, url, data=json.dumps(data), headers=self.headers())
             return r
         except Exception as error:
                 raise NameError(str(error))
 
-    def get(self, url, data={}):
+    def get(self, url, data=None):
+        if data is None:
+            data = {}
         return self.main_request(url, 'GET', data=data)
 
-    def post(self, url, data={}):
+    def post(self, url, data=None):
+        if data is None:
+            data = {}
         return self.main_request(url, 'POST', data=data)
 
-    def put(self, url, data={}):
+    def put(self, url, data=None):
+        if data is None:
+            data = {}
         return self.main_request(url, 'PUT', data=data)
 
     def delete(self, url):
         return self.main_request(url, 'DELETE')
 
-    def get_url(self, paths):
+    @staticmethod
+    def get_url(paths):
         url = os.getenv('URL', '')
         for path in paths:
             url = re.sub(r'/?$', re.sub(r'^/?', '/', str(path)), url)
-        print(url)
         return url
 
 
