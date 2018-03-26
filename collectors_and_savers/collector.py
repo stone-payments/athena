@@ -47,7 +47,7 @@ class CollectorTeam(Collector):
     def process_edges(self, edges, **kwargs):
         if edges is not None:
             for node in edges:
-                team = self.save_content(self, edges, node)
+                team = self.save_content(edges, node)
                 members, repositories = self.save_edges(team, find_key('members_edge', node),
                                                         find_key('repo_edge', node))
                 save = SaverTeam(db=self.db)
@@ -108,7 +108,7 @@ class CollectorRestrictedItems:
 
 class CollectorRestricted(CollectorRestrictedItems):
     def process_edges(self, page, node, save: Queue):
-        queue_input = (self.save_content(self, page, node), self.save_edges)
+        queue_input = (self.save_content(page, node), self.save_edges)
         save.put(queue_input)
 
 
