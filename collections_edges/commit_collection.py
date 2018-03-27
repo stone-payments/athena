@@ -6,7 +6,7 @@ import datetime
 
 class Commit:
     def __init__(self, db, org, query, query_db=None, collection_name="Commit", save_queue_type=None, edge_name="edges",
-                 branch_name=None, since_commit=None, until_commit=None):
+                 branch_name=None, since_commit=None, until_commit=None, repo_name=None):
         self.db = db
         self.org = org
         self.query = query
@@ -17,6 +17,7 @@ class Commit:
         self.branch_name = branch_name
         self.until_commit = until_commit
         self.since_commit = since_commit
+        self.repo_name = repo_name
 
     def content(self, response, node):
         save_content = {
@@ -71,8 +72,8 @@ class Commit:
 
     def collect_webhook(self):
         print('entrei collect webhook')
-        start = Collector(db=self.db, collection_name=self.collection_name, org=self.org, branch_name=self.branch_name,
-                          until=self.until_commit, since=self.since_commit,
-                          edges=self.edge_name, query=self.query, save_content=self.content, save_edges=self.edges)
+        start = Collector(db=self.db, number_of_repo=number_pagination, collection_name=self.collection_name,
+                          org=self.org, branch_name=self.branch_name, until=self.until_commit, since=self.since_commit,
+                          repo_name=self.repo_name, edges=self.edge_name, query=self.query, save_content=self.content,
+                          save_edges=self.edges)
         start.start()
-

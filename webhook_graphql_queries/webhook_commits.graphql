@@ -1,11 +1,12 @@
-query ($branch: String!, $number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
-  repository(owner: $org, name: $next2) {
+query ($repo: String!, $branch: String!, $number_of_repos: Int!, $since: GitTimestamp!, $until: GitTimestamp!, $org: String!) {
+  repository(owner: $org, name: $repo) {
     repositoryId: id
     repoName: name
     ref(qualifiedName: $branch) {
+      branchName: name
       target {
         ... on Commit {
-          history(first: $number_of_repos, after: $next, since:"2018-03-07T17:45:47Z", until:"2018-03-22T18:22:27Z") {
+          history(first: $number_of_repos, since:$since, until:$until) {
             pageInfo {
               endCursor
               hasNextPage
