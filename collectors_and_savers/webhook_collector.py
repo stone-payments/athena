@@ -1,7 +1,6 @@
-from collection_modules.module import find_key
 from collection_modules.module import client_graphql
-import pprint
 from collection_modules.module import find_key
+from collection_modules.validators import *
 
 
 class Collector:
@@ -40,22 +39,19 @@ class Collector:
                                                    "since": self.since,
                                                    "until": self.until
                                                })
-        # pprint.pprint(response)
         edges = find_key("edges", response)
         for page in edges:
             content = self.save_content(response, page)
-            print(content)
-            self.db.update(obj={"_id": content["_id"]}, patch=content, kind=content["collection_name"])
-            # self.save_collection(content)
+            self.save(content, self.save_edges)
 
-    # def process_edges(self, edges, **kwargs): pass
+    def save(self, save: dict, save_edges: type):
+        self.db.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
+        edges = save_edges(save)
+        edges = [edge for edge in edges if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name"))]
+        for edge in edges:
+            self.db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
+                            data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                           'edge_name']})
 
     def start(self):
-        print('entrei Collector')
         self._collect()
-
-    # def process_content(self, ):
-
-    # def save_collection(self, page, node, save: Queue):
-    #     queue_input = (self.save_content(page, node), self.save_edges)
-    #     save.put(queue_input)
