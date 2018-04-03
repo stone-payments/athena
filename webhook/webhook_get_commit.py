@@ -1,8 +1,8 @@
 from collection_modules.module import find_key
 import datetime
-from collections_edges import Commit
+from collections_edges import Commit, Repo
 from app import db
-from webhook_graphql_queries.webhook_graphql_queries import webhook_commits_query
+from webhook_graphql_queries.webhook_graphql_queries import webhook_commits_query, webhook_repo_query
 
 
 class GetCommit:
@@ -20,6 +20,16 @@ class GetCommit:
     def __parse_branch(data):
         return data[11:]
 
+    @staticmethod
+    def __check_readme(data, repo_name, branch):
+        modified_file = find_key("modified", data)
+        print(modified_file)
+        if "README.md" in modified_file or "readme.md" in modified_file:
+            print("Entrou")
+            repo = Repo(db, org="stone-payments", query=webhook_repo_query, collection_name="Repo", repo_name=repo_name,
+                        branch_name=branch)
+            repo.collect_webhook()
+
     def get_data(self, raw_json):
         repo_name = find_key('repository', raw_json)
         repo_name = find_key('name', repo_name)
@@ -34,7 +44,7 @@ class GetCommit:
         commit = Commit(db, "stone-payments", webhook_commits_query, collection_name="Commit", branch_name=branch,
                         since_commit=since_timestamp, until_commit=until_timestamp, repo_name=repo_name)
         commit.collect_webhook()
-
+        self.__check_readme(raw_json, repo_name, branch)
 
 
 

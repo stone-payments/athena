@@ -1,5 +1,4 @@
 from .commit_collection import *
-from .commit_stats_collection import *
 from .dev_collection import *
 from .fork_collection import *
 from .issue_collection import *

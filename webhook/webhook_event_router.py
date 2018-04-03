@@ -16,6 +16,13 @@ class WebhookEventRouter:
             if event == 'push' and find_key("deleted", data) is False:
                 get_commit = GetCommit()
                 get_commit.get_data(data)
+                modified_file = find_key("modified", data)
+                print(modified_file)
+                if "README.md" in modified_file or "readme.md" in modified_file:
+                    print("Entrou")
+
+                if "CHANGELOG.md" in modified_file:
+                    print("Entrou changelog")
 
     def start(self):
         workers = [Thread(target=self.webhook_event_router, args=()) for _ in range(1)]

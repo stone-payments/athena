@@ -1,9 +1,10 @@
 from collection_modules.module import client_graphql
 from collection_modules.module import find_key
 from collection_modules.validators import *
+import pprint
 
 
-class Collector:
+class WebhookCollector:
     def __init__(self, db: callable, collection_name: object, org: str, edges: object, query: object,
                  save_content: callable, save_edges: callable, number_of_repo: int = None, branch_name = None,
                  since=None, until=None, repo_name=None):
@@ -39,9 +40,17 @@ class Collector:
                                                    "since": self.since,
                                                    "until": self.until
                                                })
+        pprint.pprint(response)
         edges = find_key("edges", response)
-        for page in edges:
-            content = self.save_content(response, page)
+        print(edges)
+        print(type(edges))
+        if edges:
+            for page in edges:
+                content = self.save_content(response=response, node=page)
+                self.save(content, self.save_edges)
+        else:
+            print("ELSE")
+            content = self.save_content(node=response)
             self.save(content, self.save_edges)
 
     def save(self, save: dict, save_edges: type):

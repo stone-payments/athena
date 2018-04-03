@@ -108,7 +108,7 @@ class CollectorRestrictedItems:
 
 class CollectorRestricted(CollectorRestrictedItems):
     def process_edges(self, page, node, save: Queue):
-        queue_input = (self.save_content(page, node), self.save_edges)
+        queue_input = (self.save_content(page=page, node=node), self.save_edges)
         save.put(queue_input)
 
 

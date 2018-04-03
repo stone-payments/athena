@@ -1,6 +1,6 @@
 from collectors_and_savers.collector import CollectorRestricted, string_validate, not_null, find_key, convert_datetime, \
     int_validate, number_pagination, utc_time
-from collectors_and_savers.webhook_collector import Collector
+from collectors_and_savers.webhook_collector import WebhookCollector
 import datetime
 
 
@@ -19,7 +19,9 @@ class Commit:
         self.since_commit = since_commit
         self.repo_name = repo_name
 
-    def content(self, response, node):
+    def content(self, **kwargs):
+        node = kwargs.get('node')
+        response = kwargs.get('response')
         save_content = {
             "collection_name": string_validate(self.collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
@@ -72,8 +74,8 @@ class Commit:
 
     def collect_webhook(self):
         print('entrei collect webhook')
-        start = Collector(db=self.db, number_of_repo=number_pagination, collection_name=self.collection_name,
-                          org=self.org, branch_name=self.branch_name, until=self.until_commit, since=self.since_commit,
-                          repo_name=self.repo_name, edges=self.edge_name, query=self.query, save_content=self.content,
-                          save_edges=self.edges)
+        start = WebhookCollector(db=self.db, number_of_repo=number_pagination, collection_name=self.collection_name,
+                                 org=self.org, branch_name=self.branch_name, until=self.until_commit, since=self.since_commit,
+                                 repo_name=self.repo_name, edges=self.edge_name, query=self.query, save_content=self.content,
+                                 save_edges=self.edges)
         start.start()

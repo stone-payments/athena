@@ -1,0 +1,92 @@
+query ($repo: String!, $branch: String!, $number_of_repos: Int!, $org: String!, $since: GitTimestamp!, $until: GitTimestamp!) {
+  organization(login: $org) {
+    repository(name: $repo) {
+      a: object(expression: "HEAD:README.md") {
+        ... on Blob {
+          upperCaseTextReadme: text
+        }
+      }
+      b: object(expression: "HEAD:readme.md") {
+        ... on Blob {
+          lowerCaseTextReadme: text
+        }
+      }
+      ref(qualifiedName: $branch) {
+        target {
+          ... on Commit {
+            blame1: blame(path: "README.md") {
+              upperCaseReadme: ranges {
+                endingLine
+              }
+            }
+            blame2: blame(path: "readme.md") {
+              lowerCaseReadme: ranges {
+                endingLine
+              }
+            }
+            blame3: blame(path: "CONTRIBUTING.md") {
+              upperCaseContributing: ranges {
+                endingLine
+              }
+            }
+            blame4: blame(path: "contributing.md") {
+              lowerCaseContributing: ranges {
+                endingLine
+              }
+            }
+            history(first: 1, since: $since, until: $until) {
+              nodes {
+                committedInRangeDate: committedDate
+              }
+            }
+          }
+          repository {
+            licenseInfo {
+              licenseId: id
+              licenseType: key
+            }
+          }
+        }
+      }
+      languages(first: $number_of_repos) {
+        pageInfo {
+          endCursor
+        }
+        languagesCount: totalCount
+        totalSize
+        language_edges: edges {
+          languageSize: size
+          node {
+            languageId: id
+            languageName: name
+          }
+        }
+      }
+      repoId: id
+      name
+      description: descriptionHTML
+      url
+      nameWithOwner
+      isPrivate
+      primaryLanguage {
+        priLanguage: name
+      }
+      totalForks: forkCount
+      stargazers {
+        totalStars: totalCount
+      }
+      watchers {
+        totalWatchers: totalCount
+      }
+      issues {
+        totalIssues: totalCount
+      }
+      isFork
+      createdAt
+    }
+  }
+  rateLimit {
+    remaining
+    resetAt
+  }
+}
