@@ -23,9 +23,11 @@ class GetCommit:
     @staticmethod
     def __check_readme(data, repo_name, branch):
         modified_file = find_key("modified", data)
-        print(modified_file)
-        if "README.md" in modified_file or "readme.md" in modified_file:
-            print("Entrou")
+        added_file = find_key("added", data)
+        removed_file = find_key("removed", data)
+        files = list(set().union(modified_file, added_file, removed_file))
+        if "README.md" in files or "readme.md" in files or "CONTRIBUTING.md" in files or "contributing.md" in files or \
+                "LICENSE.md" in files or "LICENSE" in files:
             repo = Repo(db, org="stone-payments", query=webhook_repo_query, collection_name="Repo", repo_name=repo_name,
                         branch_name=branch)
             repo.collect_webhook()

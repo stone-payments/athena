@@ -47,6 +47,7 @@ class Repo:
             "org": string_validate(self.org, not_none=True),
             "_id": find_key('repoId', node),
             "repoName": string_validate(find_key('name', node), not_none=True),
+            "defaultBranch": string_validate(find_key('defaultBranch', node)),
             "description": string_validate(find_key('description', node)),
             "url": string_validate(find_key('url', node)),
             "openSource": bool_validate(False if find_key('isPrivate', node) else True),

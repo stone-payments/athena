@@ -42,8 +42,6 @@ class WebhookCollector:
                                                })
         pprint.pprint(response)
         edges = find_key("edges", response)
-        print(edges)
-        print(type(edges))
         if edges:
             for page in edges:
                 content = self.save_content(response=response, node=page)

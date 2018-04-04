@@ -1,4 +1,4 @@
-query ($repo: String!, $branch: String!, $number_of_repos: Int!, $org: String!, $since: GitTimestamp!, $until: GitTimestamp!) {
+query ($repo: String!, $number_of_repos: Int!, $org: String!, $since: GitTimestamp!, $until: GitTimestamp!) {
   organization(login: $org) {
     repository(name: $repo) {
       a: object(expression: "HEAD:README.md") {
@@ -11,7 +11,8 @@ query ($repo: String!, $branch: String!, $number_of_repos: Int!, $org: String!, 
           lowerCaseTextReadme: text
         }
       }
-      ref(qualifiedName: $branch) {
+      defaultBranchRef{
+      defaultBranch: name
         target {
           ... on Commit {
             blame1: blame(path: "README.md") {

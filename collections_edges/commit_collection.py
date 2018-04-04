@@ -28,7 +28,7 @@ class Commit:
             "_id": not_null(find_key('commitId', node)),
             "repositoryId": string_validate(find_key('repositoryId', response), not_none=True),
             "repoName": string_validate(find_key('repoName', response), not_none=True),
-            "branchName": string_validate(find_key('branchName', response)),
+            "branchName": [string_validate(find_key('branchName', response))],
             "messageHeadline": string_validate(find_key('messageHeadline', node)),
             "oid": not_null(find_key('oid', node)),
             "committedDate": convert_datetime(find_key('committedDate', node)),

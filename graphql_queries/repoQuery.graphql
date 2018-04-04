@@ -18,6 +18,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
                 }
               }
           defaultBranchRef {
+          defaultBranch: name
             target {
               ...on Commit{
                 blame1: blame(path: "README.md"){
