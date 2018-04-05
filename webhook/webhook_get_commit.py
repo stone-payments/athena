@@ -11,17 +11,19 @@ class GetCommit:
     def __parse_date(date):
         if date is None:
             return None
-        timezone = date[-6:-3]
-        date = date[:-6]
-        date = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%S")
-        return (date + datetime.timedelta(hours=-int(timezone))).strftime('%Y-%m-%dT%H:%M:%SZ')
+        if len(date) == 25:
+            timezone = date[-6:-3]
+            date = datetime.datetime.strptime(date[:-6], "%Y-%m-%dT%H:%M:%S")
+            return (date + datetime.timedelta(hours=-int(timezone))).strftime('%Y-%m-%dT%H:%M:%SZ')
+        else:
+            return datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
 
     @staticmethod
     def __parse_branch(data):
-        return data[11:]
+        return '/'.join(data.split("/")[2:])
 
     @staticmethod
-    def __check_readme(data, repo_name, branch):
+    def __check_repository_updates(data, repo_name, branch):
         modified_file = find_key("modified", data)
         added_file = find_key("added", data)
         removed_file = find_key("removed", data)
@@ -33,20 +35,19 @@ class GetCommit:
             repo.collect_webhook()
 
     def get_data(self, raw_json):
-        repo_name = find_key('repository', raw_json)
-        repo_name = find_key('name', repo_name)
+        org_name = find_key('login', find_key('organization', raw_json))
+        repo_name = find_key('name', find_key('repository', raw_json))
         commit_list = find_key('commits', raw_json)
+        branch = self.__parse_branch(find_key('ref', raw_json))
         if not commit_list:
             head_commit = find_key('head_commit', raw_json)
             since_timestamp = until_timestamp = self.__parse_date(find_key('timestamp', head_commit))
         else:
             since_timestamp = self.__parse_date(find_key('timestamp', commit_list[0]))
             until_timestamp = self.__parse_date(find_key('timestamp', commit_list[-1]))
-        branch = self.__parse_branch(find_key('ref', raw_json))
-        commit = Commit(db, "stone-payments", webhook_commits_query, collection_name="Commit", branch_name=branch,
+        commit = Commit(db, org_name, webhook_commits_query, collection_name="Commit", branch_name=branch,
                         since_commit=since_timestamp, until_commit=until_timestamp, repo_name=repo_name)
         commit.collect_webhook()
-        self.__check_readme(raw_json, repo_name, branch)
-
+        self.__check_repository_updates(raw_json, repo_name, branch)
 
 

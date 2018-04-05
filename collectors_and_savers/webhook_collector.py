@@ -52,7 +52,11 @@ class WebhookCollector:
             self.save(content, self.save_edges)
 
     def save(self, save: dict, save_edges: type):
+        existed_branch = self.db.query("Commit", {"_id": save["_id"]}, {"_id": 0, "branchName": 1})
         self.db.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
+        if existed_branch:
+            self.db.update_generic(obj={"_id": save["_id"]}, patch={"$addToSet": {"branchName":
+                                   {"$each": existed_branch[0]["branchName"]}}}, kind=save["collection_name"])
         edges = save_edges(save)
         edges = [edge for edge in edges if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name"))]
         for edge in edges:

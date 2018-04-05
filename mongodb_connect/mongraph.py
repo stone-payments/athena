@@ -21,6 +21,11 @@ class Mongraph(object):
         collection = self._mongodb_client[collection_name]
         collection.update_many(obj, {"$set": patch}, upsert=True)
 
+    def update_generic(self, obj: object, patch: object, kind: str = None):
+        collection_name = kind
+        collection = self._mongodb_client[collection_name]
+        collection.update_many(obj, patch, upsert=True)
+
     def connect(self, from_: str, to: str, kind: str, data: dict):
         kind = kind or '{from}${to}'.format(**{
             'from': from_,
