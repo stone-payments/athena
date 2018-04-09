@@ -24,14 +24,14 @@ class GetCommit:
     def __parse_branch(data):
         return '/'.join(data.split("/")[2:])
 
-    def __check_repository_updates(self, data, repo_name, branch):
+    def __check_repository_updates(self, org, data, repo_name, branch):
         modified_file = find_key("modified", data)
         added_file = find_key("added", data)
         removed_file = find_key("removed", data)
         files = list(set().union(modified_file, added_file, removed_file))
         if "README.md" in files or "readme.md" in files or "CONTRIBUTING.md" in files or "contributing.md" in files or \
                 "LICENSE.md" in files or "LICENSE" in files:
-            repo = Repo(self.db, org="stone-payments", query=webhook_repo_query, collection_name="Repo", repo_name=repo_name,
+            repo = Repo(self.db, org=org, query=webhook_repo_query, collection_name="Repo", repo_name=repo_name,
                         branch_name=branch)
             repo.collect_webhook()
 
@@ -49,6 +49,6 @@ class GetCommit:
         commit = Commit(self.db, org_name, webhook_commits_query, collection_name="Commit", branch_name=branch,
                         since_commit=since_timestamp, until_commit=until_timestamp, repo_name=repo_name)
         commit.collect_webhook()
-        self.__check_repository_updates(raw_json, repo_name, branch)
+        self.__check_repository_updates(org_name, raw_json, repo_name, branch)
 
 
