@@ -1,11 +1,13 @@
 from collection_modules.module import find_key
 import datetime
 from collections_edges import Commit, Repo
-from app import db
 from webhook_graphql_queries.webhook_graphql_queries import webhook_commits_query, webhook_repo_query
 
 
 class GetCommit:
+
+    def __init__(self, db):
+        self.db = db
 
     @staticmethod
     def __parse_date(date):
@@ -16,21 +18,20 @@ class GetCommit:
             date = datetime.datetime.strptime(date[:-6], "%Y-%m-%dT%H:%M:%S")
             return (date + datetime.timedelta(hours=-int(timezone))).strftime('%Y-%m-%dT%H:%M:%SZ')
         else:
-            return datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
+            return date
 
     @staticmethod
     def __parse_branch(data):
         return '/'.join(data.split("/")[2:])
 
-    @staticmethod
-    def __check_repository_updates(data, repo_name, branch):
+    def __check_repository_updates(self, data, repo_name, branch):
         modified_file = find_key("modified", data)
         added_file = find_key("added", data)
         removed_file = find_key("removed", data)
         files = list(set().union(modified_file, added_file, removed_file))
         if "README.md" in files or "readme.md" in files or "CONTRIBUTING.md" in files or "contributing.md" in files or \
                 "LICENSE.md" in files or "LICENSE" in files:
-            repo = Repo(db, org="stone-payments", query=webhook_repo_query, collection_name="Repo", repo_name=repo_name,
+            repo = Repo(self.db, org="stone-payments", query=webhook_repo_query, collection_name="Repo", repo_name=repo_name,
                         branch_name=branch)
             repo.collect_webhook()
 
@@ -45,7 +46,7 @@ class GetCommit:
         else:
             since_timestamp = self.__parse_date(find_key('timestamp', commit_list[0]))
             until_timestamp = self.__parse_date(find_key('timestamp', commit_list[-1]))
-        commit = Commit(db, org_name, webhook_commits_query, collection_name="Commit", branch_name=branch,
+        commit = Commit(self.db, org_name, webhook_commits_query, collection_name="Commit", branch_name=branch,
                         since_commit=since_timestamp, until_commit=until_timestamp, repo_name=repo_name)
         commit.collect_webhook()
         self.__check_repository_updates(raw_json, repo_name, branch)
