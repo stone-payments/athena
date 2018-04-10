@@ -50,5 +50,3 @@ class GetCommit:
                         since_commit=since_timestamp, until_commit=until_timestamp, repo_name=repo_name)
         commit.collect_webhook()
         self.__check_repository_updates(org_name, raw_json, repo_name, branch)
-
-

@@ -6,6 +6,7 @@ from webhook.webhook_new_repository import GetNewRepository
 from threading import Thread
 import pprint
 from app import db
+from webhook.event_tests import create_repository_publicized
 
 
 class WebhookEventRouter:
@@ -20,6 +21,7 @@ class WebhookEventRouter:
     def webhook_event_router(self):
         while True:
             returned_data = self.webhook_queue.get(block=True)
+            returned_data = create_repository_publicized()
             event = returned_data[0]
             data = returned_data[1]
             if event == 'push' and not find_key("deleted", data) and not find_key("forced", data) and \
@@ -39,7 +41,7 @@ class WebhookEventRouter:
                 pprint.pprint(data)
                 delete_branch = DeleteBranch(db)
                 delete_branch.get_data(data)
-            elif event == 'create' and find_key('ref_type', data) == "repository":
+            elif event == "repository":
                 print("create")
                 pprint.pprint(data)
                 new_repository = GetNewRepository(db)
