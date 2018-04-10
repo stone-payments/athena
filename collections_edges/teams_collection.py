@@ -14,7 +14,7 @@ class Teams:
             "collection_name": string_validate(self.collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
             "_id": find_key('teamId', node),
-            'createdAt': convert_datetime(find_key('createdAt', node)),
+            'created_at': convert_datetime(find_key('createdAt', node)),
             "teamName": string_validate(node["node"]["name"], not_none=True),
             "privacy": string_validate(node["node"]["privacy"]),
             "slug": string_validate(node["node"]["slug"], not_none=True),

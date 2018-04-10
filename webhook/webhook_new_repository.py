@@ -20,11 +20,11 @@ class GetNewRepository:
         repo.collect_webhook()
 
     def __delete_repository(self, org_name, repo_name, pushed_date):
-        self.db.update(obj={"org": org_name, "repoName": repo_name}, patch={"deleted_at": pushed_date},
+        self.db.update(obj={"org": org_name, "repo_name": repo_name}, patch={"deleted_at": pushed_date},
                        kind="Repo")
 
     def __update_repository(self, org_name, repo_name, pushed_date, document_name, status):
-        self.db.update_generic(obj={"org": org_name, "repoName": repo_name}, patch={"$addToSet": {document_name:
+        self.db.update_generic(obj={"org": org_name, "repo_name": repo_name}, patch={"$addToSet": {document_name:
                            {"$each": [{"date": pushed_date, "status": status}]}}}, kind="Repo")
 
     def get_data(self, raw_json):

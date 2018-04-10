@@ -1,7 +1,7 @@
 query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!, $sinceTime:GitTimestamp!, $untilTime:GitTimestamp!){
   repository(owner: $org, name: $next2) {
     repositoryId: id
-    repoName: name
+    repo_name: name
     defaultBranchRef {
       branchName: name
       target {

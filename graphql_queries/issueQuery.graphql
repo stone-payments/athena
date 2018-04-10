@@ -3,7 +3,7 @@ query ($number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
     Org: login
     repository(name: $next2) {
       repositoryId: id
-      repoName: name
+      repo_name: name
       issues(first: $number_of_repos, after: $next) {
         pageInfo {
           endCursor

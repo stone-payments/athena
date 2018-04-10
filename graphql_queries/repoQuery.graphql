@@ -18,7 +18,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
                 }
               }
           defaultBranchRef {
-          defaultBranch: name
+          default_branch: name
             target {
               ...on Commit{
                 blame1: blame(path: "README.md"){
@@ -51,8 +51,8 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
               }
               repository {
                 licenseInfo {
-                  licenseId: id
-                  licenseType: key
+                  license_id: id
+                  license_type: key
                 }
               }
             }
@@ -78,7 +78,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!, $sinceTime:GitTimes
           nameWithOwner
           isPrivate
           primaryLanguage {
-            priLanguage: name
+            primary_Language: name
           }
           totalForks: forkCount
           stargazers {

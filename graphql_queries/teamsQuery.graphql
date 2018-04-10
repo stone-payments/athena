@@ -22,7 +22,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
            repo_edge: edges {
               node {
                 repoId:id
-               repoName: name
+               repo_name: name
               }
             }
           }

@@ -1,7 +1,7 @@
 query ($repo: String!, $branch: String!, $number_of_repos: Int!, $since: GitTimestamp!, $until: GitTimestamp!, $org: String!) {
   repository(owner: $org, name: $repo) {
     repositoryId: id
-    repoName: name
+    repo_name: name
     ref(qualifiedName: $branch) {
       branchName: name
       target {

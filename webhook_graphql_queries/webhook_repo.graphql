@@ -12,7 +12,7 @@ query ($repo: String!, $number_of_repos: Int!, $org: String!, $since: GitTimesta
         }
       }
       defaultBranchRef{
-      defaultBranch: name
+      default_branch: name
         target {
           ... on Commit {
             blame1: blame(path: "README.md") {
@@ -43,8 +43,8 @@ query ($repo: String!, $number_of_repos: Int!, $org: String!, $since: GitTimesta
           }
           repository {
             licenseInfo {
-              licenseId: id
-              licenseType: key
+              license_id: id
+              license_type: key
             }
           }
         }
@@ -69,7 +69,7 @@ query ($repo: String!, $number_of_repos: Int!, $org: String!, $since: GitTimesta
       url
       nameWithOwner
       isPrivate
-      primaryLanguage {
+      primary_language {
         priLanguage: name
       }
       totalForks: forkCount
