@@ -1,6 +1,6 @@
 query ($number_of_repos: Int!, $next: String, $next2: String!,$org:String!) {
   repository(owner: $org, name: $next2) {
-    repositoryId: id
+    repository_id: id
     languages(first: $number_of_repos after:$next) {
       pageInfo{
         endCursor

@@ -16,12 +16,12 @@ class OrgCollection:
             "collection_name": string_validate(self.collection_name, not_none=True),
             "org": string_validate(org_name, not_none=True),
             "_id": not_null(find_key('id', page)),
-            "avatarUrl": string_validate(find_key('avatarUrl', page)),
+            "avatar_url": string_validate(find_key('avatarUrl', page)),
             "description": string_validate(find_key('description', page)),
-            "membersCount": int_validate(find_key('membersCount', page)),
-            "teamsCount": int_validate(find_key('teamsCount', page)),
-            "repoCount": int_validate(find_key('repoCount', page)),
-            "projectCount": int_validate(find_key('projectCount', page)),
+            "members_count": int_validate(find_key('members_count', page)),
+            "teams_Count": int_validate(find_key('teams_Count', page)),
+            "repo_count": int_validate(find_key('repo_count', page)),
+            "project_count": int_validate(find_key('project_count', page)),
             "db_last_updated": datetime.datetime.utcnow(),
         }
         return save_content

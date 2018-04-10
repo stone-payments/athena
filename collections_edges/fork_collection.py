@@ -11,17 +11,17 @@ class Fork:
         self.save_queue_type = save_queue_type
         self.edge_name = edge_name
 
-    def content(self, response, node):
+    def content(self, page, node):
         save_content = {
             "collection_name": string_validate(self.collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
             "_id": not_null(find_key('forkId', node)),
-            "repositoryId": not_null(find_key('repositoryId', response)),
-            "repo_name": string_validate(find_key('repo_name', response)),
+            "repository_id": not_null(find_key('repository_id', page)),
+            "repo_name": string_validate(find_key('repo_name', page)),
             "created_at": convert_datetime(find_key('createdAt', node)),
-            "isPrivate": bool_validate(find_key('isPrivate', node)),
-            "isLocked": bool_validate(find_key('isLocked', node)),
-            "devId": string_validate(find_key('devId', node)),
+            "is_private": bool_validate(find_key('isPrivate', node)),
+            "is_locked": bool_validate(find_key('isLocked', node)),
+            "dev_id": string_validate(find_key('dev_id', node)),
             "login": string_validate(find_key('login', node)),
             "db_last_updated": datetime.datetime.utcnow(),
         }
@@ -32,13 +32,13 @@ class Fork:
         save_edges = [{
             "edge_name": "fork_to_dev",
             "to": find_key('_id', node),
-            "from": find_key('devId', node),
+            "from": find_key('dev_id', node),
             "db_last_updated": datetime.datetime.utcnow(),
         },
             {
                 "edge_name": "fork_to_repo",
                 "to": find_key('_id', node),
-                "from": find_key('repositoryId', node),
+                "from": find_key('repository_id', node),
                 "db_last_updated": datetime.datetime.utcnow(),
             }
         ]

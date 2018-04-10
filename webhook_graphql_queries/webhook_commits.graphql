@@ -1,9 +1,9 @@
 query ($repo: String!, $branch: String!, $number_of_repos: Int!, $since: GitTimestamp!, $until: GitTimestamp!, $org: String!) {
   repository(owner: $org, name: $repo) {
-    repositoryId: id
+    repository_id: id
     repo_name: name
     ref(qualifiedName: $branch) {
-      branchName: name
+      branch_name: name
       target {
         ... on Commit {
           history(first: $number_of_repos, since:$since, until:$until) {
@@ -13,7 +13,7 @@ query ($repo: String!, $branch: String!, $number_of_repos: Int!, $since: GitTime
             }
             edges {cursor
               node {
-                commitId: id
+                commit_id: id
                 messageHeadline
                 oid
                 committedDate
@@ -23,7 +23,7 @@ query ($repo: String!, $branch: String!, $number_of_repos: Int!, $since: GitTime
                 changedFiles
                 author {
                   user {
-                    devId: id
+                    dev_id: id
                     login
                   }
                 }

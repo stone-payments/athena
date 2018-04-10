@@ -9,8 +9,8 @@ class DeleteBranch:
     def __update_deleted_branch_commits(self, org, repo_name, branch):
         existed_branch_id = self.db.query_find_to_dictionary_distinct("Commit", "_id", {"org": org,
                                                                                         "repo_name": repo_name,
-                                                                                        "branchName": branch})
-        self.db.update_generic(obj={"_id": {"$in": existed_branch_id}}, patch={"$pull": {"branchName": branch}},
+                                                                                        "branch_name": branch})
+        self.db.update_generic(obj={"_id": {"$in": existed_branch_id}}, patch={"$pull": {"branch_name": branch}},
                                kind="Commit")
 
     def get_data(self, raw_json):

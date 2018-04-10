@@ -1,9 +1,9 @@
 query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!, $sinceTime:GitTimestamp!, $untilTime:GitTimestamp!){
   repository(owner: $org, name: $next2) {
-    repositoryId: id
+    repository_id: id
     repo_name: name
     defaultBranchRef {
-      branchName: name
+      branch_name: name
       target {
         ... on Commit {
           history(first: $number_of_repos, after: $next, since: $sinceTime, until: $untilTime) {
@@ -13,7 +13,7 @@ query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!, $sinceTi
             }
             edges {
               node {
-                commitId: id
+                commit_id: id
                 messageHeadline
                 oid
                 committedDate
@@ -22,7 +22,7 @@ query($number_of_repos:Int!, $next:String, $next2:String!,$org:String!, $sinceTi
                 changedFiles
                 author {
                   user {
-                    devId: id
+                    dev_id: id
                     login
                   }
                 }

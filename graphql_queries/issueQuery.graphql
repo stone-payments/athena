@@ -2,7 +2,7 @@ query ($number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
   organization(login: $org) {
     Org: login
     repository(name: $next2) {
-      repositoryId: id
+      repository_id: id
       repo_name: name
       issues(first: $number_of_repos, after: $next) {
         pageInfo {
@@ -17,7 +17,7 @@ query ($number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
             timeline(last: 1) {
               nodes {
                 ... on ClosedEvent {
-                  closedAt: createdAt
+                  closed_at: createdAt
                   actor {
                     closed_login: login
                   }

@@ -12,8 +12,8 @@ class GetBranch:
 
     def __update_new_branch_commits(self, org, repo_name, base_branch, branch):
         existed_branch = self.db.query_find_to_dictionary_distinct("Commit", "_id", {"org": org, "repo_name": repo_name,
-                                                                                     "branchName": base_branch})
-        self.db.update_generic(obj={"_id": {"$in": existed_branch}}, patch={"$addToSet": {"branchName": {"$each": [branch]}}},
+                                                                                     "branch_name": base_branch})
+        self.db.update_generic(obj={"_id": {"$in": existed_branch}}, patch={"$addToSet": {"branch_name": {"$each": [branch]}}},
                                kind="Commit")
 
     def get_data(self, raw_json):

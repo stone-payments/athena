@@ -19,13 +19,13 @@ queue_max_size = 1500000
 num_of_threads = 1
 rest_minutes = 20  # minutes to rest and start collect again
 rate_limit_to_sleep = 10  # minimum remaining api value to wait next reset
-hash_indexes = [["Dev", "devName"], ["Dev", "login"], ["Teams", "teamName"],
+hash_indexes = [["Dev", "dev_name"], ["Dev", "login"], ["Teams", "team_name"],
                 ["Commit", "org"], ["Issue", "repo_name"], ["Repo", "readme"], ["Commit", "author"],
                 ["Repo", "repo_name"], ["Repo", "open_source"], ["Repo", "license_id"], ["Repo", "license_type"],
-                ["Issue", "closeAt"], ["Issue", "created_at"], ["Commit", "committedDate"], ["Fork", "created_at"]]
+                ["Issue", "close_at"], ["Issue", "created_at"], ["Commit", "committed_date"], ["Fork", "created_at"]]
 hash_indexes_unique = []
-skip_list_indexes = [["Issue", "closeAt"], ["Issue", "created_at"], ["Commit", "committedDate"], ["Fork", "created_at"]]
-full_text_indexes = [["Repo", "repo_name"], ["Teams", "teamName"], ["Issue", "org"],
+skip_list_indexes = [["Issue", "close_at"], ["Issue", "created_at"], ["Commit", "committed_date"], ["Fork", "created_at"]]
+full_text_indexes = [["Repo", "repo_name"], ["Teams", "team_name"], ["Issue", "org"],
                      ["Commit", "org"], ["Fork", "org"], ["Dev", "login"]]
 abuse_time_sleep = 0.7
 max_interval = 1  # max interval time for requests

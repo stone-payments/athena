@@ -9,7 +9,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
      edges {
         node {
           members(first:100) {
-            membersCount: totalCount
+            members_count: totalCount
             members_edge: edges {
               node {
                 memberId: id
@@ -18,7 +18,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
             }
           }
           repositories(first:100) {
-            repoCount: totalCount
+            repo_count: totalCount
            repo_edge: edges {
               node {
                 repoId:id

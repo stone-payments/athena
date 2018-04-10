@@ -15,11 +15,11 @@ class Teams:
             "org": string_validate(self.org, not_none=True),
             "_id": find_key('teamId', node),
             'created_at': convert_datetime(find_key('createdAt', node)),
-            "teamName": string_validate(node["node"]["name"], not_none=True),
+            "team_name": string_validate(node["node"]["name"], not_none=True),
             "privacy": string_validate(node["node"]["privacy"]),
             "slug": string_validate(node["node"]["slug"], not_none=True),
-            "membersCount": int_validate(find_key('membersCount', node)),
-            "repoCount": int_validate(find_key('repoCount', node)),
+            "members_count": int_validate(find_key('members_count', node)),
+            "repo_count": int_validate(find_key('repo_count', node)),
             "db_last_updated": datetime.datetime.utcnow(),
         }
         return save_content

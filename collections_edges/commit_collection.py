@@ -21,23 +21,24 @@ class Commit:
 
     def content(self, **kwargs):
         node = kwargs.get('node')
-        response = kwargs.get('response')
+        response = kwargs.get('page')
+        print(node)
         save_content = {
             "collection_name": string_validate(self.collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
-            "_id": not_null(find_key('commitId', node)),
-            "repositoryId": string_validate(find_key('repositoryId', response), not_none=True),
+            "_id": not_null(find_key('commit_id', node)),
+            "repository_id": string_validate(find_key('repository_id', response), not_none=True),
             "repo_name": string_validate(find_key('repo_name', response), not_none=True),
-            "branchName": [string_validate(find_key('branchName', response))],
-            "messageHeadline": string_validate(find_key('messageHeadline', node)),
+            "branch_name": [string_validate(find_key('branch_name', response))],
+            "message_head_line": string_validate(find_key('messageHeadline', node)),
             "oid": not_null(find_key('oid', node)),
-            "committedDate": convert_datetime(find_key('committedDate', node)),
+            "committed_date": convert_datetime(find_key('committedDate', node)),
             "author": string_validate(find_key('login', node)),
-            "devId": string_validate(find_key('devId', node)),
-            "commitId": string_validate(find_key('commitId', node)),
+            "dev_id": string_validate(find_key('dev_id', node)),
+            "commit_id": string_validate(find_key('commit_id', node)),
             'additions': int_validate(find_key('additions', node)),
             'deletions': int_validate(find_key('deletions', node)),
-            'numFiles': int_validate(find_key('changedFiles', node)),
+            'num_files': int_validate(find_key('changedFiles', node)),
             "db_last_updated": datetime.datetime.utcnow(),
         }
         return save_content
@@ -46,20 +47,20 @@ class Commit:
     def edges(node):
         save_edges = [{
             "edge_name": "dev_to_commit",
-            "to": find_key('commitId', node),
-            "from": find_key('devId', node),
+            "to": find_key('commit_id', node),
+            "from": find_key('dev_id', node),
             "db_last_updated": datetime.datetime.utcnow(),
         },
             {
                 "edge_name": "repo_to_commit",
-                "to": find_key('commitId', node),
-                "from": find_key('repositoryId', node),
+                "to": find_key('commit_id', node),
+                "from": find_key('repository_id', node),
                 "db_last_updated": datetime.datetime.utcnow(),
             },
             {
                 "edge_name": "repo_to_dev",
-                "to": find_key('devId', node),
-                "from": find_key('repositoryId', node),
+                "to": find_key('dev_id', node),
+                "from": find_key('repository_id', node),
                 "db_last_updated": datetime.datetime.utcnow(),
             }
         ]

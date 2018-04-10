@@ -14,11 +14,11 @@ class Dev:
         save_content = {
             "collection_name": string_validate(self.collection_name, not_none=True),
             "_id": find_key("id", node),
-            "devName": string_validate(find_key("name", node)),
+            "dev_name": string_validate(find_key("name", node)),
             "followers": int_validate(find_key("totalFollowers", node)),
             "following": int_validate(find_key("totalFollowing", node)),
             "login": string_validate(find_key("login", node), not_none=True),
-            "avatarUrl": string_validate(find_key("avatarUrl", node)),
+            "avatar_url": string_validate(find_key("avatarUrl", node)),
             "db_last_updated": datetime.datetime.utcnow(),
         }
         return save_content

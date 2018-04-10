@@ -19,7 +19,7 @@ def query_fork_mongo(self):
 
 
 def query_team_mongo(self):
-    query = {"org": self.org, "membersCount": {"$gt": 100}, 'db_last_updated': {'$gte': utc_time_datetime_format(-1)}}
+    query = {"org": self.org, "members_count": {"$gt": 100}, 'db_last_updated': {'$gte': utc_time_datetime_format(-1)}}
     projection = {'slug': 1, '_id': 0}
     collection = 'Teams'
     key_to_be_returned = 'slug'
@@ -39,7 +39,7 @@ def stats_query(self, repository):
 
 
 def query_teams_dev_mongo(self):
-    query = {'org': self.org, "membersCount": {'$gt': 100}, 'db_last_updated': {'$gte': utc_time_datetime_format(-1)}}
+    query = {'org': self.org, "members_count": {'$gt': 100}, 'db_last_updated': {'$gte': utc_time_datetime_format(-1)}}
     projection = {'slug': 1, '_id': 0}
     collection = 'Teams'
     key_to_be_returned = 'slug'
@@ -47,7 +47,7 @@ def query_teams_dev_mongo(self):
 
 
 def query_teams_repo_mongo(self):
-    query = {'org': self.org, "repoCount": {'$gt': 100}, 'db_last_updated': {'$gte': utc_time_datetime_format(-1)}}
+    query = {'org': self.org, "repo_count": {'$gt': 100}, 'db_last_updated': {'$gte': utc_time_datetime_format(-1)}}
     projection = {'slug': 1, '_id': 0}
     collection = 'Teams'
     key_to_be_returned = 'slug'

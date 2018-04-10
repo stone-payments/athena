@@ -4,17 +4,17 @@ query ($org: String!) {
     avatarUrl
     description
     members {
-      membersCount: totalCount
+      members_count: totalCount
     }
     websiteUrl
     teams {
-      teamsCount: totalCount
+      teams_Count: totalCount
     }
     repositories {
-      repoCount: totalCount
+      repo_count: totalCount
     }
     projects {
-      projectCount:totalCount
+      project_count:totalCount
     }
   }
     rateLimit{

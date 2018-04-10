@@ -91,6 +91,7 @@ class CollectorRestrictedItems:
                 return_pagination = Pagination(query=self.query, number_of_repo=self.number_of_repo, org=self.org,
                                                updated_time=self.time, slug=self.slug, next_repo=repository)
                 for page in return_pagination:
+                    print(page)
                     edges = find_key(self.edges, page)
                     if edges is not None:
                         for node in edges:
