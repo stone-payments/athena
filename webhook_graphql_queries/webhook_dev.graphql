@@ -1,0 +1,12 @@
+query ($dev: String!) {
+  user(login: $dev) {
+    id
+    name
+    login
+    avatarUrl
+  }
+  rateLimit {
+    remaining
+    resetAt
+  }
+}

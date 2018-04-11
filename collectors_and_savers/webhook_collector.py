@@ -5,9 +5,10 @@ import pprint
 
 
 class WebhookCollector:
-    def __init__(self, db: callable, collection_name: object, org: str, edges: object, query: object,
-                 save_content: callable, save_edges: callable, number_of_repo: int = None, branch_name = None,
-                 since=None, until=None, repo_name=None):
+    def __init__(self, db: callable, collection_name: object, edges: object, query: object, save_content: callable,
+                 save_edges: callable, org: str = None, number_of_repo: int = None, branch_name=None,
+                 since=None, until=None, repo_name=None, dev_name=None):
+        self.dev_name = dev_name
         self.repo_name = repo_name
         self.db = db
         self.org = org
@@ -26,7 +27,8 @@ class WebhookCollector:
         var = {
                                                    "number_of_repos": self.number_of_repo,
                                                    "org": self.org,
-                                                   "repo" : self.repo_name,
+                                                   "repo": self.repo_name,
+                                                   "dev": self.dev_name,
                                                    "branch": self.branch_name,
                                                    "since": self.since,
                                                    "until": self.until
@@ -36,6 +38,7 @@ class WebhookCollector:
                                                    "number_of_repos": self.number_of_repo,
                                                    "org": self.org,
                                                    "repo" : self.repo_name,
+                                                   "dev": self.dev_name,
                                                    "branch": self.branch_name,
                                                    "since": self.since,
                                                    "until": self.until

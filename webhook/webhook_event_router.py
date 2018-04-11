@@ -3,10 +3,11 @@ from webhook.webhook_get_commit import GetCommit
 from webhook.webhook_new_branch import GetBranch
 from webhook.webhook_delete_branch import DeleteBranch
 from webhook.webhook_repository_event import GetRepositoryEvent
+from webhook.webhook_dev_event import GetDevEvent
 from threading import Thread
 import pprint
 from app import db
-from webhook.event_tests import create_repository_publicized
+from webhook.event_tests import dev_events
 
 
 class WebhookEventRouter:
@@ -20,32 +21,32 @@ class WebhookEventRouter:
 
     def webhook_event_router(self):
         while True:
-            returned_data = self.webhook_queue.get(block=True)
-            # returned_data = create_repository_publicized()
+            # returned_data = self.webhook_queue.get(block=True)
+            returned_data = dev_events()
             event = returned_data[0]
             data = returned_data[1]
             if event == 'push' and not find_key("deleted", data) and not find_key("forced", data) and \
                     not find_key("base_ref", data) and self.__parse_branch_string(find_key("ref", data)) == "refs/heads":
                 print("NEW COMMIT")
                 pprint.pprint(data)
-                get_commit = GetCommit(db)
-                get_commit.get_data(data)
+                GetCommit(db).get_data(data)
             elif event == 'push' and find_key("created", data) and not find_key("deleted", data) \
                     and not find_key("forced", data) and find_key("base_ref", data):
                 print("NEW BRANCH")
                 pprint.pprint(data)
-                get_new_branch = GetBranch(db)
-                get_new_branch.get_data(data)
+                GetBranch(db).get_data(data)
             elif event == 'delete' and find_key('ref_type', data) == "branch":
                 print("DELETE")
                 pprint.pprint(data)
-                delete_branch = DeleteBranch(db)
-                delete_branch.get_data(data)
+                DeleteBranch(db).get_data(data)
             elif event == "repository":
                 print("repository")
                 pprint.pprint(data)
-                new_repository = GetRepositoryEvent(db)
-                new_repository.get_data(data)
+                GetRepositoryEvent(db).get_data(data)
+            elif event == "organization":
+                print("organization")
+                pprint.pprint(data)
+                GetDevEvent(db).get_data(data)
 
     def start(self):
         workers = [Thread(target=self.webhook_event_router, args=()) for _ in range(1)]
