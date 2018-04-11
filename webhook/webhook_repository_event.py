@@ -1,9 +1,10 @@
 from collection_modules.module import find_key
 from collections_edges import Repo
 from webhook_graphql_queries.webhook_graphql_queries import webhook_repo_query
+from collection_modules.module import convert_datetime
 
 
-class GetNewRepository:
+class GetRepositoryEvent:
 
     def __init__(self, db):
         self.db = db
@@ -19,13 +20,13 @@ class GetNewRepository:
 
     def __update_repository(self, org_name, repo_name, pushed_date, document_name, status):
         self.db.update_generic(obj={"org": org_name, "repo_name": repo_name}, patch={"$addToSet": {document_name:
-                           {"$each": [{"date": pushed_date, "status": status}]}}}, kind="Repo")
+                                   {"$each": [{"date": pushed_date, "status": status}]}}}, kind="Repo")
 
     def get_data(self, raw_json):
         org_name = find_key('login', find_key('organization', raw_json))
         repo_name = find_key('name', find_key('repository', raw_json))
         branch = find_key('default_branch', raw_json)
-        pushed_date = find_key('pushed_at', raw_json)
+        pushed_date = convert_datetime(find_key('pushed_at', raw_json))
         if find_key('action', raw_json) == "created":
             self.__create_repository(org_name, repo_name, branch)
         elif find_key('action', raw_json) == "deleted":

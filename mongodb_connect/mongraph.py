@@ -12,7 +12,7 @@ class Mongraph(object):
     def update_generic(self, obj: object, patch: object, kind: str = None):
         collection_name = kind
         collection = self._mongodb_client[collection_name]
-        collection.update_many(obj, patch, upsert=True)
+        collection.update_many(obj, patch, upsert=False)
 
     def connect(self, from_: str, to: str, kind: str, data: dict):
         kind = kind or '{from}${to}'.format(**{

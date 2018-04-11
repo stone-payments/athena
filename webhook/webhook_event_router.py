@@ -2,7 +2,7 @@ from collection_modules.module import find_key
 from webhook.webhook_get_commit import GetCommit
 from webhook.webhook_new_branch import GetBranch
 from webhook.webhook_delete_branch import DeleteBranch
-from webhook.webhook_new_repository import GetNewRepository
+from webhook.webhook_repository_event import GetRepositoryEvent
 from threading import Thread
 import pprint
 from app import db
@@ -42,9 +42,9 @@ class WebhookEventRouter:
                 delete_branch = DeleteBranch(db)
                 delete_branch.get_data(data)
             elif event == "repository":
-                print("create")
+                print("repository")
                 pprint.pprint(data)
-                new_repository = GetNewRepository(db)
+                new_repository = GetRepositoryEvent(db)
                 new_repository.get_data(data)
 
     def start(self):

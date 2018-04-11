@@ -22,8 +22,6 @@ class Commit:
     def content(self, **kwargs):
         node = kwargs.get('node')
         response = kwargs.get('page')
-        print(node)
-        print(response)
         save_content = {
             "collection_name": string_validate(self.collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
@@ -75,7 +73,6 @@ class Commit:
         start.start(self.save_queue_type)
 
     def collect_webhook(self):
-        print('entrei collect webhook')
         start = WebhookCollector(db=self.db, number_of_repo=number_pagination, collection_name=self.collection_name,
                                  org=self.org, branch_name=self.branch_name, until=self.until_commit, since=self.since_commit,
                                  repo_name=self.repo_name, edges=self.edge_name, query=self.query, save_content=self.content,

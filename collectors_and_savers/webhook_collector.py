@@ -40,14 +40,12 @@ class WebhookCollector:
                                                    "since": self.since,
                                                    "until": self.until
                                                })
-        pprint.pprint(response)
         edges = find_key("edges", response)
         if edges:
             for page in edges:
                 content = self.save_content(page=response, node=page)
                 self.save(content, self.save_edges)
         else:
-            print("ELSE")
             content = self.save_content(node=response)
             self.save(content, self.save_edges)
 

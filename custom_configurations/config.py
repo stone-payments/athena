@@ -1,19 +1,19 @@
 import os
 
 token = os.getenv("GRAPHQL_TOKEN")
-db_name = os.getenv("DB_NAME")
-db_url = os.getenv("MONGODB_URL")
+db_name = os.getenv("DB_NAME", "athena")
+db_url = os.getenv("MONGODB_URL", "localhost")
 username = os.getenv("MONGODB_USER", False)
 password = os.getenv("MONGODB_PASS", False)
-mongo_port = os.getenv("MONGO_PORT")
-url = os.getenv("GITHUB_GRAPHQL_URL")  # GitHub GraphQL API url
-url_rest_api = os.getenv("GITHUB_REST_URL")
+mongo_port = os.getenv("MONGO_PORT", 27017)
+url = os.getenv("GITHUB_GRAPHQL_URL", "https://api.github.com/graphql")  # GitHub GraphQL API url
+url_rest_api = os.getenv("GITHUB_REST_URL", "https://api.github.com")  # GitHub Rest API url
 number_pagination = 100  # Number of items paginated
 number_pagination_repositories = 30  # Number of items paginated by repository query
-timeout = 25.001
-since_time_days_delta = os.getenv("SINCE_TIME_DAYS_DELTA")  # days ago ex: -5
-until_time_days_delta = os.getenv("UNTIL_TIME_DAYS_DELTA")  # delta days from now ex: +1
-orgs = ["stone-payments", "mundipagg", "pagarme", "cappta", "equals-conc"]
+timeout = 25.001  # Timeout for GraphQl queries
+since_time_days_delta = os.getenv("SINCE_TIME_DAYS_DELTA", -5)  # days ago ex: -5
+until_time_days_delta = os.getenv("UNTIL_TIME_DAYS_DELTA", 1)  # delta days from now ex: 1
+orgs = ["stone-payments", "mundipagg", "pagarme", "cappta", "equals-conc"]  # input here your organization login
 update = 1  # update every x hours
 queue_max_size = 1500000
 num_of_threads = 1

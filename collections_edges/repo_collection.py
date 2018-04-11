@@ -50,8 +50,8 @@ class Repo:
             "default_branch": string_validate(find_key('default_branch', node)),
             "description": string_validate(find_key('description', node)),
             "url": string_validate(find_key('url', node)),
-            "open_source": {"date": datetime.datetime.utcnow(), "status":
-                bool_validate(False if find_key('isPrivate', node) else True)},
+            "open_source": [{"date": datetime.datetime.utcnow(), "status":
+                bool_validate(False if find_key('isPrivate', node) else True)}],
             "primary_language": string_validate(find_key('priLanguage', node)),
             "forks": int_validate(find_key('totalForks', node)),
             "issues": int_validate(find_key('totalIssues', node)),
@@ -85,10 +85,8 @@ class Repo:
         start.start()
 
     def collect_webhook(self):
-        print('entrei collect webhook REPOSITORIO')
         start = WebhookCollector(db=self.db, number_of_repo=number_pagination, collection_name=self.collection_name,
                                  org=self.org, until=utc_time(+1), since=utc_time(-1), branch_name=self.branch_name,
                                  repo_name=self.repo_name, edges=self.edge_name, query=self.query,
                                  save_content=self.content, save_edges=self.edges)
         start.start()
-
