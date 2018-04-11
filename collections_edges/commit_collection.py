@@ -23,6 +23,7 @@ class Commit:
         node = kwargs.get('node')
         response = kwargs.get('page')
         print(node)
+        print(response)
         save_content = {
             "collection_name": string_validate(self.collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),

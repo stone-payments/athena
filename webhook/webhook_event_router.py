@@ -21,7 +21,7 @@ class WebhookEventRouter:
     def webhook_event_router(self):
         while True:
             returned_data = self.webhook_queue.get(block=True)
-            returned_data = create_repository_publicized()
+            # returned_data = create_repository_publicized()
             event = returned_data[0]
             data = returned_data[1]
             if event == 'push' and not find_key("deleted", data) and not find_key("forced", data) and \

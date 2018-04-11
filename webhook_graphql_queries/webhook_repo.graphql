@@ -69,8 +69,8 @@ query ($repo: String!, $number_of_repos: Int!, $org: String!, $since: GitTimesta
       url
       nameWithOwner
       isPrivate
-      primary_language {
-        priLanguage: name
+      primaryLanguage {
+        primary_language: name
       }
       totalForks: forkCount
       stargazers {

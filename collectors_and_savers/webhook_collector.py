@@ -44,7 +44,7 @@ class WebhookCollector:
         edges = find_key("edges", response)
         if edges:
             for page in edges:
-                content = self.save_content(response=response, node=page)
+                content = self.save_content(page=response, node=page)
                 self.save(content, self.save_edges)
         else:
             print("ELSE")
