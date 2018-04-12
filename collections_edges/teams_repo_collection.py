@@ -23,6 +23,7 @@ class TeamsRepo:
             'to': find_key('teamId', response),
             'from': find_key('repoId', node),
             "db_last_updated": datetime.datetime.utcnow(),
+            "permission": find_key('permission', node)
             }
         ]
         return save_edges

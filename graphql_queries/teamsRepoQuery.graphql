@@ -5,6 +5,7 @@ query ($number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
       teamId:id
       repositories(first: $number_of_repos, after: $next) {
         edges {
+        permission
           node {
             repoId:id
             name

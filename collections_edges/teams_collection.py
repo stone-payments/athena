@@ -32,6 +32,8 @@ class Teams:
                 'to': find_key('_id', team),
                 'from': find_key('memberId', member),
                 "db_last_updated": datetime.datetime.utcnow(),
+                "role": find_key('role', member),
+
             }
             for member in members
         ]
@@ -41,6 +43,7 @@ class Teams:
                 'to': find_key('_id', team),
                 'from': find_key('repoId', repo_slice),
                 "db_last_updated": datetime.datetime.utcnow(),
+                "permission": find_key('permission', repo_slice)
             }
             for repo_slice in repos
         ]
@@ -48,6 +51,6 @@ class Teams:
 
     def collect(self):
         start = CollectorTeam(db=self.db, collection_name=self.collection_name, org=self.org, edges=self.edge_name,
-                              query=self.query, number_of_repo=number_pagination, updated_utc_time=utc_time,
+                              query=self.query, number_of_repo=number_pagination_teams, updated_utc_time=utc_time,
                               save_content=self.content, save_edges=self.edges)
         start.start()
