@@ -10,6 +10,7 @@ url = os.getenv("GITHUB_GRAPHQL_URL")  # GitHub GraphQL API url
 url_rest_api = os.getenv("GITHUB_REST_URL")
 number_pagination = 100  # Number of items paginated
 number_pagination_repositories = 30  # Number of items paginated by repository query
+number_pagination_teams = 30  # Number of items paginated by repository query
 timeout = 25.001
 since_time_days_delta = os.getenv("SINCE_TIME_DAYS_DELTA")  # days ago ex: -5
 until_time_days_delta = os.getenv("UNTIL_TIME_DAYS_DELTA")  # delta days from now ex: +1

@@ -13,6 +13,7 @@ def teams_dev(db, org, query, query_db, save_queue_type, edges_name="edges"):
             'to': find_key('teamId', response),
             'from': find_key('memberId', node),
             "db_last_updated": datetime.datetime.utcnow(),
+            "role": find_key('role', node)
         }
         ]
         return save_edges

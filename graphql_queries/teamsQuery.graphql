@@ -11,6 +11,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
           members(first:100) {
             membersCount: totalCount
             members_edge: edges {
+             role
               node {
                 memberId: id
                 memberName:name
@@ -20,6 +21,7 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
           repositories(first:100) {
             repoCount: totalCount
            repo_edge: edges {
+             permission
               node {
                 repoId:id
                repoName: name

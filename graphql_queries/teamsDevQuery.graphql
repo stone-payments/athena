@@ -5,6 +5,7 @@ query ($number_of_repos: Int!, $next: String, $next2: String!, $org: String!) {
       teamId:id
       members(first: $number_of_repos, after: $next) {
         edges {
+         role
           node {
             name
             memberId:id
