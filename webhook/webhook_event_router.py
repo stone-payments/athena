@@ -8,7 +8,7 @@ from webhook.webhook_team_event import GetTeamEvent
 from threading import Thread
 import pprint
 from app import db
-from webhook.event_tests import dev_events
+from webhook.event_tests import teams_events
 
 
 class WebhookEventRouter:
@@ -22,31 +22,31 @@ class WebhookEventRouter:
 
     def webhook_event_router(self):
         while True:
-            # returned_data = self.webhook_queue.get(block=True)
-            returned_data = dev_events()
+            returned_data = self.webhook_queue.get(block=True)
+            # returned_data = teams_events()
             event = returned_data[0]
             data = returned_data[1]
             if event == 'push' and not find_key("deleted", data) and not find_key("forced", data) and \
                     not find_key("base_ref", data) and self.__parse_branch_string(find_key("ref", data)) == "refs/heads":
                 print("NEW COMMIT")
-                pprint.pprint(data)
+                # pprint.pprint(data)
                 GetCommit(db).get_data(data)
             elif event == 'push' and find_key("created", data) and not find_key("deleted", data) \
                     and not find_key("forced", data) and find_key("base_ref", data):
                 print("NEW BRANCH")
-                pprint.pprint(data)
+                # pprint.pprint(data)
                 GetBranch(db).get_data(data)
             elif event == 'delete' and find_key('ref_type', data) == "branch":
                 print("DELETE")
-                pprint.pprint(data)
+                # pprint.pprint(data)
                 DeleteBranch(db).get_data(data)
             elif event == "repository":
                 print("repository")
-                pprint.pprint(data)
+                # pprint.pprint(data)
                 GetRepositoryEvent(db).get_data(data)
             elif event == "organization":
                 print("organization")
-                pprint.pprint(data)
+                # pprint.pprint(data)
                 GetDevEvent(db).get_data(data)
             elif event == "team":
                 print("team")
