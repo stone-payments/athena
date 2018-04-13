@@ -7,7 +7,8 @@ import pprint
 class WebhookCollector:
     def __init__(self, db: callable, collection_name: object, edges: object, query: object, save_content: callable,
                  save_edges: callable, org: str = None, number_of_repo: int = None, branch_name=None,
-                 since=None, until=None, repo_name=None, dev_name=None):
+                 since=None, until=None, repo_name=None, dev_name=None, slug=None):
+        self.slug = slug
         self.dev_name = dev_name
         self.repo_name = repo_name
         self.db = db
@@ -31,33 +32,37 @@ class WebhookCollector:
                                                    "dev": self.dev_name,
                                                    "branch": self.branch_name,
                                                    "since": self.since,
-                                                   "until": self.until
+                                                   "until": self.until,
+                                                   "slug": self.slug
                                                }
         print(var)
-        response = client_graphql.execute(self.query, {
+        return client_graphql.execute(self.query, {
                                                    "number_of_repos": self.number_of_repo,
                                                    "org": self.org,
                                                    "repo" : self.repo_name,
                                                    "dev": self.dev_name,
                                                    "branch": self.branch_name,
                                                    "since": self.since,
-                                                   "until": self.until
+                                                   "until": self.until,
+                                                   "slug": self.slug
                                                })
+
+    def __content(self, response):
         edges = find_key("edges", response)
         if edges:
             for page in edges:
                 content = self.save_content(page=response, node=page)
-                self.save(content, self.save_edges)
+                self.__save_edges(content, self.save_edges)
         else:
             content = self.save_content(node=response)
-            self.save(content, self.save_edges)
+            self.__save_edges(content, self.save_edges)
 
-    def save(self, save: dict, save_edges: type):
-        existed_branch = self.db.query("Commit", {"_id": save["_id"]}, {"_id": 0, "branch_name": 1})
-        self.db.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
-        if existed_branch:
-            self.db.update_generic(obj={"_id": save["_id"]}, patch={"$addToSet": {"branch_name":
-                                   {"$each": existed_branch[0]["branch_name"]}}}, kind=save["collection_name"])
+    def __content_team(self, response):
+        content = self.save_content(node=response)
+        self.__save_edges_teams(response, content, self.save_edges)
+
+    def __save_edges(self, save: dict, save_edges: type):
+        self.__save_content(save)
         edges = save_edges(save)
         edges = [edge for edge in edges if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name"))]
         for edge in edges:
@@ -65,5 +70,29 @@ class WebhookCollector:
                             data={key: value for key, value in edge.items() if key not in ['from', 'to',
                                                                                            'edge_name']})
 
+    def __save_content(self, save: dict):
+        existed_branch = self.db.query("Commit", {"_id": save["_id"]}, {"_id": 0, "branch_name": 1})
+        self.db.update(obj={"_id": save["_id"]}, patch=save, kind=save["collection_name"])
+        if existed_branch:
+            self.db.update_generic(obj={"_id": save["_id"]}, patch={"$addToSet": {"branch_name":
+                                                                                      {"$each": existed_branch[0][
+                                                                                          "branch_name"]}}},
+                                   kind=save["collection_name"])
+
+    def __save_edges_teams(self, response: dict, save: dict, save_edges: type):
+        self.__save_content(save)
+        members, repositories = save_edges(content=save, members=find_key("members_edge", response),
+                                           repos=find_key("repo_edge", response))
+        edges = [edge for edge in members if validate_edge(edge.get("to"), edge.get("from"), edge.get("edge_name"))]
+        for edge in edges:
+            self.db.connect(to=edge.get("to"), from_=edge.get("from"), kind=edge.get("edge_name"),
+                            data={key: value for key, value in edge.items() if key not in ['from', 'to',
+                                                                                           'edge_name']})
+
     def start(self):
-        self._collect()
+        response = self._collect()
+        self.__content(response)
+
+    def start_team(self):
+        response = self._collect()
+        self.__content_team(response)

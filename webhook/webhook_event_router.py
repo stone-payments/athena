@@ -4,6 +4,7 @@ from webhook.webhook_new_branch import GetBranch
 from webhook.webhook_delete_branch import DeleteBranch
 from webhook.webhook_repository_event import GetRepositoryEvent
 from webhook.webhook_dev_event import GetDevEvent
+from webhook.webhook_team_event import GetTeamEvent
 from threading import Thread
 import pprint
 from app import db
@@ -21,8 +22,8 @@ class WebhookEventRouter:
 
     def webhook_event_router(self):
         while True:
-            returned_data = self.webhook_queue.get(block=True)
-            # returned_data = dev_events()
+            # returned_data = self.webhook_queue.get(block=True)
+            returned_data = dev_events()
             event = returned_data[0]
             data = returned_data[1]
             if event == 'push' and not find_key("deleted", data) and not find_key("forced", data) and \
@@ -47,6 +48,10 @@ class WebhookEventRouter:
                 print("organization")
                 pprint.pprint(data)
                 GetDevEvent(db).get_data(data)
+            elif event == "team":
+                print("team")
+                pprint.pprint(data)
+                GetTeamEvent(db).get_data(data)
 
     def start(self):
         workers = [Thread(target=self.webhook_event_router, args=()) for _ in range(1)]

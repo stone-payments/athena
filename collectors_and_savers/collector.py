@@ -48,8 +48,8 @@ class CollectorTeam(Collector):
         if edges is not None:
             for node in edges:
                 team = self.save_content(edges, node)
-                members, repositories = self.save_edges(team, find_key('members_edge', node),
-                                                        find_key('repo_edge', node))
+                members, repositories = self.save_edges(team=team, members=find_key('members_edge', node),
+                                                        repos=find_key('repo_edge', node))
                 save = SaverTeam(db=self.db)
                 save.save(team, members, repositories)
 

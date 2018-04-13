@@ -1,0 +1,40 @@
+query ($slug: String!, $org: String!) {
+  organization(login: $org) {
+    team(slug: $slug) {
+      members(first: 100) {
+        members_count: totalCount
+        members_edge: edges {
+          role
+          node {
+            memberId: id
+            memberName: name
+          }
+        }
+      }
+      repositories(first: 100) {
+        repo_count: totalCount
+        repo_edge: edges {
+          permission
+          node {
+            owner {
+              id
+              login
+            }
+            viewerCanAdminister
+            repoId: id
+            repo_name: name
+          }
+        }
+      }
+      createdAt
+      teamId: id
+      name
+      privacy
+      slug
+    }
+  }
+  rateLimit {
+    remaining
+    resetAt
+  }
+}
