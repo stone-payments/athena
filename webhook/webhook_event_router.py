@@ -8,7 +8,7 @@ from webhook.webhook_team_event import GetTeamEvent
 from threading import Thread
 import pprint
 from app import db
-from webhook.event_tests import teams_events
+from webhook.event_tests import team_add_repository
 
 
 class WebhookEventRouter:
@@ -23,7 +23,7 @@ class WebhookEventRouter:
     def webhook_event_router(self):
         while True:
             returned_data = self.webhook_queue.get(block=True)
-            # returned_data = teams_events()
+            # returned_data = team_add_repository()
             event = returned_data[0]
             data = returned_data[1]
             if event == 'push' and not find_key("deleted", data) and not find_key("forced", data) and \

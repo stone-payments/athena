@@ -47,8 +47,8 @@ class CollectorTeam(Collector):
     def process_edges(self, edges, **kwargs):
         if edges is not None:
             for node in edges:
-                team = self.save_content(edges, node)
-                members, repositories = self.save_edges(team=team, members=find_key('members_edge', node),
+                team = self.save_content(edges=edges, node=node)
+                members, repositories = self.save_edges(content=team, members=find_key('members_edge', node),
                                                         repos=find_key('repo_edge', node))
                 save = SaverTeam(db=self.db)
                 save.save(team, members, repositories)
