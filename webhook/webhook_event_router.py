@@ -50,8 +50,12 @@ class WebhookEventRouter:
                 GetDevEvent(db).get_data(data)
             elif event == "team":
                 print("team")
-                pprint.pprint(data)
+                # pprint.pprint(data)
                 GetTeamEvent(db).get_data(data)
+            elif event == "membership":
+                print("membership")
+                # pprint.pprint(data)
+                GetTeamEvent(db).get_member_data(data)
 
     def start(self):
         workers = [Thread(target=self.webhook_event_router, args=()) for _ in range(1)]
