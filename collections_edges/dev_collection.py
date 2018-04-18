@@ -1,5 +1,9 @@
-from collectors_and_savers.collector import *
+from collection_modules.module import find_key, utc_time
+from collection_modules.validators import string_validate
+from collectors_and_savers.collector import CollectorGeneric
 from collectors_and_savers.webhook_collector import WebhookCollector
+from custom_configurations.config import number_pagination
+from datetime import datetime
 
 
 class Dev:
@@ -19,7 +23,7 @@ class Dev:
             "dev_name": string_validate(find_key("name", node)),
             "login": string_validate(find_key("login", node), not_none=True),
             "avatar_url": string_validate(find_key("avatarUrl", node)),
-            "db_last_updated": datetime.datetime.utcnow(),
+            "db_last_updated": datetime.utcnow(),
         }
         return save_content
 

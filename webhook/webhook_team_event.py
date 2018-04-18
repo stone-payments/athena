@@ -35,9 +35,9 @@ class GetTeamEvent:
     def __get_permission(raw_json):
         write = find_key('push', raw_json)
         admin = find_key('admin', raw_json)
-        if (admin):
+        if admin:
             return "ADMIN"
-        elif (write):
+        elif write:
             return "WRITE"
         else:
             return "READ"
@@ -75,19 +75,20 @@ class GetTeamEvent:
         team_name = find_key('slug', find_key('team', raw_json))
         repo_name = find_key('name', repository)
         org_name = find_key('login', find_key('organization', raw_json))
-        if find_key('action', raw_json) == "created":
+        action = find_key('action', raw_json)
+        if action == "created":
             self.__create_team(org_name, team_name)
-        elif find_key('action', raw_json) == "deleted":
+        elif action == "deleted":
             self.__delete_team(org_name, team_name)
-        elif find_key('action', raw_json) == "edited":
+        elif action == "edited":
             if find_key('permissions', find_key('changes', raw_json)):
                 self.__update_team_repository_edges(find_key('permissions', repository), org_name, team_name, repo_name,
                                                     "repo_to_team")
             else:
                 self.__create_team(org_name, team_name)
-        elif find_key('action', raw_json) == "added_to_repository":
+        elif action == "added_to_repository":
             self.__update_team_repository_edges(find_key('permissions', repository), org_name, team_name, repo_name,
                                                 "repo_to_team")
-        elif find_key('action', raw_json) == "removed_from_repository":
+        elif action == "removed_from_repository":
             self.__delete_team_repository_edges(find_key('permissions', repository), org_name, team_name, repo_name,
                                                 "repo_to_team")

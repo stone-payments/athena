@@ -1,4 +1,4 @@
-from collection_modules.log_message import *
+from collection_modules.log_message import log
 
 
 def not_null(value):

@@ -1,4 +1,8 @@
-from collectors_and_savers.collector import *
+from collection_modules.module import find_key, utc_time, convert_datetime
+from collection_modules.validators import string_validate, not_null, bool_validate
+from collectors_and_savers.collector import CollectorRestricted
+from custom_configurations.config import number_pagination
+from datetime import datetime
 
 
 class Fork:
@@ -23,7 +27,7 @@ class Fork:
             "is_locked": bool_validate(find_key('isLocked', node)),
             "dev_id": string_validate(find_key('dev_id', node)),
             "login": string_validate(find_key('login', node)),
-            "db_last_updated": datetime.datetime.utcnow(),
+            "db_last_updated": datetime.utcnow(),
         }
         return save_content
 
@@ -33,13 +37,13 @@ class Fork:
             "edge_name": "fork_to_dev",
             "to": find_key('_id', node),
             "from": find_key('dev_id', node),
-            "db_last_updated": datetime.datetime.utcnow(),
+            "db_last_updated": datetime.utcnow(),
         },
             {
                 "edge_name": "fork_to_repo",
                 "to": find_key('_id', node),
                 "from": find_key('repository_id', node),
-                "db_last_updated": datetime.datetime.utcnow(),
+                "db_last_updated": datetime.utcnow(),
             }
         ]
         return save_edges

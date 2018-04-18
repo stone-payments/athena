@@ -23,8 +23,9 @@ class GetDevEvent:
 
     def get_data(self, raw_json):
         dev_name = find_key('login', find_key('membership', raw_json))
-        if find_key('action', raw_json) == "member_added":
+        action = find_key('action', raw_json)
+        if action == "member_added":
             self.__create_dev(dev_name)
-        elif find_key('action', raw_json) == "member_removed":
+        elif action == "member_removed":
             self.__delete_dev(dev_name)
 

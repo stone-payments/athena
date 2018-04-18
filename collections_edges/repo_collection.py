@@ -1,7 +1,11 @@
-from collectors_and_savers.collector import *
+from datetime import datetime
+
 from collection_modules.language_detect import text_to_language
+from collection_modules.module import find_key, utc_time, convert_datetime, parse_multiple_languages
+from collection_modules.validators import string_validate, bool_validate, int_validate
+from collectors_and_savers.collector import CollectorGeneric
 from collectors_and_savers.webhook_collector import WebhookCollector
-import pprint
+from custom_configurations.config import number_pagination, number_pagination_repositories
 
 
 class Repo:
@@ -16,8 +20,6 @@ class Repo:
 
     def content(self, **kwargs):
         node = kwargs.get('node')
-        pprint.pprint(node)
-        # org_name = kwargs.get('org')
         lower_case_readme = find_key('lowerCaseReadme', node)
         upper_case_readme = find_key('upperCaseReadme', node)
         lower_case_contributing = find_key('lowerCaseContributing', node)
@@ -50,8 +52,8 @@ class Repo:
             "default_branch": string_validate(find_key('default_branch', node)),
             "description": string_validate(find_key('description', node)),
             "url": string_validate(find_key('url', node)),
-            "open_source": [{"date": datetime.datetime.utcnow(), "status":
-                bool_validate(False if find_key('isPrivate', node) else True)}],
+            "open_source": [{"date": datetime.utcnow(), "status":
+                            bool_validate(False if find_key('isPrivate', node) else True)}],
             "primary_language": string_validate(find_key('priLanguage', node)),
             "forks": int_validate(find_key('totalForks', node)),
             "issues": int_validate(find_key('totalIssues', node)),
@@ -65,7 +67,7 @@ class Repo:
             "readme": string_validate(readme),
             "readme_language": string_validate(readme_language),
             "contributing": string_validate(contributing),
-            "db_last_updated": datetime.datetime.utcnow(),
+            "db_last_updated": datetime.utcnow(),
             "languages": parse_multiple_languages(node, "language_edges", "languageName",
                                                   "languageSize"),
             "committed_today": bool_validate(False if find_key('committedInRangeDate', node) is None else True)

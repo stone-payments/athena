@@ -2,10 +2,11 @@ import datetime
 import time
 from clients import ClientRest
 from clients import GraphQLClient
-from custom_configurations.config import *
+from custom_configurations.config import url, token, token_webhook, timeout, rate_limit_to_sleep
 from collection_modules.log_message import *
 
 client_graphql = GraphQLClient(url, token, timeout)
+client_graphql_webhook = GraphQLClient(url, token_webhook, timeout)
 client_rest = ClientRest(token, timeout)
 
 

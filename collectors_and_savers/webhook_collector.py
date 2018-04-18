@@ -1,13 +1,14 @@
-from collection_modules.module import client_graphql
+from collection_modules.module import client_graphql_webhook
 from collection_modules.module import find_key
-from collection_modules.validators import *
+from collection_modules.validators import validate_edge
 import pprint
 
 
 class WebhookCollector:
     def __init__(self, db: callable, collection_name: object, edges: object, query: object, save_content: callable,
                  save_edges: callable, org: str = None, number_of_repo: int = None, branch_name=None,
-                 since=None, until=None, repo_name=None, dev_name=None, slug=None):
+                 since=None, until=None, repo_name=None, dev_name=None, slug: str =None, issue_number: int = None):
+        self.issue_number = issue_number
         self.slug = slug
         self.dev_name = dev_name
         self.repo_name = repo_name
@@ -33,10 +34,11 @@ class WebhookCollector:
                                                    "branch": self.branch_name,
                                                    "since": self.since,
                                                    "until": self.until,
-                                                   "slug": self.slug
+                                                   "slug": self.slug,
+                                                   "issue_number": self.issue_number
                                                }
         print(var)
-        return client_graphql.execute(self.query, {
+        return client_graphql_webhook.execute(self.query, {
                                                    "number_of_repos": self.number_of_repo,
                                                    "org": self.org,
                                                    "repo" : self.repo_name,
@@ -44,7 +46,8 @@ class WebhookCollector:
                                                    "branch": self.branch_name,
                                                    "since": self.since,
                                                    "until": self.until,
-                                                   "slug": self.slug
+                                                   "slug": self.slug,
+                                                   "issue_number": self.issue_number
                                                })
 
     def __content(self, response):
@@ -54,7 +57,8 @@ class WebhookCollector:
                 content = self.save_content(page=response, node=page)
                 self.__save_edges(content, self.save_edges)
         else:
-            content = self.save_content(node=response)
+            print("foi")
+            content = self.save_content(node=response, page=response)
             self.__save_edges(content, self.save_edges)
 
     def __content_team(self, response):
@@ -91,6 +95,7 @@ class WebhookCollector:
 
     def start(self):
         response = self._collect()
+        pprint.pprint(response)
         self.__content(response)
 
     def start_team(self):

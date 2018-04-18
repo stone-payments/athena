@@ -27,11 +27,12 @@ class GetRepositoryEvent:
         repo_name = find_key('name', find_key('repository', raw_json))
         branch = find_key('default_branch', raw_json)
         pushed_date = convert_datetime(find_key('pushed_at', raw_json))
-        if find_key('action', raw_json) == "created":
+        action = find_key('action', raw_json)
+        if action == "created":
             self.__create_repository(org_name, repo_name, branch)
-        elif find_key('action', raw_json) == "deleted":
+        elif action == "deleted":
             self.__delete_repository(org_name, repo_name, pushed_date)
-        elif find_key('action', raw_json) == "publicized":
+        elif action == "publicized":
             self.__update_repository(org_name, repo_name, pushed_date, "open_source", True)
-        elif find_key('action', raw_json) == "privatized":
+        elif action == "privatized":
             self.__update_repository(org_name, repo_name, pushed_date, "open_source", False)

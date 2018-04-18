@@ -1,4 +1,8 @@
-from collectors_and_savers.collector import *
+from datetime import datetime
+
+from collection_modules.module import find_key
+from collectors_and_savers.collector import CollectorRestrictedTeam
+from custom_configurations.config import number_pagination
 
 
 class TeamsDev:
@@ -22,7 +26,7 @@ class TeamsDev:
             "edge_name": "dev_to_team",
             'to': find_key('teamId', response),
             'from': find_key('memberId', node),
-            "db_last_updated": datetime.datetime.utcnow(),
+            "db_last_updated": datetime.utcnow(),
             "role": find_key('role', node)
             }
         ]

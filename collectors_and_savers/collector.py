@@ -1,8 +1,13 @@
 import ast
 import queue
-from collection_modules.module import *
+import time
+from queue import Queue
+from threading import Thread
+
+from collection_modules.module import utc_time, client_rest, find_key
 from collection_modules.pagination import Pagination
-from collectors_and_savers.saver import *
+from collectors_and_savers.saver import SaverGeneric, SaverTeam
+from custom_configurations.config import queue_max_size, url_rest_api, abuse_time_sleep, num_of_threads
 
 
 def _start_repository_queue_worker(query_result: iter, collect_type: object, queue_type: Queue):

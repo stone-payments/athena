@@ -1,11 +1,15 @@
-from collections_edges import *
+from queue import Queue
+
+from collection_modules.log_message import log
+from collections_edges import OrgCollection, Repo, Dev, Teams, TeamsRepo, TeamsDev, Commit, Fork, Issue
 from collectors_and_savers.saver import SaverThread
-from custom_configurations.config import *
+from custom_configurations.config import db_name, db_url, username, password, mongo_port, hash_indexes, \
+    hash_indexes_unique, full_text_indexes, queue_max_size
 from graphql_queries.graphql_queries import *
-from mongodb_queries.mongodb_queries import *
-from mongodb_connect.mongraph import *
 from mongodb_connect.db_connection import DbConnection
-from collection_modules.log_message import *
+from mongodb_connect.mongraph import Mongraph
+from mongodb_queries.mongodb_queries import query_commit_mongo, query_fork_mongo, query_teams_dev_mongo, \
+    query_teams_repo_mongo, issue_mongo
 
 db_connection = DbConnection(db_name=db_name, db_url=db_url, username=username, password=password, mongo_port=mongo_port,
                              hash_indexes=hash_indexes, hash_indexes_unique=hash_indexes_unique,

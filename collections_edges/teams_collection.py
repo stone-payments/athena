@@ -1,5 +1,10 @@
-from collectors_and_savers.collector import *
+from datetime import datetime
+
+from collection_modules.module import find_key, utc_time, convert_datetime
+from collection_modules.validators import string_validate, int_validate
+from collectors_and_savers.collector import CollectorTeam
 from collectors_and_savers.webhook_collector import WebhookCollector
+from custom_configurations.config import number_pagination_teams
 
 
 class Teams:
@@ -23,7 +28,7 @@ class Teams:
             "slug": string_validate(find_key('slug', node), not_none=True),
             "members_count": int_validate(find_key('members_count', node)),
             "repo_count": int_validate(find_key('repo_count', node)),
-            "db_last_updated": datetime.datetime.utcnow(),
+            "db_last_updated": datetime.utcnow(),
         }
         return save_content
 
@@ -32,13 +37,12 @@ class Teams:
         team = kwargs.get('content')
         members = kwargs.get('members')
         repos = kwargs.get('repos')
-        # print(members)
         collect_member_of_team = [
             {
                 "edge_name": "dev_to_team",
                 'to': find_key('_id', team),
                 'from': find_key('memberId', member),
-                "db_last_updated": datetime.datetime.utcnow(),
+                "db_last_updated": datetime.utcnow(),
                 "role": find_key('role', member),
 
             }
@@ -49,7 +53,7 @@ class Teams:
                 "edge_name": "repo_to_team",
                 'to': find_key('_id', team),
                 'from': find_key('repoId', repo_slice),
-                "db_last_updated": datetime.datetime.utcnow(),
+                "db_last_updated": datetime.utcnow(),
                 "permission": find_key('permission', repo_slice)
             }
             for repo_slice in repos

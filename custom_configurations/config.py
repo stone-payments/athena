@@ -1,6 +1,7 @@
 import os
 
 token = os.getenv("GRAPHQL_TOKEN")
+token_webhook = os.getenv("GRAPHQL_TOKEN")
 db_name = os.getenv("DB_NAME", "athena")
 db_url = os.getenv("MONGODB_URL", "localhost")
 username = os.getenv("MONGODB_USER", False)

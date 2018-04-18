@@ -1,9 +1,9 @@
 import json
 import time
 import requests
-from requests.exceptions import *
+from requests.exceptions import ReadTimeout
 from custom_configurations.config import max_interval, max_retries
-from collection_modules.log_message import *
+from collection_modules.log_message import log
 
 
 class Retry:

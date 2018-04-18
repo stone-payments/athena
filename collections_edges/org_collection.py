@@ -1,4 +1,8 @@
-from collectors_and_savers.collector import *
+from collectors_and_savers.collector import CollectorGeneric
+from collection_modules.validators import string_validate, not_null, int_validate
+from collection_modules.module import find_key, utc_time
+from custom_configurations.config import number_pagination_repositories
+from datetime import datetime
 
 
 class OrgCollection:
@@ -22,7 +26,7 @@ class OrgCollection:
             "teams_Count": int_validate(find_key('teams_Count', page)),
             "repo_count": int_validate(find_key('repo_count', page)),
             "project_count": int_validate(find_key('project_count', page)),
-            "db_last_updated": datetime.datetime.utcnow(),
+            "db_last_updated": datetime.utcnow(),
         }
         return save_content
 

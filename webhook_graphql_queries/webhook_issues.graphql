@@ -1,0 +1,38 @@
+query ($repo: String!, $issue_number: Int!, $org: String!) {
+  organization(login: $org) {
+    Org: login
+    repository(name: $repo) {
+      repository_id: id
+      repo_name: name
+      issue(number: $issue_number) {
+        state
+        authorAssociation
+        lastEditedAt
+        timeline(last: 1) {
+          nodes {
+            ... on ClosedEvent {
+              closed_at: createdAt
+              actor {
+                closed_login: login
+              }
+            }
+          }
+        }
+        author {
+          created_login: login
+        }
+        issueId: id
+        createdAt
+        closed
+        labels(first: 1) {
+          edges {
+            node {
+              label: name
+            }
+          }
+        }
+        title
+      }
+    }
+  }
+}
