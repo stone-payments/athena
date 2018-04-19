@@ -1,5 +1,5 @@
 from apistar.test import TestClient
-from .webhook_app import app
+from webhook_app import app
 
 
 def test_http_request():

@@ -6,7 +6,8 @@ import urllib.parse
 class DbConnection:
 
     def __init__(self, mongo_port, password, username, hash_indexes_unique, full_text_indexes, hash_indexes, db_name,
-                 db_url):
+                 db_url, auth_source):
+        self.auth_source = auth_source
         self.mongo_port = mongo_port
         self.password = password
         self.username = username
@@ -24,7 +25,7 @@ class DbConnection:
             username = urllib.parse.quote_plus(self.username)
             client = MongoClient('mongodb://%s:%s@%s:%s/%s?authSource=%s' % (username, password, self.db_url,
                                                                              self.mongo_port, self.db_name,
-                                                                             self.db_name))
+                                                                             self.auth_source))
         else:
             client = MongoClient('mongodb://%s:%s/%s' % (self.db_url, self.mongo_port, self.db_name))
         _db = client[self.db_name]

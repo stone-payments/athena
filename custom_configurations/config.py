@@ -6,6 +6,7 @@ db_name = os.getenv("DB_NAME", "athena")
 db_url = os.getenv("MONGODB_URL", "localhost")
 username = os.getenv("MONGODB_USER", False)
 password = os.getenv("MONGODB_PASS", False)
+auth_source = os.getenv("MONGODB_AUTH_SOURCE", db_name)
 mongo_port = os.getenv("MONGO_PORT", 27017)
 url = os.getenv("GITHUB_GRAPHQL_URL", "https://api.github.com/graphql")  # GitHub GraphQL API url
 url_rest_api = os.getenv("GITHUB_REST_URL", "https://api.github.com")  # GitHub Rest API url
