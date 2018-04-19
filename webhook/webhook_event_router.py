@@ -8,14 +8,14 @@ from webhook.webhook_team_event import GetTeamEvent
 from webhook.webhook_issues_event import GetIssueEvent
 from threading import Thread
 import pprint
-from app import db
 from webhook.event_tests import issues
 
 
 class WebhookEventRouter:
 
-    def __init__(self, webhook_queue):
+    def __init__(self, db, webhook_queue):
         self.webhook_queue = webhook_queue
+        self.db = db
 
     @staticmethod
     def __parse_branch_string(data):
@@ -31,36 +31,36 @@ class WebhookEventRouter:
                     not find_key("base_ref", data) and self.__parse_branch_string(find_key("ref", data)) == "refs/heads":
                 print("NEW COMMIT")
                 # pprint.pprint(data)
-                GetCommit(db).get_data(data)
+                GetCommit(self.db).get_data(data)
             elif event == 'push' and find_key("created", data) and not find_key("deleted", data) \
                     and not find_key("forced", data) and find_key("base_ref", data):
                 print("NEW BRANCH")
                 # pprint.pprint(data)
-                GetBranch(db).get_data(data)
+                GetBranch(self.db).get_data(data)
             elif event == 'delete' and find_key('ref_type', data) == "branch":
                 print("DELETE")
                 # pprint.pprint(data)
-                DeleteBranch(db).get_data(data)
+                DeleteBranch(self.db).get_data(data)
             elif event == "repository":
                 print("repository")
                 # pprint.pprint(data)
-                GetRepositoryEvent(db).get_data(data)
+                GetRepositoryEvent(self.db).get_data(data)
             elif event == "organization":
                 print("organization")
                 # pprint.pprint(data)
-                GetDevEvent(db).get_data(data)
+                GetDevEvent(self.db).get_data(data)
             elif event == "team":
                 print("team")
                 # pprint.pprint(data)
-                GetTeamEvent(db).get_data(data)
+                GetTeamEvent(self.db).get_data(data)
             elif event == "membership":
                 print("membership")
                 # pprint.pprint(data)
-                GetTeamEvent(db).get_member_data(data)
+                GetTeamEvent(self.db).get_member_data(data)
             elif event == "issues":
                 print("issues")
                 pprint.pprint(data)
-                GetIssueEvent(db).get_data(data)
+                GetIssueEvent(self.db).get_data(data)
 
     def start(self):
         workers = [Thread(target=self.webhook_event_router, args=()) for _ in range(1)]

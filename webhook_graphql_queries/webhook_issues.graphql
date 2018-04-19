@@ -25,11 +25,9 @@ query ($repo: String!, $issue_number: Int!, $org: String!) {
         createdAt
         closed
         labels(first: 1) {
-          edges {
-            node {
+            nodes {
               label: name
             }
-          }
         }
         title
       }
