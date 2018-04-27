@@ -46,20 +46,28 @@ class GetTeamEvent:
         team_id = self.db.query_find_to_dictionary_distinct("Teams", "_id", {"org": org_name, "slug": team_name})
         repository_id = self.db.query_find_to_dictionary_distinct("Repo", "_id",
                                                                   {"org": org_name, "repo_name": repo_name})
-        return team_id, repository_id
+        if team_id and repository_id:
+            return team_id, repository_id
+        raise Exception("Repository or team null")
 
     def __update_team_repository_edges(self, raw_json, org_name, team_name, repo_name, edge_kind):
         permission = self.__get_permission(raw_json)
-        team_id, repository_id = self.__get_repository_data(org_name, team_name, repo_name)
-        self.db.connect(from_=repository_id[0], to=team_id[0], kind=edge_kind,
-                        data={"db_last_updated": datetime.utcnow(), "permission": permission})
+        try:
+            team_id, repository_id = self.__get_repository_data(org_name, team_name, repo_name)
+            self.db.connect(from_=repository_id[0], to=team_id[0], kind=edge_kind,
+                            data={"db_last_updated": datetime.utcnow(), "permission": permission})
+        except Exception as e:
+            print(e)
 
     def __delete_team_repository_edges(self, raw_json, org_name, team_name, repo_name, edge_kind):
         permission = self.__get_permission(raw_json)
-        team_id, repository_id = self.__get_repository_data(org_name, team_name, repo_name)
-        self.db.connect(from_=repository_id[0], to=team_id[0], kind=edge_kind,
-                        data={"db_last_updated": datetime.utcnow(), "permission": permission, "deleted_at":
-                              datetime.utcnow()})
+        try:
+            team_id, repository_id = self.__get_repository_data(org_name, team_name, repo_name)
+            self.db.connect(from_=repository_id[0], to=team_id[0], kind=edge_kind,
+                            data={"db_last_updated": datetime.utcnow(), "permission": permission, "deleted_at":
+                                  datetime.utcnow()})
+        except Exception as e:
+            print(e)
 
     def get_member_data(self, raw_json):
         team_name = find_key('slug', find_key('team', raw_json))
