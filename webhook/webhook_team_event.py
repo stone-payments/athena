@@ -22,9 +22,12 @@ class GetTeamEvent:
         return team_id, member_id
 
     def __create_team_member_edges(self, org_name, team_name, member_name):
-        team_id, member_id = self.__get_member(org_name, team_name, member_name)
-        self.db.connect(from_=member_id[0], to=team_id[0], kind="dev_to_team",
-                        data={"db_last_updated": datetime.utcnow()})
+        try:
+            team_id, member_id = self.__get_member(org_name, team_name, member_name)
+            self.db.connect(from_=member_id[0], to=team_id[0], kind="dev_to_team",
+                            data={"db_last_updated": datetime.utcnow()})
+        except Exception as e:
+            print(e)
 
     def __delete_team_member_edges(self, org_name, team_name, member_name):
         team_id, member_id = self.__get_member(org_name, team_name, member_name)
