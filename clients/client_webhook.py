@@ -19,7 +19,7 @@ class ClientRest(object):
             r = requests.request(method, url, data=json.dumps(data), headers=self.headers())
             return r
         except Exception as error:
-                raise NameError(str(error))
+            raise NameError(str(error))
 
     def get(self, url, data=None):
         if data is None:
