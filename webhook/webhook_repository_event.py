@@ -1,7 +1,6 @@
-from collection_modules.module import find_key
+from collection_modules.module import convert_datetime
 from collections_edges import Repo
 from webhook_graphql_queries.webhook_graphql_queries import webhook_repo_query
-from collection_modules.module import convert_datetime
 
 
 class GetRepositoryEvent:
@@ -18,21 +17,22 @@ class GetRepositoryEvent:
         self.db.update(obj={"org": org_name, "repo_name": repo_name}, patch={"deleted_at": pushed_date},
                        kind="Repo")
 
-    def __update_repository(self, org_name, repo_name, pushed_date, document_name, status):
+    def __update_repository(self, org_name, repo_name, pushed_date, status, document_name='open_source'):
         self.db.update_generic(obj={"org": org_name, "repo_name": repo_name}, patch={"$addToSet": {document_name:
                                    {"$each": [{"date": pushed_date, "status": status}]}}}, kind="Repo")
 
     def get_data(self, raw_json):
-        org_name = find_key('login', find_key('organization', raw_json))
-        repo_name = find_key('name', find_key('repository', raw_json))
-        branch = find_key('default_branch', raw_json)
-        pushed_date = convert_datetime(find_key('pushed_at', raw_json))
-        action = find_key('action', raw_json)
+        action = raw_json['action']
+        org_name = raw_json['organization']['login']
+        repo_name = raw_json['repository']['name']
+        branch = raw_json['repository']['default_branch']
+        pushed_date = convert_datetime(raw_json['repository']['pushed_at'])
+
         if action == "created":
             self.__create_repository(org_name, repo_name, branch)
         elif action == "deleted":
             self.__delete_repository(org_name, repo_name, pushed_date)
         elif action == "publicized":
-            self.__update_repository(org_name, repo_name, pushed_date, "open_source", True)
+            self.__update_repository(org_name, repo_name, pushed_date, True)
         elif action == "privatized":
-            self.__update_repository(org_name, repo_name, pushed_date, "open_source", False)
+            self.__update_repository(org_name, repo_name, pushed_date, False)

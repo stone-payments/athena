@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from collection_modules.module import find_key
 from collections_edges import Dev
 from webhook_graphql_queries.webhook_graphql_queries import webhook_dev_query
 
@@ -22,10 +21,6 @@ class GetDevEvent:
                                    {"$each": [{"date": pushed_date, "status": status}]}}}, kind="Repo")
 
     def get_data(self, raw_json):
-        dev_name = find_key('login', find_key('membership', raw_json))
-        action = find_key('action', raw_json)
-        if action == "member_added":
-            self.__create_dev(dev_name)
-        elif action == "member_removed":
-            self.__delete_dev(dev_name)
-
+        dev_name, action = raw_json['membership']['user']['login'], raw_json['action']
+        call = {'member_added': self.__create_dev, 'member_removed': self.__delete_dev}
+        call[action](dev_name)

@@ -36,14 +36,12 @@ class GetTeamEvent:
 
     @staticmethod
     def __get_permission(raw_json):
-        write = find_key('push', raw_json)
-        admin = find_key('admin', raw_json)
+        write, admin = find_key('push', raw_json), find_key('admin', raw_json)
         if admin:
             return "ADMIN"
         elif write:
             return "WRITE"
-        else:
-            return "READ"
+        return "READ"
 
     def __get_repository_data(self, org_name, team_name, repo_name):
         team_id = self.db.query_find_to_dictionary_distinct("Teams", "_id", {"org": org_name, "slug": team_name})

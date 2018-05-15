@@ -1,5 +1,6 @@
-from collection_modules.module import find_key
 import datetime
+
+from collection_modules.module import find_key
 from collections_edges import Commit, Repo
 from webhook_graphql_queries.webhook_graphql_queries import webhook_commits_query, webhook_repo_query
 
@@ -28,21 +29,18 @@ class GetCommit:
         modified_file = find_key("modified", data)
         added_file = find_key("added", data)
         removed_file = find_key("removed", data)
-        files = list(set().union(modified_file, added_file, removed_file))
-        if "README.md" in files or "readme.md" in files or "CONTRIBUTING.md" in files or "contributing.md" in files or \
-                "LICENSE.md" in files or "LICENSE" in files:
+        files = set().union(modified_file, added_file, removed_file)
+        updated = {'README.md', 'readme.md', 'CONTRIBUTING.md', 'contributing.md', 'LICENSE.md', 'LICENSE'}
+        if updated.issubset(files):
             repo = Repo(self.db, org=org, query=webhook_repo_query, collection_name="Repo", repo_name=repo_name,
                         branch_name=branch)
             repo.collect_webhook()
 
     def get_data(self, raw_json):
-        org_name = find_key('login', find_key('organization', raw_json))
-        repo_name = find_key('name', find_key('repository', raw_json))
-        commit_list = find_key('commits', raw_json)
-        branch = self.__parse_branch(find_key('ref', raw_json))
+        org_name, repo_name = raw_json['organization']['login'], raw_json['repository']['name']
+        commit_list, branch = raw_json['commits'], self.__parse_branch(raw_json['ref'])
         if not commit_list:
-            head_commit = find_key('head_commit', raw_json)
-            since_timestamp = until_timestamp = self.__parse_date(find_key('timestamp', head_commit))
+            since_timestamp = until_timestamp = self.__parse_date(raw_json['head_commit']['timestamp'])
         else:
             since_timestamp = self.__parse_date(find_key('timestamp', commit_list[0]))
             until_timestamp = self.__parse_date(find_key('timestamp', commit_list[-1]))

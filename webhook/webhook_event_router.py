@@ -1,14 +1,14 @@
-from collection_modules.module import find_key
-from webhook.webhook_get_commit import GetCommit
-from webhook.webhook_new_branch import GetBranch
-from webhook.webhook_delete_branch import DeleteBranch
-from webhook.webhook_repository_event import GetRepositoryEvent
-from webhook.webhook_dev_event import GetDevEvent
-from webhook.webhook_team_event import GetTeamEvent
-from webhook.webhook_issues_event import GetIssueEvent
-from threading import Thread
 import pprint
-from webhook.event_tests import issues
+from threading import Thread
+
+from collection_modules.module import find_key
+from webhook.webhook_delete_branch import DeleteBranch
+from webhook.webhook_dev_event import GetDevEvent
+from webhook.webhook_get_commit import GetCommit
+from webhook.webhook_issues_event import GetIssueEvent
+from webhook.webhook_new_branch import GetBranch
+from webhook.webhook_repository_event import GetRepositoryEvent
+from webhook.webhook_team_event import GetTeamEvent
 
 
 class WebhookEventRouter:

@@ -1,9 +1,10 @@
 import datetime
 import time
+
 from clients import ClientRest
 from clients import GraphQLClient
-from custom_configurations.config import url, token, token_webhook, timeout, rate_limit_to_sleep
 from collection_modules.log_message import *
+from custom_configurations.config import url, token, token_webhook, timeout, rate_limit_to_sleep
 
 client_graphql = GraphQLClient(url, token, timeout)
 client_graphql_webhook = GraphQLClient(url, token_webhook, timeout)
@@ -14,16 +15,12 @@ def find_key(key, json) -> iter:
     if isinstance(json, list):
         for item in json:
             f = find_key(key, item)
-            if f is not None:
-                return f
+            if f is not None: return f
     elif isinstance(json, dict):
-        if key in json:
-            return json[key]
-        else:
-            for inner in json.values():
-                f = find_key(key, inner)
-                if f is not None:
-                    return f
+        if key in json: return json[key]
+        for inner in json.values():
+            f = find_key(key, inner)
+            if f is not None: return f
     return None
 
 

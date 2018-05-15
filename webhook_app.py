@@ -1,4 +1,3 @@
-
 from queue import Queue
 
 from apistar import Route, Response, http
