@@ -1,8 +1,10 @@
+import re
+
+from bs4 import BeautifulSoup
 from langdetect import detect
 from langdetect.lang_detect_exception import LangDetectException
-import re
 from markdown import markdown
-from bs4 import BeautifulSoup
+
 from .languages_codes import languages as lang
 
 

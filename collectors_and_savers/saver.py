@@ -1,5 +1,6 @@
 from queue import Queue
 from threading import Thread
+
 from collection_modules.validators import validate_edge
 from custom_configurations.config import num_of_threads
 

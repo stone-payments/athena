@@ -1,7 +1,8 @@
+import pprint
+
 from collection_modules.module import client_graphql_webhook
 from collection_modules.module import find_key
 from collection_modules.validators import validate_edge
-import pprint
 
 
 class WebhookCollector:

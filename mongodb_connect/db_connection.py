@@ -1,6 +1,7 @@
-from pymongo import MongoClient
-from pymongo import ASCENDING, TEXT
 import urllib.parse
+
+from pymongo import ASCENDING, TEXT
+from pymongo import MongoClient
 
 
 class DbConnection:
