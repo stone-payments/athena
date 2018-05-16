@@ -16,8 +16,7 @@ class TeamsDev:
 
     @staticmethod
     def content(*_):
-        save_content = {
-        }
+        save_content = {}
         return save_content
 
     @staticmethod

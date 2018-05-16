@@ -1,9 +1,11 @@
 import json
 import time
+
 import requests
 from requests.exceptions import ReadTimeout
-from custom_configurations.config import max_interval, max_retries
+
 from collection_modules.log_message import log
+from custom_configurations.config import max_interval, max_retries
 
 
 class Retry:
@@ -68,7 +70,7 @@ class ClientRest:
         self.timeout = timeout
 
     def execute(self, url: str, query: str, temp: str) -> object:
-        query = '{}{}{}'.format(url, query, temp)
+        query = f'{url}{query}{temp}'
         if self.token:
             headers = {'Authorization': 'token %s' % self.token}
             req = requests_retry.get(query, headers=headers, timeout=self.timeout)

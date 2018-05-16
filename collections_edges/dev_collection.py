@@ -30,8 +30,7 @@ class Dev:
 
     @staticmethod
     def edges(*_):
-        save_edges = [
-        ]
+        save_edges = []
         return save_edges
 
     def collect(self):

@@ -22,9 +22,7 @@ class Issue:
 
     def content(self, **kwargs):
         page = kwargs.get('page')
-        print(page)
         node = kwargs.get('node')
-        print(node)
         save_content = {
             "collection_name": string_validate(self.collection_name),
             "org": string_validate(self.org, not_none=True),

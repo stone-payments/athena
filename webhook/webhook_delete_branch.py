@@ -1,4 +1,3 @@
-from collection_modules.module import find_key
 
 
 class DeleteBranch:
@@ -14,7 +13,7 @@ class DeleteBranch:
                                kind="Commit")
 
     def get_data(self, raw_json):
-        org_name = find_key('login', find_key('owner', raw_json))
-        repo_name = find_key('name', find_key('repository', raw_json))
-        branch = find_key('ref', raw_json)
+        org_name = raw_json['repository']['owner']['login']
+        repo_name = raw_json['repository']['name']
+        branch = raw_json['ref']
         self.__update_deleted_branch_commits(org_name, repo_name, branch)

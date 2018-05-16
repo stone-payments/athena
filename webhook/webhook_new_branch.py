@@ -1,4 +1,3 @@
-from collection_modules.module import find_key
 
 
 class GetBranch:
@@ -17,8 +16,10 @@ class GetBranch:
                                kind="Commit")
 
     def get_data(self, raw_json):
-        org_name = find_key('login', find_key('organization', raw_json))
-        repo_name = find_key('name', find_key('repository', raw_json))
-        base_branch = self.__parse_branch_string(find_key('base_ref', raw_json))
-        branch = self.__parse_branch_string(find_key('ref', raw_json))
+        import pprint
+        pprint.pprint(raw_json)
+        org_name = raw_json['organization']['login']
+        repo_name = raw_json['repository']['name']
+        base_branch = self.__parse_branch_string(raw_json['base_ref'])
+        branch = self.__parse_branch_string(raw_json['ref'])
         self.__update_new_branch_commits(org_name, repo_name, base_branch, branch)

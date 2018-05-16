@@ -12,14 +12,14 @@ class Mongraph(object):
     def update_generic(self, obj: object, patch: object, kind: str = None):
         collection_name = kind
         collection = self._mongodb_client[collection_name]
-        collection.update_many(obj, patch, upsert=False)
+        collection.update_many(obj, patch)
 
     def connect(self, from_: str, to: str, kind: str, data: dict):
         kind = kind or '{from}${to}'.format(**{
             'from': from_,
             'to': to
         })
-        edge_id = str(from_) + str(to)
+        edge_id = f"{from_}{to}"
         self.update(obj={"_id": edge_id}, patch={"from": from_, "to": to, "type": kind, "data": data}, kind="edges")
 
     def query(self, collection, query, projection):

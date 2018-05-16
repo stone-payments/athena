@@ -26,24 +26,17 @@ class Repo:
         upper_case_contributing = find_key('upperCaseContributing', node)
         lower_case_text_readme = find_key('lowerCaseTextReadme', node)
         upper_case_text_readme = find_key('upperCaseTextReadme', node)
+        readme, readme_language, contributing = None, None, None
         if upper_case_readme:
             readme = "OK" if upper_case_readme[-1]['endingLine'] >= 5 else "Poor"
         elif lower_case_readme:
             readme = "OK" if lower_case_readme[-1]['endingLine'] >= 5 else "Poor"
-        else:
-            readme = None
-        if upper_case_text_readme and readme is not None:
+        if upper_case_text_readme and readme:
             readme_language = text_to_language(upper_case_text_readme)
-        elif lower_case_text_readme and readme is not None:
+        elif lower_case_text_readme and readme:
             readme_language = text_to_language(lower_case_text_readme)
-        else:
-            readme_language = None
-        if upper_case_contributing:
+        if upper_case_contributing or lower_case_contributing:
             contributing = "OK"
-        elif lower_case_contributing:
-            contributing = "OK"
-        else:
-            contributing = None
         save_content = {
             "collection_name": string_validate(self.collection_name, not_none=True),
             "org": string_validate(self.org, not_none=True),
@@ -76,8 +69,7 @@ class Repo:
 
     @staticmethod
     def edges(*_):
-        save_edges = [
-        ]
+        save_edges = []
         return save_edges
 
     def collect(self):
