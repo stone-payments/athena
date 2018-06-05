@@ -1,5 +1,6 @@
 query ($number_of_repos: Int!, $next: String, $org: String!) {
   organization(login: $org) {
+    orgName: name
     members(first: $number_of_repos, after: $next) {
       pageInfo {
         hasNextPage
@@ -7,6 +8,11 @@ query ($number_of_repos: Int!, $next: String, $org: String!) {
       }
       edges {
         node {
+          organizations(first:15){
+            orgNames:nodes{
+              login
+            }
+          }
           id
           name
           followers(first: 1) {

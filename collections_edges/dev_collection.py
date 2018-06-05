@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from collection_modules.module import find_key, utc_time
-from collection_modules.validators import string_validate
+from collection_modules.validators import string_validate, array_validate
 from collectors_and_savers.collector import CollectorGeneric
 from collectors_and_savers.webhook_collector import WebhookCollector
 from custom_configurations.config import number_pagination
@@ -21,6 +21,7 @@ class Dev:
         save_content = {
             "collection_name": string_validate(self.collection_name, not_none=True),
             "_id": find_key("id", node),
+            "org": [name['login'] if name else None for name in array_validate(find_key("orgNames", node))],
             "dev_name": string_validate(find_key("name", node)),
             "login": string_validate(find_key("login", node), not_none=True),
             "avatar_url": string_validate(find_key("avatarUrl", node)),

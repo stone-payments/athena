@@ -40,3 +40,12 @@ def bool_validate(value, not_none=False):
         log.error("Field value must be an bool")
         raise ValueError("Field value must be an bool")
     return value
+
+
+def array_validate(value, not_none=False):
+    if not_none:
+        not_null(value)
+    if not isinstance(value, list):
+        log.error("Field value must be an array")
+        return []
+    return value
